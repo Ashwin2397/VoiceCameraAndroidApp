@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ConfigurationActivity">
+
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <Spinner
+                android:id="@+id/spCameras"
+                android:layout_width="wrap_content"
+                android:entries="@array/cameras"
+                android:layout_height="wrap_content">
+
+            </Spinner>
+            <EditText
+                android:id="@+id/etCameraIp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5sp"
+                android:layout_marginLeft="5sp"
+                android:ems="10"
+                android:inputType="text"
+                android:text="Camera IP" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <Spinner
+                android:id="@+id/spGimbals"
+                android:layout_width="wrap_content"
+                android:entries="@array/gimbals"
+                android:layout_height="wrap_content">
+
+            </Spinner>
+            <EditText
+                android:id="@+id/etGimbalIp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5sp"
+                android:layout_marginLeft="5sp"
+                android:ems="10"
+                android:inputType="text"
+                android:focusable="false"
+                android:text="Gimbal IP" />
+
+        </TableRow>
+
+<!--        <TableRow-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent" >-->
+
+<!--            <Switch-->
+<!--                android:id="@+id/canonSwitch"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="5sp"-->
+<!--                android:layout_marginLeft="5sp"-->
+<!--                android:text="Canon Camera: "-->
+<!--                tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/canonIp"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="5sp"-->
+<!--                android:layout_marginLeft="5sp"-->
+<!--                android:ems="10"-->
+<!--                android:inputType="text"-->
+<!--                android:text="Canon IP" />-->
+
+<!--        </TableRow>-->
+
+<!--        <TableRow-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_marginStart="5sp"-->
+<!--            android:layout_marginLeft="5sp">-->
+
+<!--            <Switch-->
+<!--                android:id="@+id/androidCameraSwitch"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Android Camera: "-->
+<!--                tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+<!--        </TableRow>-->
+
+<!--        <TableRow-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_marginStart="5sp"-->
+<!--            android:layout_marginLeft="5sp">-->
+
+<!--            <Switch-->
+<!--                android:id="@+id/roninGimbalSwitch"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Ronin Gimbal: "-->
+<!--                tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/roninIp"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:ems="10"-->
+<!--                android:inputType="text"-->
+<!--                android:text="Ronin IP" />-->
+<!--        </TableRow>-->
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5sp"
+            android:layout_marginLeft="5sp"
+            android:text="Visible Controls: "
+            android:textSize="20dp" />
+
+        <LinearLayout
+            android:id="@+id/llControls"
+            android:orientation="horizontal">
+
+
+        <LinearLayout
+            android:id="@+id/llCameraControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+<!--                <Switch-->
+<!--                    android:id="@+id/zoomSwitch"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="5sp"-->
+<!--                    android:layout_marginLeft="5sp"-->
+<!--                    android:text="Zoom: "-->
+<!--                    tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+<!--                <Switch-->
+<!--                    android:id="@+id/focusSwitch"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="5sp"-->
+<!--                    android:layout_marginLeft="5sp"-->
+<!--                    android:text="Focus: "-->
+<!--                    tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+<!--                <Switch-->
+<!--                    android:id="@+id/apertureSwitch"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="5sp"-->
+<!--                    android:layout_marginLeft="5sp"-->
+<!--                    android:text="Aperture: "-->
+<!--                    tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+<!--                <Switch-->
+<!--                    android:id="@+id/modeSwitch"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="5sp"-->
+<!--                    android:layout_marginLeft="5sp"-->
+<!--                    android:text="Mode: "-->
+<!--                    tools:ignore="UseSwitchCompatOrMaterialXml" />-->
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llGimbalControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+        </LinearLayout>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <Button
+                android:id="@+id/cancelBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10sp"
+                android:layout_weight="1"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/saveBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10sp"
+                android:layout_weight="1"
+                android:text="Save" />
+        </TableRow>
+
+    </TableLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
