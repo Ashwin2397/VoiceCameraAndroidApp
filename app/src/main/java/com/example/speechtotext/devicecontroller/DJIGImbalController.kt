@@ -11,14 +11,13 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import java.io.Serializable
 
-class DJIGImbalController: Device, Gimbal {
+class DJIGimbalController: Device, Gimbal, Serializable {
 
     private val deviceName = DeviceName.DJI_RS_2
     private val connectionType = ConnectionType.HTTP
-    private val featuresAvailable = arrayListOf<Feature>(
-
-    )
+    private val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
 
     val featureURL = mapOf<Feature, String>(
 
@@ -87,19 +86,6 @@ class DJIGImbalController: Device, Gimbal {
 
         return this.BASE_URL + this.featureURL[feature]
     }
-
-}
-
-interface Gimbal {
-
-    /*
-    * Moves gimbal incrementally with the provided angles.
-    * @param {Float} yaw Horizontal rotation
-    * @param {Float} pitch Vertical rotation
-    * @param {Float} roll Rotate about central point
-    * @param {Integer} isIncremental 1 for incremental, 0 for absolute
-    * */
-    fun move(yaw: Float, pitch: Float, roll: Float, isIncremental: Int): Unit
 
 }
 
