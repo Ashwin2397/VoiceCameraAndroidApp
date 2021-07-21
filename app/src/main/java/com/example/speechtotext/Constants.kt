@@ -11,7 +11,8 @@ enum class DeviceType {
 
 enum class ConnectionType {
     BLUETOOTH,
-    HTTP
+    HTTP,
+    NATIVE
 }
 
 enum class DeviceName {
@@ -40,6 +41,7 @@ enum class Feature {
     SHOOT,
     FOCUS,
     APERTURE,
+    MODE,
     FOCUS_TYPE,
     LIVEVIEW_FLIP,
     LEFT,
@@ -62,32 +64,47 @@ val firstCommands = mapOf<String, Word>(
     "doom" to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
     "shoot" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
     "soot" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
+    "chute" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
+    "shute" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
     "suit" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
     "focus" to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
     "left" to Word("left", Feature.LEFT, InputType.COMMAND_1, DeviceType.CAMERA),
-)
+    "aperture" to Word("aperture", Feature.APERTURE, InputType.COMMAND_1, DeviceType.CAMERA),
+    "focus" to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
+    "mode" to Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
+
+    )
 
 val numericalParameters = mapOf<String, Word>(
-    "1" to Word(1, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "2" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "3" to Word(3, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "one" to Word(1, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "what" to Word(1, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "too" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "to" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "two" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "three" to Word(3, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "tree" to Word(3, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "tea" to Word(3, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "1" to Word("1", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "2" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "3" to Word("3", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "one" to Word("1", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "what" to Word("1", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "too" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "to" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "two" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "three" to Word("3", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "tree" to Word("3",Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "tea" to Word("3", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
 )
 
 val masterDictionary = mapOf<String, Word>(
     "zoom" to Word("zoom", Feature.ZOOM, InputType.COMMAND, DeviceType.CAMERA),
     "shoot" to Word("shoot", Feature.SHOOT, InputType.COMMAND, DeviceType.CAMERA),
     "left" to Word("left", Feature.LEFT, InputType.COMMAND, DeviceType.GIMBAL),
-    "1" to Word(1, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "2" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "too" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "two" to Word(2, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
-    "one" to Word(1, Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY)
-)
+    "1" to Word("1", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "2" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "too" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "two" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "one" to Word("1", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
+    "aperture" to Word("aperture", Feature.APERTURE, InputType.COMMAND_1, DeviceType.CAMERA),
+    "focus" to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
+    "mode" to Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
+    "photo" to Word("photo", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
+    "movie" to Word("movie", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
+    "point" to Word("point", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
+    "face" to Word("face", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
+    "spot" to Word("spot", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
+
+    )
