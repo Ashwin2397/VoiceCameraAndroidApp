@@ -19,6 +19,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
     private var speechRecognizer: SpeechRecognizer? = null
     var isOnPartial:Boolean = false
     var model: SpeechToTextEngineObserver? = null
+    var isActive = false
 
     fun initialize(isOnPartial: Boolean, model: SpeechToTextEngineObserver) {
 
@@ -96,7 +97,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
         if (!result.isNullOrEmpty()) {
 
             // Most probable recognized text is in the first position.
-            val recognizedText = result[0]
+            val recognizedText = result[0].lowercase()
 
             // Give each word to callback
             notifyModel(recognizedText)
@@ -115,7 +116,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
         if (!result.isNullOrEmpty()) {
 
             // Most probable recognized text is in the first position.
-            val recognizedText = result[0]
+            val recognizedText = result[0].lowercase()
 
             if (isOnPartial) {
 
