@@ -62,7 +62,7 @@ class ShootObserver(
 
     override fun newWord(word: String) {
 
-        Log.d(this.TAG, word)
+        // Log.d(this.TAG, word)
         val parsedWord = this.parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
 
@@ -206,7 +206,7 @@ class ZoomObserver(
 
     override fun newWord(word: String) {
 
-        Log.d(this.TAG, word)
+        // Log.d(this.TAG, word)
         val parsedWord = this.parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
 
@@ -367,7 +367,7 @@ class ApertureObserver(
 
     override fun newWord(word: String) {
 
-        Log.d(this.TAG, word)
+        // Log.d(this.TAG, word)
         val parsedWord = this.parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
 
@@ -531,7 +531,7 @@ class FocusObserver(
 
     override fun newWord(word: String) {
 
-        Log.d(this.TAG, word)
+        // Log.d(this.TAG, word)
         val parsedWord = this.parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
 
@@ -685,7 +685,7 @@ class ModeObserver(
 
     override fun newWord(word: String) {
 
-        Log.d(this.TAG, word)
+        // Log.d(this.TAG, word)
         val parsedWord = this.parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
 
@@ -765,6 +765,791 @@ class ModeObserver(
     fun mode() {
         Log.d(TAG, "MODE: " + this.currentWord.value)
         this.textView.setText("MODE: " + this.currentWord.value)
+    }
+
+    override fun onCommandClick() {
+
+        newWord(this.command)
+    }
+
+    override fun onParameterClick(parameter: String) {
+
+        newWord(parameter)
+
+    }
+
+
+}
+
+
+class LeftObserver(
+    val textView: TextView
+): Observer {
+    private val TAG = "LEFT_OBSERVER"
+
+    private var cameraController: Camera? = null
+    private var gimbalController: Gimbal? = null
+
+    var uiController:UIController? = null
+
+    val states by lazy {
+        mapOf<Int, State>(
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
+            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+        )
+    }
+
+    val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+    val consecutiveWords = mapOf<String, Word>()
+
+    val command = "left"
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+    override fun setCameraController(cameraController: Camera) {
+        this.cameraController = cameraController
+    }
+
+    override fun setGimbalController(gimbalController: Gimbal) {
+        this.gimbalController = gimbalController
+    }
+
+    override fun setUIController(uiController: UIController) {
+
+        this.uiController = uiController
+    }
+
+    override fun getControlParameters(): MutableList<String> {
+
+        return this.parameters
+    }
+
+    private fun selectParameter() {
+        this.uiController!!.selectParameter(false, this.currentWord.value)
+    }
+
+    override fun newWord(word: String) {
+
+        // Log.d(this.TAG, word)
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun changeState(newState: Int) {
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+
+            newStateObject!!.runCallbacks();
+
+        }
+
+
+    }
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, Feature.LEFT, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
+    }
+
+    fun reset() {
+
+//        timer.schedule(TimerTask {}, 100)
+        this.currentState = 0
+
+        // Does'nt work unless you run on ui thread, which I have not figured out yet
+        val mainLooper = Looper.getMainLooper()
+
+        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+            uiController!!.reset()
+        }else {
+
+            Thread(Runnable {
+
+                Timer("Reset UI", false).schedule(1000) {
+
+                    Handler(mainLooper).post {
+
+                        uiController!!.reset()
+                    }
+                }
+            }).start()
+        }
+    }
+
+    fun left() {
+        Log.d(TAG, "LEFT: " + this.currentWord.value)
+        this.textView.setText("LEFT: " + this.currentWord.value)
+
+//        this.cameraController?.setZoom(this.currentWord.value)
+    }
+
+    override fun onCommandClick() {
+
+        newWord(this.command)
+    }
+
+    override fun onParameterClick(parameter: String) {
+
+        newWord(parameter)
+
+    }
+
+
+}
+
+
+class RightObserver(
+    val textView: TextView
+): Observer {
+    private val TAG = "RIGHT_OBSERVER"
+
+    private var cameraController: Camera? = null
+    private var gimbalController: Gimbal? = null
+
+    var uiController:UIController? = null
+
+    val states by lazy {
+        mapOf<Int, State>(
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
+            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+        )
+    }
+
+    val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+    val consecutiveWords = mapOf<String, Word>()
+
+    val command = "right"
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+    override fun setCameraController(cameraController: Camera) {
+        this.cameraController = cameraController
+    }
+
+    override fun setGimbalController(gimbalController: Gimbal) {
+        this.gimbalController = gimbalController
+    }
+
+    override fun setUIController(uiController: UIController) {
+
+        this.uiController = uiController
+    }
+
+    override fun getControlParameters(): MutableList<String> {
+
+        return this.parameters
+    }
+
+    private fun selectParameter() {
+        this.uiController!!.selectParameter(false, this.currentWord.value)
+    }
+
+    override fun newWord(word: String) {
+
+        // Log.d(this.TAG, word)
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun changeState(newState: Int) {
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+
+            newStateObject!!.runCallbacks();
+
+        }
+
+
+    }
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, Feature.RIGHT, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
+    }
+
+    fun reset() {
+
+//        timer.schedule(TimerTask {}, 100)
+        this.currentState = 0
+
+        // Does'nt work unless you run on ui thread, which I have not figured out yet
+        val mainLooper = Looper.getMainLooper()
+
+        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+            uiController!!.reset()
+        }else {
+
+            Thread(Runnable {
+
+                Timer("Reset UI", false).schedule(1000) {
+
+                    Handler(mainLooper).post {
+
+                        uiController!!.reset()
+                    }
+                }
+            }).start()
+        }
+    }
+
+    fun left() {
+        Log.d(TAG, "RIGHT: " + this.currentWord.value)
+        this.textView.setText("RIGHT: " + this.currentWord.value)
+
+//        this.cameraController?.setZoom(this.currentWord.value)
+    }
+
+    override fun onCommandClick() {
+
+        newWord(this.command)
+    }
+
+    override fun onParameterClick(parameter: String) {
+
+        newWord(parameter)
+
+    }
+
+
+}
+
+
+class UpObserver(
+    val textView: TextView
+): Observer {
+    private val TAG = "UP_OBSERVER"
+
+    private var cameraController: Camera? = null
+    private var gimbalController: Gimbal? = null
+
+    var uiController:UIController? = null
+
+    val states by lazy {
+        mapOf<Int, State>(
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
+            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+        )
+    }
+
+    val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+    val consecutiveWords = mapOf<String, Word>()
+
+    val command = "up"
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+    override fun setCameraController(cameraController: Camera) {
+        this.cameraController = cameraController
+    }
+
+    override fun setGimbalController(gimbalController: Gimbal) {
+        this.gimbalController = gimbalController
+    }
+
+    override fun setUIController(uiController: UIController) {
+
+        this.uiController = uiController
+    }
+
+    override fun getControlParameters(): MutableList<String> {
+
+        return this.parameters
+    }
+
+    private fun selectParameter() {
+        this.uiController!!.selectParameter(false, this.currentWord.value)
+    }
+
+    override fun newWord(word: String) {
+
+        // Log.d(this.TAG, word)
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun changeState(newState: Int) {
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+
+            newStateObject!!.runCallbacks();
+
+        }
+
+
+    }
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, Feature.UP, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
+    }
+
+    fun reset() {
+
+//        timer.schedule(TimerTask {}, 100)
+        this.currentState = 0
+
+        // Does'nt work unless you run on ui thread, which I have not figured out yet
+        val mainLooper = Looper.getMainLooper()
+
+        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+            uiController!!.reset()
+        }else {
+
+            Thread(Runnable {
+
+                Timer("Reset UI", false).schedule(1000) {
+
+                    Handler(mainLooper).post {
+
+                        uiController!!.reset()
+                    }
+                }
+            }).start()
+        }
+    }
+
+    fun left() {
+        Log.d(TAG, "UP: " + this.currentWord.value)
+        this.textView.setText("UP: " + this.currentWord.value)
+
+//        this.cameraController?.setZoom(this.currentWord.value)
+    }
+
+    override fun onCommandClick() {
+
+        newWord(this.command)
+    }
+
+    override fun onParameterClick(parameter: String) {
+
+        newWord(parameter)
+
+    }
+
+
+}
+
+
+class DownObserver(
+    val textView: TextView
+): Observer {
+    private val TAG = "DOWN_OBSERVER"
+
+    private var cameraController: Camera? = null
+    private var gimbalController: Gimbal? = null
+
+    var uiController:UIController? = null
+
+    val states by lazy {
+        mapOf<Int, State>(
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
+            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+        )
+    }
+
+    val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+    val consecutiveWords = mapOf<String, Word>()
+
+    val command = "down"
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+    override fun setCameraController(cameraController: Camera) {
+        this.cameraController = cameraController
+    }
+
+    override fun setGimbalController(gimbalController: Gimbal) {
+        this.gimbalController = gimbalController
+    }
+
+    override fun setUIController(uiController: UIController) {
+
+        this.uiController = uiController
+    }
+
+    override fun getControlParameters(): MutableList<String> {
+
+        return this.parameters
+    }
+
+    private fun selectParameter() {
+        this.uiController!!.selectParameter(false, this.currentWord.value)
+    }
+
+    override fun newWord(word: String) {
+
+        // Log.d(this.TAG, word)
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun changeState(newState: Int) {
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+
+            newStateObject!!.runCallbacks();
+
+        }
+
+
+    }
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, Feature.DOWN, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
+    }
+
+    fun reset() {
+
+//        timer.schedule(TimerTask {}, 100)
+        this.currentState = 0
+
+        // Does'nt work unless you run on ui thread, which I have not figured out yet
+        val mainLooper = Looper.getMainLooper()
+
+        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+            uiController!!.reset()
+        }else {
+
+            Thread(Runnable {
+
+                Timer("Reset UI", false).schedule(1000) {
+
+                    Handler(mainLooper).post {
+
+                        uiController!!.reset()
+                    }
+                }
+            }).start()
+        }
+    }
+
+    fun left() {
+        Log.d(TAG, "DOWN: " + this.currentWord.value)
+        this.textView.setText("DOWN: " + this.currentWord.value)
+
+//        this.cameraController?.setZoom(this.currentWord.value)
+    }
+
+    override fun onCommandClick() {
+
+        newWord(this.command)
+    }
+
+    override fun onParameterClick(parameter: String) {
+
+        newWord(parameter)
+
+    }
+
+
+}
+
+
+class RollObserver(
+    val textView: TextView
+): Observer {
+    private val TAG = "ROLL_OBSERVER"
+
+    private var cameraController: Camera? = null
+    private var gimbalController: Gimbal? = null
+
+    var uiController:UIController? = null
+
+    val states by lazy {
+        mapOf<Int, State>(
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
+            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+        )
+    }
+
+    val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+    val consecutiveWords = mapOf<String, Word>()
+
+    val command = "roll"
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+    override fun setCameraController(cameraController: Camera) {
+        this.cameraController = cameraController
+    }
+
+    override fun setGimbalController(gimbalController: Gimbal) {
+        this.gimbalController = gimbalController
+    }
+
+    override fun setUIController(uiController: UIController) {
+
+        this.uiController = uiController
+    }
+
+    override fun getControlParameters(): MutableList<String> {
+
+        return this.parameters
+    }
+
+    private fun selectParameter() {
+        this.uiController!!.selectParameter(false, this.currentWord.value)
+    }
+
+    override fun newWord(word: String) {
+
+        // Log.d(this.TAG, word)
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun changeState(newState: Int) {
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+
+            newStateObject!!.runCallbacks();
+
+        }
+
+
+    }
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, Feature.ROLL, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
+    }
+
+    fun reset() {
+
+//        timer.schedule(TimerTask {}, 100)
+        this.currentState = 0
+
+        // Does'nt work unless you run on ui thread, which I have not figured out yet
+        val mainLooper = Looper.getMainLooper()
+
+        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+            uiController!!.reset()
+        }else {
+
+            Thread(Runnable {
+
+                Timer("Reset UI", false).schedule(1000) {
+
+                    Handler(mainLooper).post {
+
+                        uiController!!.reset()
+                    }
+                }
+            }).start()
+        }
+    }
+
+    fun left() {
+        Log.d(TAG, "ROLL: " + this.currentWord.value)
+        this.textView.setText("ROLL: " + this.currentWord.value)
+
+//        this.cameraController?.setZoom(this.currentWord.value)
     }
 
     override fun onCommandClick() {

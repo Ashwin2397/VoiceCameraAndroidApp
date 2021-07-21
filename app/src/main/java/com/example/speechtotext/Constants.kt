@@ -50,6 +50,10 @@ enum class Feature {
     INCREMENTAL_MOVEMENT,
     ANY,
     UNDEFINED,
+    ROLL,
+    DOWN,
+    UP,
+    RIGHT,
 }
 
 enum class ImageType {
@@ -69,6 +73,10 @@ val firstCommands = mapOf<String, Word>(
     "suit" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
     "focus" to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
     "left" to Word("left", Feature.LEFT, InputType.COMMAND_1, DeviceType.CAMERA),
+    "right" to Word("right", Feature.RIGHT, InputType.COMMAND_1, DeviceType.CAMERA),
+    "up" to Word("up", Feature.UP, InputType.COMMAND_1, DeviceType.CAMERA),
+    "down" to Word("down", Feature.DOWN, InputType.COMMAND_1, DeviceType.CAMERA),
+    "roll" to Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA),
     "aperture" to Word("aperture", Feature.APERTURE, InputType.COMMAND_1, DeviceType.CAMERA),
     "focus" to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
     "mode" to Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
@@ -106,5 +114,10 @@ val masterDictionary = mapOf<String, Word>(
     "point" to Word("point", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
     "face" to Word("face", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
     "spot" to Word("spot", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
+    "left" to Word("left", Feature.LEFT, InputType.COMMAND_1, DeviceType.CAMERA),
+    "right" to Word("right", Feature.RIGHT, InputType.COMMAND_1, DeviceType.CAMERA),
+    "up" to Word("up", Feature.UP, InputType.COMMAND_1, DeviceType.CAMERA),
+    "down" to Word("down", Feature.DOWN, InputType.COMMAND_1, DeviceType.CAMERA),
+    "roll" to Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA),
 
     )
