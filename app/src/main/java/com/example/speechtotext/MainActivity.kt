@@ -5,386 +5,308 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.hardware.Camera
+import android.graphics.Bitmap
+import android.graphics.Camera
 import android.os.Build
 import android.os.Bundle
-import android.speech.RecognitionListener
-import android.speech.SpeechRecognizer
+import android.os.Handler
+import android.os.Looper
+import android.util.AttributeSet
 import android.util.Log
-import android.view.Display
-import android.view.SurfaceHolder
-import android.view.SurfaceView
-import android.widget.TextView
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
+import androidx.core.graphics.drawable.toDrawable
+import androidx.recyclerview.widget.ItemTouchHelper.DOWN
+import androidx.recyclerview.widget.ItemTouchHelper.UP
+import com.example.speechtotext.devicecontroller.*
+import com.example.speechtotext.manager.SystemManager
+import kotlinx.android.synthetic.main.activity_configuration.*
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.net.URL
 import java.util.*
+import kotlin.concurrent.schedule
 
 
-const val BASE_URL = "http://10.0.0.97:8080"
+/*
+* TODO:
+* - Refactor start transcription button to be in the system configuration or a button by itself?
+* - Refactor such that the button SHOOT can never be disabled
+* - Add camera connection button
+* - Create a button toggle class
+* - Create toggle function for STT
+* - When camera gets disconnected, must report to user and stop polling camera for the view
+* - Refactor controllers map and abstract it to another class that uses a factory design pattern
+* - Refactor all controllers to adopt the singleton design pattern
+* */
 
-class MainActivity : AppCompatActivity(), Activity() {
+
+class MainActivity : AppCompatActivity(){
+
+    val TAG = "MAIN_ACTIVITY"
+    val db by lazy {
+        Database(this)
+    }
+    val model by lazy {
+        Model(transcription)
+    }
+    val stt by lazy {
+        SpeechToTextEngine(applicationContext)
+    }
+    var observers:MutableMap<Feature, Observer>? = null
+
+    var chosenControls = mutableListOf<Feature>(
+        Feature.ZOOM, Feature.APERTURE, Feature.FOCUS, Feature.MODE
+    )
+    var chosenCamera = DeviceName.CANON
+    var chosenGimbal = DeviceName.PILOTFLY
+
+    var buttons = mutableMapOf<Feature, Button>()
+
+    // REFACTOR: Use factory design pattern
+    val controllers = mutableMapOf<DeviceName, Any>(
+        DeviceName.CANON to CanonCameraController(),
+        DeviceName.NATIVE to NativeCameraController(),
+        DeviceName.DJI_RS_2 to DJIGimbalController(),
+        DeviceName.PILOTFLY to PilotflyGimbalController()
+    )
+
+    override fun onResume() {
+        super.onResume()
+
+        // Check db for controls
+        Log.d(TAG, "You are back to main activity")
+        Log.d(TAG, "Camera chosen: ${db.getCamera()}; Gimbal chosen: ${db.getGimbal()}")
+        Log.d(TAG, "Controls chosen: ${db.getControls()}")
+
+        // Update controls being rendered
+        chosenControls = db.getControls()
+
+        // Update camera controller
+        chosenCamera = db.getCamera().deviceName
+        val cameraController = controllers.get(chosenCamera) as Device
+
+        // Update gimbal controller
+        chosenGimbal = db.getGimbal().deviceName
+        val gimbalController = controllers.get(chosenGimbal) as Device
+
+        if (cameraController.getConnectionType() == ConnectionType.HTTP) {
+            cameraController.setIp(db.getCamera().ipAddress)
+        }
+
+        if (gimbalController.getConnectionType() == ConnectionType.HTTP) {
+            gimbalController.setIp(db.getGimbal().ipAddress)
+        }
+
+
+        createButtons()
+        initializeObservers()
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-    /*
-        // Get the Intent action
-        val sttIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        val systemManager = SystemManager()
+        val featuresManager = systemManager.getFeaturesManager()
 
-        sttIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-        // Language model defines the purpose, there are special models for other use cases, like search.
-        sttIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        // Adding an extra language, you can use any language from the Locale class(These are the ones that you have downloaded in your phone).
-        sttIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        // To render the configuration view
+        configurationButton.setOnClickListener{
 
-        sttIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-        // Text that shows up on the Speech input prompt.
-//            sttIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now!")
-
-        sttIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-          applicationContext.getPackageName());
-
-        // Add custom listeners.
-        // Add custom listeners.
-
-        val sr = SpeechRecognizer.createSpeechRecognizer(applicationContext)
-        val speechCallback = SpeechCallback(sr, sttIntent)
-
-        val listener = CustomRecognitionListener(transcription, sr, sttIntent, speechCallback)
-        sr.setRecognitionListener(listener)*/
-
-        /*DO HTTP REQUESTS HERE */
-
-
-//        print(r.headers)
-//        val stt = SpeechToTextEngine(applicationContext)
-//        val model = Model(transcription)
-//        val adaptiveParameterButtonBar = AdaptiveParameterButtonBar()
-//        val uiController = UIController(shootImage, adaptiveParameterButtonBar)
-//        val shootObserver = ShootObserver(uiController)
-//
-//        // Pass random functions for simulation purposes only
-//        uiController.setFeature(Feature.SHOOT, shootObserver::reset, shootObserver::reset)
-//
-//        model.addObserver(shootObserver)
-//
-//        stt.initialize(true, model)
-//
-//        startTranscription.setOnClickListener {
-//            transcription.text = "BUTTON CLICKED"
-//
-//
-//            try {
-//                val permissions: Array<String> = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.INTERNET)
-//                requestPermissions( permissions, 101)
-//
-//                stt.openStream()
-//
-//            }catch (e: ActivityNotFoundException){
-//                e.printStackTrace()
-//            }
-
-//            try {
-//                // Start the intent for a result, and pass in our request code.
-//            } catch (e: ActivityNotFoundException) {
-//                // Handling error when the service is not available.
-//                e.printStackTrace()
-//                Toast.makeText(this, "Your device does not support STT.", Toast.LENGTH_LONG).show()
-//            }
-
-        }
-    }
-
-    private fun getImage() {
-
-
-        Glide.with(applicationContext)
-            .load("http://10.0.0.97:8080/ccapi/ver100/shooting/liveview/flip")
-            .into(imageView);
-//
-////        val retroFitBuilder = Retrofit.Builder()
-////            .addConverterFactory(GsonConverterFactory.create(
-////                GsonBuilder().setLenient().create()
-////            ))
-////            .baseUrl(BASE_URL)
-////            .build()
-////            .create(ApiInterface::class.java)
-//        // Converters are for both requests and responses
-//        val retroFitBuilder = Retrofit.Builder()
-//            .baseUrl(BASE_URL)
-//            .addConverterFactory(ScalarsConverterFactory.create())
-//            .build()
-//            .create(ApiInterface :: class.java)
-//
-//        val data = retroFitBuilder.getLiveViewFlip()
-//
-//        data.enqueue(object : Callback<String?> {
-//            @RequiresApi(Build.VERSION_CODES.O)
-//            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-//
-//                Log.d("RESPONSE", response.body().toString())
-//
-//
-////                val responseBody = response.body()!!.byteInputStream()
-//
-////                val imageView = findViewById<ImageView>(R.id.imageView)
-////
-////                val byteArray = response.body()!!
-////                    .chunked(2)
-////                    .map { it(2).toByte() }
-////                    .toByteArray()
-////                val imageByteArray = Base64.getDecoder().decode(response.body()!!.toString())
-//                    val inputStream: InputStream = response.body().toString().byteInputStream()
-//
-//
-////
-////                val imageBm = BitmapFactory.decodeByteArray(imageByteArray)
-//                val imageBm = BitmapFactory.decodeStream(inputStream)
-//
-//                imageView.setImageBitmap(imageBm)
-//                runOnUiThread( Runnable {
-//
-//
-//                    fun run(){
-//                        Log.d("IMAGE_SET", "In here")
-//                        imageView.setImageBitmap(imageBm)
-//                    }
-//                })
-//            }
-//
-//            override fun onFailure(call: Call<String?>, t: Throwable) {
-//                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
-//            }
-//        })
-
-
-    }
-//    private fun shoot() {
-//
-//        val retroFitBuilder = Retrofit.Builder()
-//            .baseUrl(BASE_URL)
-//            .addConverterFactory(GsonConverterFactory.create())
-//            .addConverterFactory(ScalarsConverterFactory.create())
-//            .build()
-//            .create(CanonCameraApiInterface :: class.java)
-//
-//        val data = retroFitBuilder.shoot(Focus(af = true))
-//
-//        data.enqueue(object : Callback<Empty?> {
-//            override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
-//
-//                Log.d("RESPONSE", response.body().toString())
-//
-//            }
-//
-//            override fun onFailure(call: Call<Empty?>, t: Throwable) {
-//                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
-//            }
-//        })
-//
-//
-//    }
-//
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        val transcription = findViewById<TextView>(R.id.transcription)
-//
-//
-//        when (requestCode) {
-//            // Handle the result for our request code.
-//            1 -> {
-//                // Safety checks to ensure data is available.
-//                if (resultCode == Activity.RESULT_OK && data != null) {
-//                    // Retrieve the result array.
-//                    val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-//                    // Ensure result array is not null or empty to avoid errors.
-//                    if (!result.isNullOrEmpty()) {
-//                        // Recognized text is in the first position.
-//                        val recognizedText = result[0]
-//                        // Do what you want with the recognized text.
-//                        transcription.setText(recognizedText)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    override fun onEndOfSpeech() {
-//
-//
-//    }
-//    fun initialize() {
-//
-//        setRecognitionListener
-//        val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(android.content.Context)
-//    }
-//
-//    fun openStream() {}
-//
-//    fun closeStream() {}
-//
-//    fun transcribeWord() {}
-
-
-
-}
-
-class SpeechCallback(private val speechRecognizer: SpeechRecognizer,private val intent: Intent){
-
-    fun onEndOfSpeech() {
-        speechRecognizer.startListening(intent)
-
-    }
-
-}
-
-class CustomRecognitionListener(private val transcription: TextView, private val speechRecognizer: SpeechRecognizer,private val intent: Intent, val cb: SpeechCallback): RecognitionListener {
-
-    val TAG = "SPEECH_LISTENER"
-    override fun onReadyForSpeech(params: Bundle?) {
-        Log.d(TAG, "onReadyForSpeech")
-    }
-
-    override fun onBeginningOfSpeech() {
-        Log.d(TAG, "onBeginningOfSpeech")
-    }
-
-    override fun onRmsChanged(rmsdB: Float) {
-
-    }
-
-    override fun onBufferReceived(buffer: ByteArray?) {
-        Log.d(TAG, "onBufferReceived")
-    }
-
-    override fun onEndOfSpeech() {
-
-//        val permissions: Array<String> = arrayOf(android.Manifest.permission.RECORD_AUDIO)
-//        requestPermissions(permissions, 101)
-
-//        speechRecognizer.setRecognitionListener(this)
-//        cb.onEndOfSpeech()
-
-        Log.d(TAG, "onEndofSpeech")
-    }
-
-    override fun onError(error: Int) {
-        Log.e(TAG, "error $error")
-//        conversionCallaback.onErrorOccured(TranslatorUtil.getErrorText(error))
-        speechRecognizer.startListening(intent)
-
-    }
-
-    override fun onResults(results: Bundle) {
-
-        val result = results.getStringArrayList("results_recognition")
-
-        Log.d(TAG, "onResults; Results: " + results.toString() )
-        if (!result.isNullOrEmpty()) {
-            // Recognized text is in the first position.
-            val recognizedText = result[0]
-            // Do what you want with the recognized text.
-            transcription.setText(recognizedText)
-
-            speechRecognizer.startListening(intent)
+           Intent(this, ConfigurationActivity::class.java).also {
+               it.putExtra("EXTRA_FEATURES_MANAGER", featuresManager)
+               startActivity(it)
+           }
 
         }
 
 
+        observers = mutableMapOf<Feature, Observer>(
+            Feature.SHOOT to ShootObserver(transcription),
+            Feature.ZOOM to ZoomObserver(transcription),
+            Feature.APERTURE to ApertureObserver(transcription),
+            Feature.FOCUS to FocusObserver(transcription),
+            Feature.MODE to ModeObserver(transcription),
+            Feature.LEFT to LeftObserver(transcription),
+            Feature.RIGHT to RightObserver(transcription),
+            Feature.UP to UpObserver(transcription),
+            Feature.DOWN to DownObserver(transcription),
+            Feature.ROLL to RollObserver(transcription),
+        )
+
+        // Create buttons
+        createButtons()
+        initializeObservers()
+
+        stt.initialize(true, model)
+
+        // Must start STT upon user interaction
+        //
+        startTranscription.setOnClickListener {
 
 
-    }
+//            // For debugging purposes
+            transcription.text = "BUTTON CLICKED"
 
-    override fun onPartialResults(partialResults: Bundle?) {
-        Log.d(TAG, "onPartialResults")
+            startTranscription.text = "VOICE CONTROL: ON"
 
-        val result = partialResults?.getStringArrayList("results_recognition")
-
-        Log.d(TAG, "onResults; Results: " + partialResults?.toString() )
-        if (!result.isNullOrEmpty()) {
-            // Recognized text is in the first position.
-            val recognizedText = result[0]
-
-            // Do what you want with the recognized text.
-            transcription.setText(recognizedText)
-
-        }
-    }
-
-    override fun onEvent(eventType: Int, params: Bundle?) {
-        Log.d(TAG, "onEvent $eventType")
-    }
-
-}
-
-/** A basic Camera preview class */
-class CameraPreview(
-    context: Context,
-    private val mCamera: Camera
-) : SurfaceView(context), SurfaceHolder.Callback {
-
-    val TAG = "CAMERA_PREVIEW"
-
-    private val mHolder: SurfaceHolder = holder.apply {
-        // Install a SurfaceHolder.Callback so we get notified when the
-        // underlying surface is created and destroyed.
-        addCallback(this@CameraPreview)
-        // deprecated setting, but required on Android versions prior to 3.0
-        setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
-    }
-
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        // The Surface has been created, now tell the camera where to draw the preview.
-        mCamera.apply {
             try {
-                setPreviewDisplay(holder)
-                startPreview()
-            } catch (e: IOException) {
-                Log.d(TAG, "Error setting camera preview: ${e.message}")
+//                    val permissions: Array<String> = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.INTERNET)
+//                    requestPermissions( permissions, 101)
+
+                stt.openStream()
+
+            }catch (e: ActivityNotFoundException){
+                Toast.makeText(this, "Your device does not support STT.", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
             }
+            
+//            // Refactor, create toggle feature
+//            if (!stt.isActive) {
+//
+//
+//
+//                stt.isActive = true
+//            }else {
+//                startTranscription.text = "VOICE CONTROL: OFF"
+//
+//                try {
+//                    stt.closeStream()
+//
+//                }catch (e: ActivityNotFoundException){
+//                    Toast.makeText(this, "Your device does not support STT.", Toast.LENGTH_LONG).show()
+//                    e.printStackTrace()
+//                }
+//
+//                stt.isActive = false
+//
+//            }
+
+//            val camera = CanonCameraController()
+//
+//            Timer().scheduleAtFixedRate(object : TimerTask() {
+//                override fun run() {
+////                    getImage()
+//                    camera.getLiveviewFlip(this@MainActivity::setBm)
+//
+//
+//                }
+//            },0 ,100)
+
+        }
+
+        btnConnectCamera.setOnClickListener {
+
+            val camera = controllers.get(chosenCamera) as com.example.speechtotext.devicecontroller.Camera
+
+            camera?.configureLiveview(this@MainActivity::setImageView)
+
+        }
+
+
+    }
+
+    fun setImageView(camera: com.example.speechtotext.devicecontroller.Camera) {
+
+        Timer().scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+
+                try{
+
+                    camera.getLiveviewFlip(this@MainActivity::setBm)
+                }catch (e: Exception) {
+                    Toast.makeText(applicationContext, "Camera IP is incorrect", Toast.LENGTH_LONG)
+                }
+
+            }
+        },0 ,100)
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun setBm(bitmap: Bitmap?) {
+        runOnUiThread {
+            if (bitmap != null) {
+
+                imageView.apply {
+
+                    setZ(-1.toFloat())
+                    setImageBitmap(bitmap)
+                }
+
+            }
+
         }
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        // empty. Take care of releasing the Camera preview in your activity.
+    fun createButtons() {
+
+        removeButtons()
+        val NUMBER_ROWS = 5
+        var verticalLinearLayout:LinearLayout? = null
+        var i = 0
+
+        chosenControls.forEach {
+            if (it.toString() != "SHOOT") {
+
+                if (i%NUMBER_ROWS == 0) {
+
+                    verticalLinearLayout = LinearLayout(applicationContext)
+                    verticalLinearLayout!!.layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT)
+                    verticalLinearLayout!!.orientation = LinearLayout.VERTICAL
+
+                    commandButtonCreatorLayout.addView(verticalLinearLayout)
+                }
+
+                var newButton = Button(applicationContext).apply {
+                    setText(it.toString())
+
+                    // Set constraints
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT)
+                }
+
+                verticalLinearLayout!!.addView(newButton)
+
+                buttons.put(it, newButton)
+                i+= 1
+            }
+
+        }
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
-        if (mHolder.surface == null) {
-            // preview surface does not exist
-            return
-        }
+    fun removeButtons() {
 
-        // stop preview before making changes
-        try {
-            mCamera.stopPreview()
-        } catch (e: Exception) {
-            // ignore: tried to stop a non-existent preview
-        }
+        commandButtonCreatorLayout.removeAllViews()
+        buttons.clear()
+        buttons.put(Feature.SHOOT, shootImage)
+    }
 
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
+    fun initializeObservers() {
 
-        // start preview with new settings
-        mCamera.apply {
-            try {
-                setPreviewDisplay(mHolder)
-                startPreview()
-            } catch (e: Exception) {
-                Log.d(TAG, "Error starting camera preview: ${e.message}")
+        model.removeAllObservers()
+        observers!!.forEach {
+
+            val observer = it.value
+
+            var isChosenControl = buttons.containsKey(it.key)
+            if (isChosenControl) {
+
+                val uiController = UIController(buttons[it.key]!!, AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
+
+                observer.setUIController(uiController)
+                observer.setCameraController(controllers.get(chosenCamera)!! as com.example.speechtotext.devicecontroller.Camera)
+                observer.setGimbalController(controllers.get(chosenGimbal)!! as Gimbal)
+                uiController.setFeature(it.key, observer.getControlParameters(), observer::onCommandClick, observer::onParameterClick)
+
+                model.addObserver(observer)
             }
         }
     }
