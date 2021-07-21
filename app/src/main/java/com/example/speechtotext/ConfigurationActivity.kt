@@ -262,7 +262,7 @@ class ConfigurationActivity : AppCompatActivity() {
         var chosenControls = mutableMapOf<Feature, CheckBox>()
         var stringToEnum = mutableMapOf<String, DeviceName>()
 
-        val NUMBER_COLUMNS = 3
+        val NUMBER_ROWS = 3
         fun init() {
 
             this.spDevice.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -317,7 +317,7 @@ class ConfigurationActivity : AppCompatActivity() {
 
             features?.forEach {
 
-                if (i%NUMBER_COLUMNS == 0) {
+                if (i%NUMBER_ROWS == 0) {
 
                     verticalLinearLayout = LinearLayout(context)
                     verticalLinearLayout!!.layoutParams = LinearLayout.LayoutParams(
