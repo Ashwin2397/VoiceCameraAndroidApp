@@ -1,19 +1,23 @@
 package com.example.speechtotext
 
+import android.app.Activity
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.example.speechtotext.manager.FeaturesManager
 import kotlinx.android.synthetic.main.activity_configuration.*
 
 /*
 * NOTE:
 * - Improve view to allow only 1 camera and 1 gimbal selection from a dropdown list
 * - Improve view to have a column for gimbal controls and camera controls that dynamically render upon change of selection of camera and gimbal from it's intitial selection
+* - Improve controls such that gimbal controls and camera controls are stored separately    
 * */
 
 /*
@@ -28,8 +32,96 @@ class ConfigurationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_configuration)
+
+        val featuresManager = intent.getSerializableExtra("EXTRA_FEATURES_MANAGER") as FeaturesManager
+
+        val cameraUiController = UiController(
+            DeviceType.CAMERA,
+            spCameras,
+            etCameraIp,
+            llCameraControls,
+            featuresManager.availableCameraFeatures,
+            featuresManager.isHttpDevice,
+            applicationContext
+        )
+
+        cameraUiController.init()
+
+        val gimbalUiController = UiController(
+            DeviceType.GIMBAL,
+            spGimbals,
+            etGimbalIp,
+            llGimbalControls,
+            featuresManager.availableGimbalFeatures,
+            featuresManager.isHttpDevice,
+            applicationContext
+        )
+
+        gimbalUiController.init()
+
+        btnLoad.setOnClickListener {
+
+            Log.d("CANCEL", "Camera chosen: ${Database(this).getCamera()}; Gimbal chosen: ${Database(this).getGimbal()}")
+            Log.d("CANCEL", "Controls chosen: ${Database(this).getControls()}")
+
+//                cancel()
+        }
+
+        CommitView(
+            btnSave,
+            btnCancel,
+            this,
+            cameraUiController,
+            gimbalUiController
+            ).init()
+
+//        val uiControllerCamera = UiController(
+//            spCameras,
+//            etCameraIp,
+//            llCameraControls,
+//            mutableMapOf<String, ArrayList<Feature>>(
+//                "Canon Camera" to arrayListOf(
+//                    Feature.APERTURE,
+//                    Feature.FOCUS,
+//                    Feature.SHOOT,
+//                    Feature.ZOOM,
+//                    Feature.MODE
+//                ),
+//                "Native Camera" to arrayListOf(
+//                    Feature.APERTURE,
+//                    Feature.FOCUS,
 //
-//        val featuresManager = intent.getSerializableExtra("EXTRA_FEATURES_MANAGER") as FeaturesManager
+//                ),
+//            ),
+//            mutableMapOf<String, Boolean>(
+//                "Canon Camera" to true,
+//                "Native Camera" to false
+//            ),
+//           applicationContext
+//        )
+//
+//        uiControllerCamera.init()
+
+//        val uiControllerGimbal = UiController(
+//            spGimbals,
+//            etGimbalIp,
+//            llGimbalControls,
+//            mutableMapOf<String, ArrayList<Feature>>(
+//                "DJI Ronin" to arrayListOf(
+//                    Feature.MOVE
+//                ),
+//                "Pilotfly" to arrayListOf(
+//                    Feature.MOVE
+//                    ),
+//            ),
+//            mutableMapOf<String, Boolean>(
+//                "DJI Ronin" to true,
+//                "Pilotfly" to false
+//            ),
+//            applicationContext
+//        )
+//
+//        uiControllerGimbal.init()
 //
 //        var cameraSwitches = mutableMapOf<Feature, Switch>()
 //        var gimbalSwitches = mutableMapOf<Feature, Switch>()
@@ -111,190 +203,66 @@ class ConfigurationActivity : AppCompatActivity() {
 //            }
 //        }
 
-        val uiControllerCamera = UiController(
-            spCameras,
-            etCameraIp,
-            llCameraControls,
-            mutableMapOf<String, ArrayList<Feature>>(
-                "Canon Camera" to arrayListOf(
-                    Feature.APERTURE,
-                    Feature.FOCUS,
-                    Feature.SHOOT,
-                    Feature.ZOOM,
-                    Feature.MODE
-                ),
-                "Native Camera" to arrayListOf(
-                    Feature.APERTURE,
-                    Feature.FOCUS,
-
-                ),
-            ),
-            mutableMapOf<String, Boolean>(
-                "Canon Camera" to true,
-                "Native Camera" to false
-            ),
-           applicationContext
-        )
-
-        uiControllerCamera.init()
-
-        val uiControllerGimbal = UiController(
-            spGimbals,
-            etGimbalIp,
-            llGimbalControls,
-            mutableMapOf<String, ArrayList<Feature>>(
-                "DJI Ronin" to arrayListOf(
-                    Feature.MOVE
-                ),
-                "Pilotfly" to arrayListOf(
-                    Feature.MOVE
-                    ),
-            ),
-            mutableMapOf<String, Boolean>(
-                "DJI Ronin" to true,
-                "Pilotfly" to false
-            ),
-            applicationContext
-        )
-
-        uiControllerGimbal.init()
-    }
-
-    class ModelUi{
-
-        var chosenDevice = ""
-        var chosenDeviceIp = ""
-        var observers = arrayListOf<ObserverUI>()
-
-        fun notifyObservers() {
-
-            observers.forEach {
-                it.deviceChange(chosenDevice)
-            }
-        }
-
-        fun setDevice(chosenDevice: String) {
-
-            this.chosenDevice = chosenDevice
-
-            notifyObservers()
-        }
-
-        fun getDevice(): String {
-
-            return chosenDevice
-        }
-    }
-
-    interface ObserverUI {
-        fun deviceChange(newDevice: String): Unit
-        fun init(): Unit
-    }
-
-    class EtIp(
-        val etIp: EditText,
-        val deviceHasIp: Map<String, Boolean>
-    ): ObserverUI {
-
-        override fun deviceChange(newDevice: String) {
-
-            // Check if device needs an ip, if it does not, then disable the textbox
-            val hasIp = deviceHasIp.get(newDevice) ?: false
-
-            etIp.apply {
-                isFocusable = hasIp
-                isFocusableInTouchMode = hasIp
-                inputType = mapOf<Boolean, Int>(
-                    false to InputType.TYPE_NULL,
-                    true to InputType.TYPE_CLASS_TEXT
-                ).get(hasIp)!!
-            }
-
-        }
-
-        override fun init() {
-
-        }
-    }
-
-    class SpDevice(
-        val spDevice: Spinner,
-        val modelUi: ModelUi
-    ): ObserverUI {
-
-        override fun init() {
-
-            // Set on item selected listener for spinner
-            this.spDevice.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    val chosenDevice = parent?.getItemAtPosition(position).toString()
-                    modelUi.setDevice(chosenDevice)
-
-//                    Toast.makeText(applicationContext, "Selected item: ${parent?.getItemAtPosition(position).toString()}", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                }
-            }
-
-        }
-
-        override fun deviceChange(newDevice: String) {
-            // Upon device change, we render the device's list of controls
-
-        }
-    }
-
-    class VisibleControls(
-        llControls: LinearLayout
-    ){
-
-        fun addControls(controls: Map<DeviceName, ArrayList<Feature>>) {}
     }
 
     class CommitView(
         val btnSave: Button,
-        val btnCancel: Button
+        val btnCancel: Button,
+        val activity: Activity,
+        val cameraUiController: UiController,
+        val gimbalUiController: UiController
     ){
+
+        val database = Database(activity)
 
         /*
         * Add click listeners for both btnSave and btnCancel
         * */
-        fun init() {}
+        fun init() {
 
-        /*
-        * Get:
-        * - chosen camera and it's ip
-        * - chosen gimbal and it's ip
-        * - chosen controls from the checkboxes
-        * */
-        fun save() {}
+            btnSave.setOnClickListener {
+
+
+                // Get chosen controls from the uiController object
+                database.saveControls(cameraUiController.getChosenControls() + gimbalUiController.getChosenControls())
+
+                val cameraDetails = cameraUiController.getChosenDevice()
+                val gimbalDetails = gimbalUiController.getChosenDevice()
+                database.saveDevices(cameraDetails, gimbalDetails)
+            }
+
+            btnCancel.setOnClickListener {
+
+                Log.d("CANCEL", "Camera chosen: ${database.getCamera().deviceName.toString()}")
+//                cancel()
+            }
+
+        }
 
         /*
         * Don't save the settings and finish() the current activity
         * */
-        fun cancel() {}
+        fun cancel() {
+
+            this.activity.finish()
+        }
     }
 
     class UiController(
+        val deviceType: DeviceType,
         val spDevice: Spinner,
         val etIp: EditText,
         val llControls: LinearLayout,
-        val deviceControls: Map<String, ArrayList<Feature>>,
-        val deviceHasIp: Map<String, Boolean>,
+        val deviceControls: Map<DeviceName, ArrayList<Feature>>,
+        val deviceHasIp: Map<DeviceName , Boolean>,
         val context: Context
     ){
 
         var chosenDevice = ""
         var chosenControls = mutableMapOf<Feature, CheckBox>()
+        var stringToEnum = mutableMapOf<String, DeviceName>()
 
+        val NUMBER_COLUMNS = 3
         fun init() {
 
             this.spDevice.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -316,12 +284,16 @@ class ConfigurationActivity : AppCompatActivity() {
                 }
             }
 
+            deviceControls.forEach {
+
+                stringToEnum.put(it.key.toString(), it.key)
+            }
 
         }
 
         private fun setIpView() {
 
-            val hasIp = deviceHasIp.get(chosenDevice) ?: false
+            val hasIp = deviceHasIp.get(stringToEnum.get(chosenDevice)) ?: false
 
             etIp.apply {
                 isFocusable = hasIp
@@ -336,15 +308,16 @@ class ConfigurationActivity : AppCompatActivity() {
         private fun displayControls() {
 
             this.llControls.removeAllViews()
+            chosenControls.clear()
 
-            val features = deviceControls.get(chosenDevice)
+            val features = deviceControls.get(stringToEnum.get(chosenDevice))
 
             var verticalLinearLayout:LinearLayout? = null
             var i = 0
 
             features?.forEach {
 
-                if (i%3 == 0) {
+                if (i%NUMBER_COLUMNS == 0) {
 
                     verticalLinearLayout = LinearLayout(context)
                     verticalLinearLayout!!.layoutParams = LinearLayout.LayoutParams(
@@ -368,8 +341,25 @@ class ConfigurationActivity : AppCompatActivity() {
                 verticalLinearLayout!!.addView(newFeature)
                 i += 1
             }
+        }
 
+        fun getChosenControls(): ArrayList<Feature> {
 
+            val chosenControlsList = arrayListOf<Feature>()
+
+            chosenControls.forEach {
+
+                if (it.value.isChecked) {
+                    chosenControlsList.add(it.key)
+                }
+            }
+
+            return chosenControlsList
+        }
+
+        fun getChosenDevice(): DeviceDetails {
+
+            return DeviceDetails(DeviceName.valueOf(chosenDevice), etIp.text.toString())
         }
     }
 
