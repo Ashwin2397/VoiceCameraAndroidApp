@@ -15,9 +15,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.IOException
 import android.app.*
+import android.graphics.Bitmap
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import java.io.Serializable
 
 /*
 * TODO:
@@ -30,30 +32,39 @@ import retrofit2.http.PUT
 * - All responses of each HTTP call must be parsed to render the appropriate UI view and to handle errors efficiently
 * - Refactor getURl(), getIP(), setIP() methods to a HTTPDevice object?
 * - Create function for HTTP requests to reduce repetition of code
+* - Add error handling so as to prevent crash from failing, this includes the uses of Toasts
+* - Change all methods to accept strings only, to accomodate the STTE
+* - Implement "mode" to toggle between movie and photo
 * */
 
 
-class CanonCameraController: Device {
+class CanonCameraController: Device, Camera, Serializable {
 
-    val featuresAvailable = arrayListOf<Feature>(Feature.ZOOM, Feature.SHOOT)
+    val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.MODE, Feature.ZOOM, Feature.FOCUS, Feature.APERTURE)
     private val deviceName = DeviceName.CANON
     private val connectionType = ConnectionType.HTTP
 
     val httpNetworkManager = null // API Interface
     val featureURL = mapOf<Feature, String>(
 
-        Feature.SHOOT to "ccapi/ver100/shooting/control/shutterbutton",
-        Feature.ZOOM to "ccapi/ver100/shooting/control/zoom",
-        Feature.LIVEVIEW_FLIP to "/ccapi/ver100/shooting/liveview/flip/"
+        Feature.SHOOT to "ccapi/ver100/shooting/control/shutterbutton/",
+        Feature.ZOOM to "ccapi/ver100/shooting/control/zoom/",
+        Feature.LIVEVIEW_FLIP to "/ccapi/ver100/shooting/liveview/flip/",
+        Feature.APERTURE to ""
 
     )
-    var ip = "10.0.0.97";
+    var ip = "192.168.0.106";
     var BASE_URL = "http://" + this.ip + ":8080/"
 
     val okClient by lazy {
         OkHttpClient()
     }
 
+    val okRequest by lazy {
+        Request.Builder()
+            .url("http://${ip}:8080/ccapi/ver100/shooting/liveview/flip/")
+            .build()
+    }
     override fun getDeviceName(): DeviceName {
         return this.deviceName
     }
@@ -104,18 +115,45 @@ class CanonCameraController: Device {
 
         this.ip = ipAddress
     }
+
+    /*
+    * Configures liveview so that camera can connect to imageView.
+    *
+    * */
+    override fun configureLiveview(callback: (camera: Camera) -> Unit) {
+        val retroFitBuilder = Retrofit.Builder()
+            .baseUrl(this.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .build()
+            .create(CanonCameraApiInterface :: class.java)
+
+        val data = retroFitBuilder.configureLiveview(LiveView("medium", "on"))
+
+        data.enqueue(object : Callback<Empty?> {
+            override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
+
+                Log.d("RESPONSE", response.body().toString())
+
+                callback(this@CanonCameraController)
+
+            }
+
+            override fun onFailure(call: Call<Empty?>, t: Throwable) {
+                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+            }
+        })
+    }
+
     /*
     * Gets the static live view image as a bitmap
     * Uses okHTTP client.
     * @param {} Callback function to run once image has been received from camera.
     * */
-    fun getLiveviewFlip(callback: () -> Unit) {
+    override fun getLiveviewFlip(callback: (bitmap: Bitmap?) -> Unit) {
 
-        val okRequest = Request.Builder()
-                .url(BASE_URL + this.featureURL[Feature.LIVEVIEW_FLIP])
-                .build()
 
-        this.okClient.newCall(okRequest).enqueue(object : okhttp3.Callback {
+        this.okClient.newCall(this.okRequest).enqueue(object : okhttp3.Callback {
 
             override fun onFailure(call: okhttp3.Call, e: IOException) {
                 Log.d("RESPONSE_ERROR", e.message ?: "Error: No Error message")
@@ -130,7 +168,7 @@ class CanonCameraController: Device {
                 val bitmap = BitmapFactory.decodeStream(inputStream)
 
                 // Supply bitmap to callback function
-//                callback(bitmap) // Correct syntax for calling callback that requires parameter
+                callback(bitmap) // Correct syntax for calling callback that requires parameter
 
                 Log.d("RESPONSE", response.body.toString())
 
@@ -142,10 +180,10 @@ class CanonCameraController: Device {
     * Sends HTTP shoot request to camera to grab a picture.
     * Uses retrofit.
     * */
-    fun shoot(): Unit {
+    override fun shoot(): Unit {
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL + this.featureURL[Feature.SHOOT])
+            .baseUrl(this.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
@@ -170,18 +208,18 @@ class CanonCameraController: Device {
 
     /*
     * Zooms in as per the zoom factor provided
-    * @param {Integer} zoomFactor The integer amount to zoom in by
+    * @param {String} zoomFactor The integer amount to zoom in by.
     * */
-    fun zoom(zoomFactor: Int): Unit {
+    override fun setZoom(zoomFactor: String): Unit {
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL + this.featureURL[Feature.ZOOM])
+            .baseUrl(this.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
             .create(CanonCameraApiInterface :: class.java)
 
-        val data = retroFitBuilder.zoom(Zoom(value = zoomFactor))
+        val data = retroFitBuilder.zoom(Zoom(value = zoomFactor.toInt()))
 
         data.enqueue(object : Callback<Zoom?> {
             override fun onResponse(call: Call<Zoom?>, response: Response<Zoom?>) {
@@ -198,14 +236,14 @@ class CanonCameraController: Device {
 
     /*
     * Changes the aperture of the camera
-    * @param {Float} apertureFactor The new aperture to update to
+    * @param {String} apertureFactor The new aperture to update to.
     * */
-    fun aperture(apertureFactor: Float): Unit {
+    override fun setAperture(apertureFactor: String): Unit {
 
-        val apertureValue = "f" + apertureFactor.toString()
+        val apertureValue = "f" + apertureFactor.toFloat().toString()
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL + this.featureURL[Feature.APERTURE])
+            .baseUrl(this.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
@@ -231,16 +269,22 @@ class CanonCameraController: Device {
     * Changes the focus type of the camera
     * @param {String} focusType The new focus type to update to
     * */
-    fun focusType(focusType: String): Unit {
+    override fun setFocusType(focusType: String): Unit {
+
+        val focusTypes = mapOf<String, String>(
+            "face" to "face+tracking",
+            "spot" to "spot",
+            "point" to "1point"
+        )
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL + this.featureURL[Feature.FOCUS_TYPE])
+            .baseUrl(this.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
             .create(CanonCameraApiInterface :: class.java)
 
-        val data = retroFitBuilder.focusType(FocusType(value = focusType))
+        val data = retroFitBuilder.focusType(FocusType(value = focusTypes[focusType]!!))
 
         data.enqueue(object : Callback<FocusType?> {
             override fun onResponse(call: Call<FocusType?>, response: Response<FocusType?>) {
@@ -260,25 +304,6 @@ class CanonCameraController: Device {
 
 }
 
-interface Device {
-    fun getDeviceName(): DeviceName
-    fun connectDevice(): Unit
-    fun getConnectionType(): ConnectionType
-
-    /*
-    * Check if given feature is available.
-    * @param {feature.<SOME FEATURE>} Feature -.
-    * @return {Boolean} Indicating if feature is available.
-    */
-    fun isFeatureAvailable(feature: Feature): Boolean
-
-    /*
-   * Get list of features available by camera
-   * @return {Array} An array of feature.camera enums.
-   */
-    fun getAvailableFeatures(): ArrayList<Feature>
-
-}
 interface CanonCameraApiInterface {
 
     @POST("ccapi/ver100/shooting/control/shutterbutton")
@@ -287,12 +312,21 @@ interface CanonCameraApiInterface {
     @POST("ccapi/ver100/shooting/control/zoom")
     fun zoom(@Body body: Zoom): Call<Zoom>
 
+    @POST("ccapi/ver100/shooting/liveview")
+    fun configureLiveview(@Body body: LiveView): Call<Empty>
+
     @PUT("ccapi/ver100/shooting/settings/av")
     fun aperture(@Body body: Aperture): Call<Aperture>
 
     @PUT("ccapi/ver100/shooting/settings/afmethod")
     fun focusType(@Body body: FocusType): Call<FocusType>
 }
+
+// Use @SerializedName("liveviewsize") and camelcase the variable
+data class LiveView(
+    val liveviewsize: String,
+    val cameradisplay: String
+)
 
 data class Focus(
 
