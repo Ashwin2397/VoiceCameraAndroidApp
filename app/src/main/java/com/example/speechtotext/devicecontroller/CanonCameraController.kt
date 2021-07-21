@@ -53,7 +53,7 @@ class CanonCameraController: Device, Camera, Serializable {
         Feature.APERTURE to ""
 
     )
-    var ip = "192.168.0.106";
+    private var ip = "192.168.0.107";
     var BASE_URL = "http://" + this.ip + ":8080/"
 
     val okClient by lazy {
@@ -65,6 +65,11 @@ class CanonCameraController: Device, Camera, Serializable {
             .url("http://${ip}:8080/ccapi/ver100/shooting/liveview/flip/")
             .build()
     }
+
+    override fun setIp(ip: String) {
+        this.ip = ip
+    }
+
     override fun getDeviceName(): DeviceName {
         return this.deviceName
     }

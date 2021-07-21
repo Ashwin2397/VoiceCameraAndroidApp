@@ -29,6 +29,10 @@ class PilotflyGimbalController: Device, Gimbal {
         return featuresAvailable
     }
 
+    override fun setIp(ip: String) {
+        TODO("Not yet implemented")
+    }
+
     override fun move(yaw: Float, pitch: Float, roll: Float, isIncremental: Int) {
         TODO("Not yet implemented")
     }

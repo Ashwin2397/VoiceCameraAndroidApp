@@ -31,6 +31,8 @@ interface Device {
    */
     fun getAvailableFeatures(): ArrayList<Feature>
 
+    fun setIp(ip: String)
+
 }
 
 

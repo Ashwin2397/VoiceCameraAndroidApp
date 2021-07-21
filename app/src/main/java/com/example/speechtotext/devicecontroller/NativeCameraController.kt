@@ -80,6 +80,10 @@ class NativeCameraController: Device, Camera {
         return featuresAvailable
     }
 
+    override fun setIp(ip: String) {
+        TODO("Not yet implemented")
+    }
+
     override fun configureLiveview(callback: (camera: Camera) -> Unit) {
         TODO("Not yet implemented")
     }

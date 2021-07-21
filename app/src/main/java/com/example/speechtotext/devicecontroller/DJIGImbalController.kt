@@ -17,7 +17,7 @@ class DJIGimbalController: Device, Gimbal, Serializable {
 
     private val deviceName = DeviceName.DJI_RS_2
     private val connectionType = ConnectionType.HTTP
-    private val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
+    private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
 
     val featureURL = mapOf<Feature, String>(
 
@@ -25,9 +25,12 @@ class DJIGimbalController: Device, Gimbal, Serializable {
         Feature.INCREMENTAL_MOVEMENT to "",
 
     )
-    var ip = "";
+    private var ip = "";
     var BASE_URL = "http://" + this.ip + ":8080/"
 
+    override fun setIp(ip: String) {
+        this.ip = ip
+    }
     override fun getDeviceName(): DeviceName {
         return this.deviceName
     }
