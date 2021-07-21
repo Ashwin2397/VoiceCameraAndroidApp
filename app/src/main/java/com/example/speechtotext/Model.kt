@@ -1,6 +1,9 @@
 package com.example.speechtotext
 
 import android.widget.TextView
+import com.example.speechtotext.devicecontroller.Camera
+import com.example.speechtotext.devicecontroller.Gimbal
+import com.example.speechtotext.devicecontroller.PilotflyGimbalController
 import kotlin.collections.ArrayList
 
 
@@ -71,6 +74,10 @@ class Model(val textView: TextView): SpeechToTextEngineObserver{
         }
     }
 
+    fun removeAllObservers() {
+
+        observers.clear()
+    }
     override fun newWord(word: String) {
 
 
@@ -89,12 +96,17 @@ interface SpeechToTextEngineObserver {
 interface Observer {
 
     fun newWord(word: String)
-
+    fun setUIController(uiController: UIController)
+    fun getControlParameters(): MutableList<String>
+    fun onCommandClick()
+    fun onParameterClick(parameter: String)
+    fun setGimbalController(gimbalController: Gimbal)
+    fun setCameraController(cameraController: Camera)
 
 }
 
 data class Word(
-    val value: Any,
+    val value: String,
     val feature: Feature,
     val inputType: InputType,
     val deviceType: DeviceType
@@ -104,7 +116,6 @@ class State(
     val state: Int,
     val input: Map<InputType, Int>,
     val callbacks: Array<() -> Unit>,
-    val finalCallbacks: Array<() -> Unit>
 
 ){
 
@@ -127,15 +138,7 @@ class State(
             it()
         }
     }
-    /*
-	* Runs all final callbacks once state has been attained for the first time
-    */
-    fun runFinalCallbacks() {
 
-        this.finalCallbacks.forEach {
-            it()
-        }
-    }
 
 }
 //
