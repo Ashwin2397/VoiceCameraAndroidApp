@@ -1,65 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
+<!--
+TODO:
+- Refactor the imageview to allow for the addition of the tiny camera icon upon start up
+  while still being able to produce the same image size
+-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/commandButtonCreatorLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="left"
         android:layout_marginTop="15dp"
-        android:orientation="vertical"
+        android:gravity="left"
+        android:orientation="horizontal"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="15dp">
 
-<!--        <Button-->
-<!--            android:id="@+id/zoom"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="15dp"-->
-<!--            android:layout_marginLeft="15dp"-->
-<!--            android:layout_marginTop="0dp"-->
-<!--            android:text="Zoom"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/zoom"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="15dp"-->
+        <!--            android:layout_marginLeft="15dp"-->
+        <!--            android:layout_marginTop="0dp"-->
+        <!--            android:text="Zoom"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--        <Button-->
-<!--            android:id="@+id/aperture"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="15dp"-->
-<!--            android:layout_marginLeft="15dp"-->
-<!--            android:layout_marginTop="0dp"-->
-<!--            android:text="Aperture"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/aperture"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="15dp"-->
+        <!--            android:layout_marginLeft="15dp"-->
+        <!--            android:layout_marginTop="0dp"-->
+        <!--            android:text="Aperture"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--        <Button-->
-<!--            android:id="@+id/focus"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="15dp"-->
-<!--            android:layout_marginLeft="15dp"-->
-<!--            android:layout_marginTop="0dp"-->
-<!--            android:text="Focus"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/focus"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="15dp"-->
+        <!--            android:layout_marginLeft="15dp"-->
+        <!--            android:layout_marginTop="0dp"-->
+        <!--            android:text="Focus"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--        <Button-->
-<!--            android:id="@+id/mode"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="15dp"-->
-<!--            android:layout_marginLeft="15dp"-->
-<!--            android:layout_marginTop="0dp"-->
-<!--            android:text="Mode"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/mode"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="15dp"-->
+        <!--            android:layout_marginLeft="15dp"-->
+        <!--            android:layout_marginTop="0dp"-->
+        <!--            android:text="Mode"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
 
     </LinearLayout>
@@ -83,6 +90,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+<!--        android:adjustViewBounds="true"-->
+<!--        android:maxWidth="42dp"-->
+<!--        android:maxHeight="42dp"-->
+<!--        android:scaleType="fitCenter"-->
 
     <Button
         android:id="@+id/shootImage"
@@ -135,8 +146,5 @@
 
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/flFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
