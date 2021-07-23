@@ -30,7 +30,7 @@
                 android:layout_marginLeft="5sp"
                 android:ems="10"
                 android:inputType="text"
-                android:text="Camera IP" />
+                android:text="192.168.0.107" />
 
         </TableRow>
 
@@ -53,7 +53,7 @@
                 android:ems="10"
                 android:inputType="text"
                 android:focusable="false"
-                android:text="Gimbal IP" />
+                android:text="192.168.0.106" />
 
         </TableRow>
 
@@ -190,7 +190,7 @@
 
             <Button
                 android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10sp"
                 android:layout_weight="1"
@@ -198,19 +198,19 @@
 
             <Button
                 android:id="@+id/btnSave"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10sp"
                 android:layout_weight="1"
                 android:text="Save" />
 
-            <Button
-                android:id="@+id/btnLoad"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10sp"
-                android:layout_weight="1"
-                android:text="Load" />
+<!--            <Button-->
+<!--                android:id="@+id/btnLoad"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="10sp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:text="Load" />-->
         </TableRow>
 
     </TableLayout>

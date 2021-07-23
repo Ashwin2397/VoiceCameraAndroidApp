@@ -75,7 +75,7 @@ TODO:
         android:id="@+id/transcription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="transcription ... "
+        android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -90,6 +90,7 @@ TODO:
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 <!--        android:adjustViewBounds="true"-->
 <!--        android:maxWidth="42dp"-->
 <!--        android:maxHeight="42dp"-->
