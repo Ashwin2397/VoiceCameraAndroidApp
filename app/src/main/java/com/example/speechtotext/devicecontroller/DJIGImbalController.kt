@@ -1,6 +1,8 @@
 package com.example.speechtotext.devicecontroller
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.example.speechtotext.*
 import com.google.gson.annotations.SerializedName
 import retrofit2.Call
@@ -13,6 +15,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.io.Serializable
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 class DJIGimbalController: Device, Gimbal, Serializable {
@@ -20,6 +23,8 @@ class DJIGimbalController: Device, Gimbal, Serializable {
     private val deviceName = DeviceName.DJI_RS_2
     private val connectionType = ConnectionType.HTTP
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
+    var context: Context? = null
+
 
     val featureURL = mapOf<Feature, String>(
 
@@ -27,10 +32,13 @@ class DJIGimbalController: Device, Gimbal, Serializable {
         Feature.INCREMENTAL_MOVEMENT to "",
 
     )
-    private var ip = "";
+    private var ip = "192.168.0.106";
     var BASE_URL = "http://${ip}:8080/"
     val RANGE:Float = 10F
 
+    override fun setApplicationContext(context: Context) {
+        this.context = context
+    }
 
     override fun setIp(ip: String) {
         this.ip = ip
@@ -49,28 +57,33 @@ class DJIGimbalController: Device, Gimbal, Serializable {
 
     override fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int) {
 
+        try {
+            val url = this.BASE_URL
+            val retroFitBuilder = Retrofit.Builder()
+                .baseUrl(this.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build()
+                .create(DJIGimbalAPIInterface :: class.java)
 
-        val url = this.BASE_URL
-        val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .build()
-            .create(DJIGimbalAPIInterface :: class.java)
+            val data = retroFitBuilder.moveGimbal(MoveGimbal(yaw = convert(yaw), pitch = convert(pitch), roll = convert(roll), isAbsolute = isAbsolute.toString(), timeForAction = "10"))
 
-        val data = retroFitBuilder.moveGimbal(MoveGimbal(yaw = convert(yaw), pitch = convert(pitch), roll = convert(roll), isAbsolute = isAbsolute.toString(), timeForAction = "10"))
+            data.enqueue(object: Callback<Empty?> {
+                override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
 
-        data.enqueue(object: Callback<Empty?> {
-            override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
+                    Log.d("RESPONSE", response.body().toString())
 
-                Log.d("RESPONSE", response.body().toString())
+                }
 
-            }
+                override fun onFailure(call: Call<Empty?>, t: Throwable) {
+                    Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+                }
+            })
 
-            override fun onFailure(call: Call<Empty?>, t: Throwable) {
-                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
-            }
-        })
+        }catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "DJI Gimbal not connected", Toast.LENGTH_SHORT).show()
+        }
 
     }
 

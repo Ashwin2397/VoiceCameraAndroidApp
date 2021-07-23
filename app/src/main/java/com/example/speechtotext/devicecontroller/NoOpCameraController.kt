@@ -29,9 +29,13 @@ class NoOpCameraController: Device, Camera {
     private val deviceName = DeviceName.NO_OP_CAMERA
     private val connectionType = ConnectionType.NATIVE
 
-    var context: Context? = null
     var textView: TextView? = null
 
+    var context: Context? = null
+
+    override fun setApplicationContext(context: Context) {
+        this.context = context
+    }
     override fun setIp(ip: String) {
     }
 

@@ -42,6 +42,17 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
             applicationContext.getPackageName());
     }
 
+    fun toggleStream() {
+
+        if (isActive) {
+            closeStream()
+        }else {
+            openStream()
+        }
+
+        isActive = !isActive
+    }
+
     fun openStream() {
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(applicationContext)

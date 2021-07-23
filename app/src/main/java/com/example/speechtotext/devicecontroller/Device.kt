@@ -1,5 +1,6 @@
 package com.example.speechtotext.devicecontroller
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
@@ -32,6 +33,9 @@ interface Device {
     fun getAvailableFeatures(): ArrayList<Feature>
 
     fun setIp(ip: String)
+
+    fun setApplicationContext(context: Context)
+
 
 }
 

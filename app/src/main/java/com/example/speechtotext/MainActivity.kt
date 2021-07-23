@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.speechtotext.devicecontroller.*
 import com.example.speechtotext.manager.SystemManager
 import kotlinx.android.synthetic.main.activity_configuration.*
@@ -60,11 +61,9 @@ class MainActivity : AppCompatActivity(){
         Feature.ROLL to RollObserver(),
     )
 
-    var chosenControls = mutableListOf<Feature>(
-        Feature.ZOOM, Feature.APERTURE, Feature.FOCUS, Feature.MODE
-    )
+    var chosenControls = mutableListOf<Feature>()
     var chosenCamera = DeviceName.CANON
-    var chosenGimbal = DeviceName.PILOTFLY
+    var chosenGimbal = DeviceName.DJI_RS_2
 
     var buttons = mutableMapOf<Feature, Button>()
 
@@ -82,6 +81,7 @@ class MainActivity : AppCompatActivity(){
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onResume() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         super.onResume()
 
         // Refactor screenChanged boolean, might not need it
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity(){
 
         Toast.makeText(this, "MAIN", Toast.LENGTH_SHORT).show()
 
-        val systemManager = SystemManager()
+        val systemManager = SystemManager(applicationContext)
         val featuresManager = systemManager.getFeaturesManager()
 
         // To render the configuration view
@@ -153,61 +153,31 @@ class MainActivity : AppCompatActivity(){
 
         }
 
+        controllers.forEach {
+            (it.value as Device).setApplicationContext(applicationContext)
+        }
+
         // Create buttons
         createButtons()
         initializeObservers()
 
         stt.initialize(true, model)
 
-        // Must start STT upon user interaction
-        //
+        // Must start STT via user interaction
         startTranscription.setOnClickListener {
 
-
-            startTranscription.text = "VOICE CONTROL: ON"
+            startTranscription.text = "VOICE CONTROL: ${mapOf(true to "ON", false to "OFF").get(!stt.isActive)}"
 
             try {
                 val permissions: Array<String> = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.INTERNET)
                 requestPermissions( permissions, 101)
 
-                stt.openStream()
+                stt.toggleStream()
 
             }catch (e: ActivityNotFoundException){
                 Toast.makeText(this, "Your device does not support STT.", Toast.LENGTH_LONG).show()
                 e.printStackTrace()
             }
-            
-//            // Refactor, create toggle feature
-            if (!stt.isActive) {
-
-
-
-                stt.isActive = true
-            }else {
-                startTranscription.text = "VOICE CONTROL: OFF"
-
-                try {
-                    stt.closeStream()
-
-                }catch (e: ActivityNotFoundException){
-                    Toast.makeText(this, "Your device does not support STT.", Toast.LENGTH_LONG).show()
-                    e.printStackTrace()
-                }
-
-                stt.isActive = false
-
-            }
-
-//            val camera = CanonCameraController()
-//
-//            Timer().scheduleAtFixedRate(object : TimerTask() {
-//                override fun run() {
-////                    getImage()
-//                    camera.getLiveviewFlip(this@MainActivity::setBm)
-//
-//
-//                }
-//            },0 ,100)
 
         }
 
@@ -233,7 +203,7 @@ class MainActivity : AppCompatActivity(){
                 }catch (e: Exception) {
                     Toast.makeText(applicationContext, "Camera IP is incorrect", Toast.LENGTH_LONG)
 
-                    // Stop timer
+                    // REFACTOR: Stop timer
                 }
 
             }
@@ -264,6 +234,7 @@ class MainActivity : AppCompatActivity(){
         var verticalLinearLayout:LinearLayout? = null
         var i = 0
 
+        chosenControls = db.getControls()
         chosenControls.forEach {
 
 
@@ -307,6 +278,9 @@ class MainActivity : AppCompatActivity(){
     }
 
     fun initializeObservers() {
+
+        chosenCamera = db.getCamera().deviceName
+        chosenGimbal = db.getGimbal().deviceName
 
         model.removeAllObservers()
         observers!!.forEach {

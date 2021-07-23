@@ -1,5 +1,6 @@
 package com.example.speechtotext.devicecontroller
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
@@ -59,13 +60,18 @@ class NativeCameraController: Device, Camera {
 
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.ZOOM)
     private val connectionType = ConnectionType.NATIVE
-    
+    private val deviceName = DeviceName.NATIVE
+    var context: Context? = null
+
+    override fun setApplicationContext(context: Context) {
+        this.context = context
+    }
+
     override fun getDeviceName(): DeviceName {
-        TODO("Not yet implemented")
+        return this.deviceName
     }
 
     override fun connectDevice() {
-        TODO("Not yet implemented")
     }
 
     override fun getConnectionType(): ConnectionType {
@@ -73,7 +79,11 @@ class NativeCameraController: Device, Camera {
     }
 
     override fun isFeatureAvailable(feature: Feature): Boolean {
-        TODO("Not yet implemented")
+        if ( this.featuresAvailable.contains(feature) ) {
+            return true;
+        }
+
+        return false;
     }
 
     override fun getAvailableFeatures(): ArrayList<Feature> {
@@ -81,30 +91,23 @@ class NativeCameraController: Device, Camera {
     }
 
     override fun setIp(ip: String) {
-        TODO("Not yet implemented")
     }
 
     override fun configureLiveview(callback: (camera: Camera) -> Unit) {
-        TODO("Not yet implemented")
     }
 
     override fun getLiveviewFlip(callback: (bitmap: Bitmap?) -> Unit) {
-        TODO("Not yet implemented")
     }
 
     override fun shoot() {
-        TODO("Not yet implemented")
     }
 
     override fun setZoom(zoomFactor: String) {
-        TODO("Not yet implemented")
     }
 
     override fun setAperture(apertureFactor: String) {
-        TODO("Not yet implemented")
     }
 
     override fun setFocusType(focusType: String) {
-        TODO("Not yet implemented")
     }
 }

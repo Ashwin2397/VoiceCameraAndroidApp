@@ -1,5 +1,6 @@
-package com.example.speechtotext
+    package com.example.speechtotext
 
+import android.content.Context
 import android.widget.TextView
 import com.example.speechtotext.devicecontroller.Camera
 import com.example.speechtotext.devicecontroller.Gimbal

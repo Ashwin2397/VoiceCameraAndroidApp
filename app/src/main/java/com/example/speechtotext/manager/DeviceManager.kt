@@ -1,5 +1,6 @@
 package com.example.speechtotext.manager
 
+import android.content.Context
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
@@ -15,9 +16,9 @@ import kotlin.collections.ArrayList
 * cameras and gimbals that were available. Maybe when porting it over, we can do that.
 */
 
-class SystemManager: Serializable {
+class SystemManager(val context: Context): Serializable {
 
-    val deviceManager = DeviceManager()
+    val deviceManager = DeviceManager(context)
 
     fun getFeaturesManager(): FeaturesManager {
 
@@ -124,7 +125,7 @@ class FeaturesManager(
 /*
 * This should adopt the factory design pattern and replace the controllers map from the main activity
 * */
-class DeviceManager{
+class DeviceManager(val context: Context){
 
     var gimbal:Device? = null
     var camera:Device? = null

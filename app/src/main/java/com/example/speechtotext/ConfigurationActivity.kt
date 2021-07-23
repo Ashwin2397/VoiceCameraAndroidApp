@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.speechtotext.manager.FeaturesManager
 import kotlinx.android.synthetic.main.activity_configuration.*
 
@@ -30,6 +31,8 @@ class ConfigurationActivity : AppCompatActivity() {
     var hasAdded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_configuration)
 

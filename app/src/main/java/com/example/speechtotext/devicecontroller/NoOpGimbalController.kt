@@ -11,9 +11,13 @@ class NoOpGimbalController: Device, Gimbal {
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
     private val deviceName = DeviceName.NO_OP_GIMBAL
     private val connectionType = ConnectionType.NATIVE
+    var context: Context? = null
 
-    val context: Context? = null
+
     var textView: TextView? = null
+    override fun setApplicationContext(context: Context) {
+        this.context = context
+    }
 
     override fun getDeviceName(): DeviceName {
         return this.deviceName

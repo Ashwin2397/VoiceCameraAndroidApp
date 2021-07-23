@@ -1144,7 +1144,6 @@ class UpObserver: Observer {
 
     override fun newWord(word: String) {
 
-        // Log.d(this.TAG, word)
         val parsedWord = this.parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
 
@@ -1562,6 +1561,83 @@ class RollObserver: Observer {
 
         newWord(parameter)
 
+    }
+
+
+}
+
+
+class FSM(
+    val states: Map<Int, State>,
+    val consecutiveWords: Map<String, Word>,
+    val command: String,
+    val feature: Feature
+){
+
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+
+    fun newWord(word: String) {
+
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun changeState(newState: Int) {
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+
+            newStateObject!!.runCallbacks();
+
+        }
+
+
+    }
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, feature, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
     }
 
 

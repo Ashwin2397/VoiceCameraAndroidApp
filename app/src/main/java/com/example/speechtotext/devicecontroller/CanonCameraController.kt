@@ -15,6 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.IOException
 import android.app.*
+import android.content.Context
 import android.graphics.Bitmap
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -43,6 +44,9 @@ class CanonCameraController: Device, Camera, Serializable {
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.MODE, Feature.ZOOM, Feature.FOCUS, Feature.APERTURE)
     private val deviceName = DeviceName.CANON
     private val connectionType = ConnectionType.HTTP
+    var context: Context? = null
+
+
 
     val httpNetworkManager = null // API Interface
     val featureURL = mapOf<Feature, String>(
@@ -64,6 +68,10 @@ class CanonCameraController: Device, Camera, Serializable {
         Request.Builder()
             .url("http://${ip}:8080/ccapi/ver100/shooting/liveview/flip/")
             .build()
+    }
+
+    override fun setApplicationContext(context: Context) {
+        this.context = context
     }
 
     override fun setIp(ip: String) {
