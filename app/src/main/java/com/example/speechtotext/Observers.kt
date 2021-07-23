@@ -17,9 +17,8 @@ import kotlin.concurrent.schedule
 *   -
 * */
 
-class ShootObserver(
-    val textView: TextView
-): Observer {
+class ShootObserver: Observer {
+
     private val TAG = "SHOOT_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -53,6 +52,9 @@ class ShootObserver(
     override fun setUIController(uiController: UIController) {
 
         this.uiController = uiController
+    }
+    override fun getUIController(): UIController? {
+        return this.uiController
     }
 
     override fun getControlParameters(): MutableList<String> {
@@ -141,7 +143,6 @@ class ShootObserver(
 
     fun shoot() {
         Log.d("SHOOT_OBSERVER", "SHOOT!!!!")
-        this.textView.setText("SHOT A SHOT")
     }
 
     override fun onCommandClick() {
@@ -157,9 +158,7 @@ class ShootObserver(
 
 }
 
-class ZoomObserver(
-    val textView: TextView
-): Observer {
+class ZoomObserver: Observer {
     private val TAG = "ZOOM_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -195,6 +194,9 @@ class ZoomObserver(
         this.uiController = uiController
     }
 
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -294,7 +296,6 @@ class ZoomObserver(
 
     fun zoom() {
         Log.d(TAG, "ZOOM: " + this.currentWord.value)
-        this.textView.setText("ZOOM: " + this.currentWord.value)
 
         this.cameraController?.setZoom(this.currentWord.value)
     }
@@ -314,9 +315,7 @@ class ZoomObserver(
 }
 
 
-class ApertureObserver(
-    val textView: TextView
-): Observer {
+class ApertureObserver: Observer {
     private val TAG = "APERTURE_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -355,7 +354,9 @@ class ApertureObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -455,7 +456,6 @@ class ApertureObserver(
 
     fun aperture() {
         Log.d(TAG, "APERTURE: " + this.currentWord.value)
-        this.textView.setText("APERTURE: " + this.currentWord.value)
 
         this.cameraController?.setAperture(this.currentWord.value)
     }
@@ -475,9 +475,7 @@ class ApertureObserver(
 }
 
 
-class FocusObserver(
-    val textView: TextView
-): Observer {
+class FocusObserver: Observer {
     private val TAG = "FOCUS_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -519,7 +517,9 @@ class FocusObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -610,7 +610,6 @@ class FocusObserver(
 
     fun focus() {
         Log.d(TAG, "FOCUS: " + this.currentWord.value)
-        this.textView.setText("FOCUS: " + this.currentWord.value)
 
         this.cameraController?.setFocusType(this.currentWord.value)
     }
@@ -630,9 +629,7 @@ class FocusObserver(
 }
 
 
-class ModeObserver(
-    val textView: TextView
-): Observer {
+class ModeObserver: Observer {
     private val TAG = "MODE_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -673,7 +670,9 @@ class ModeObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -764,7 +763,6 @@ class ModeObserver(
 
     fun mode() {
         Log.d(TAG, "MODE: " + this.currentWord.value)
-        this.textView.setText("MODE: " + this.currentWord.value)
     }
 
     override fun onCommandClick() {
@@ -782,9 +780,7 @@ class ModeObserver(
 }
 
 
-class LeftObserver(
-    val textView: TextView
-): Observer {
+class LeftObserver: Observer {
     private val TAG = "LEFT_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -819,7 +815,9 @@ class LeftObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -919,8 +917,8 @@ class LeftObserver(
 
     fun left() {
         Log.d(TAG, "LEFT: " + this.currentWord.value)
-        this.textView.setText("LEFT: " + this.currentWord.value)
 
+        this.gimbalController!!.move("-${this.currentWord.value}", "0", "0", 0)
 //        this.cameraController?.setZoom(this.currentWord.value)
     }
 
@@ -939,9 +937,7 @@ class LeftObserver(
 }
 
 
-class RightObserver(
-    val textView: TextView
-): Observer {
+class RightObserver: Observer {
     private val TAG = "RIGHT_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -953,7 +949,7 @@ class RightObserver(
         mapOf<Int, State>(
             0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
             1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
-            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::right, this::reset)),
         )
     }
 
@@ -976,7 +972,9 @@ class RightObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -1074,9 +1072,10 @@ class RightObserver(
         }
     }
 
-    fun left() {
+    fun right() {
         Log.d(TAG, "RIGHT: " + this.currentWord.value)
-        this.textView.setText("RIGHT: " + this.currentWord.value)
+
+        this.gimbalController!!.move("${this.currentWord.value}", "0", "0", 0)
 
 //        this.cameraController?.setZoom(this.currentWord.value)
     }
@@ -1096,9 +1095,7 @@ class RightObserver(
 }
 
 
-class UpObserver(
-    val textView: TextView
-): Observer {
+class UpObserver: Observer {
     private val TAG = "UP_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -1110,7 +1107,7 @@ class UpObserver(
         mapOf<Int, State>(
             0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
             1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
-            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::up, this::reset)),
         )
     }
 
@@ -1133,7 +1130,9 @@ class UpObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -1231,9 +1230,10 @@ class UpObserver(
         }
     }
 
-    fun left() {
+    fun up() {
         Log.d(TAG, "UP: " + this.currentWord.value)
-        this.textView.setText("UP: " + this.currentWord.value)
+
+        this.gimbalController!!.move("0", "${this.currentWord.value}", "0", 0)
 
 //        this.cameraController?.setZoom(this.currentWord.value)
     }
@@ -1253,9 +1253,7 @@ class UpObserver(
 }
 
 
-class DownObserver(
-    val textView: TextView
-): Observer {
+class DownObserver: Observer {
     private val TAG = "DOWN_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -1267,7 +1265,7 @@ class DownObserver(
         mapOf<Int, State>(
             0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
             1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
-            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::down, this::reset)),
         )
     }
 
@@ -1290,7 +1288,9 @@ class DownObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -1388,9 +1388,10 @@ class DownObserver(
         }
     }
 
-    fun left() {
+    fun down() {
         Log.d(TAG, "DOWN: " + this.currentWord.value)
-        this.textView.setText("DOWN: " + this.currentWord.value)
+
+        this.gimbalController!!.move("0", "-${this.currentWord.value}", "0", 0)
 
 //        this.cameraController?.setZoom(this.currentWord.value)
     }
@@ -1410,9 +1411,7 @@ class DownObserver(
 }
 
 
-class RollObserver(
-    val textView: TextView
-): Observer {
+class RollObserver: Observer {
     private val TAG = "ROLL_OBSERVER"
 
     private var cameraController: Camera? = null
@@ -1424,7 +1423,7 @@ class RollObserver(
         mapOf<Int, State>(
             0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
             1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
-            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::left, this::reset)),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::roll, this::reset)),
         )
     }
 
@@ -1447,7 +1446,9 @@ class RollObserver(
 
         this.uiController = uiController
     }
-
+    override fun getUIController(): UIController? {
+        return this.uiController
+    }
     override fun getControlParameters(): MutableList<String> {
 
         return this.parameters
@@ -1545,9 +1546,9 @@ class RollObserver(
         }
     }
 
-    fun left() {
+    fun roll() {
         Log.d(TAG, "ROLL: " + this.currentWord.value)
-        this.textView.setText("ROLL: " + this.currentWord.value)
+        this.gimbalController!!.move("0", "0", "${this.currentWord.value}", 0)
 
 //        this.cameraController?.setZoom(this.currentWord.value)
     }

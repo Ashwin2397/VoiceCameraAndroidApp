@@ -33,7 +33,7 @@ class PilotflyGimbalController: Device, Gimbal {
         TODO("Not yet implemented")
     }
 
-    override fun move(yaw: Float, pitch: Float, roll: Float, isIncremental: Int) {
+    override fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int) {
         TODO("Not yet implemented")
     }
 }

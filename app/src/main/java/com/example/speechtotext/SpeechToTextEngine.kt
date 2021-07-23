@@ -55,6 +55,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
     fun closeStream() {
 
         speechRecognizer!!.stopListening()
+        speechRecognizer!!.destroy()
     }
 
     /*Speech Listener Methods*/
@@ -128,6 +129,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
     }
 
     override fun onEvent(eventType: Int, params: Bundle?) {
+
         Log.d(TAG, "onEvent $eventType")
     }
 

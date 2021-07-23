@@ -21,7 +21,10 @@ enum class DeviceName {
     CANON,
     NATIVE,
     ANY,
-    UNDEFINED
+    UNDEFINED,
+    NO_OP,
+    NO_OP_CAMERA,
+    NO_OP_GIMBAL
 }
 
 enum class InputType {
@@ -100,7 +103,6 @@ val numericalParameters = mapOf<String, Word>(
 val masterDictionary = mapOf<String, Word>(
     "zoom" to Word("zoom", Feature.ZOOM, InputType.COMMAND, DeviceType.CAMERA),
     "shoot" to Word("shoot", Feature.SHOOT, InputType.COMMAND, DeviceType.CAMERA),
-    "left" to Word("left", Feature.LEFT, InputType.COMMAND, DeviceType.GIMBAL),
     "1" to Word("1", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
     "2" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),
     "too" to Word("2", Feature.ANY, InputType.NUMERICAL_PARAMETER, DeviceType.ANY),

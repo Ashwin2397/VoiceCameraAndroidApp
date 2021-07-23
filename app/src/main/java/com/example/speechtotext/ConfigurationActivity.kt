@@ -59,14 +59,6 @@ class ConfigurationActivity : AppCompatActivity() {
 
         gimbalUiController.init()
 
-        btnLoad.setOnClickListener {
-
-            Log.d("CANCEL", "Camera chosen: ${Database(this).getCamera()}; Gimbal chosen: ${Database(this).getGimbal()}")
-            Log.d("CANCEL", "Controls chosen: ${Database(this).getControls()}")
-
-//                cancel()
-        }
-
         CommitView(
             btnSave,
             btnCancel,
@@ -74,6 +66,17 @@ class ConfigurationActivity : AppCompatActivity() {
             cameraUiController,
             gimbalUiController
             ).init()
+
+
+
+//
+//        btnLoad.setOnClickListener {
+//
+//            Log.d("CANCEL", "Camera chosen: ${Database(this).getCamera()}; Gimbal chosen: ${Database(this).getGimbal()}")
+//            Log.d("CANCEL", "Controls chosen: ${Database(this).getControls()}")
+//
+////                cancel()
+//        }
 
 //        val uiControllerCamera = UiController(
 //            spCameras,
@@ -229,23 +232,19 @@ class ConfigurationActivity : AppCompatActivity() {
                 val cameraDetails = cameraUiController.getChosenDevice()
                 val gimbalDetails = gimbalUiController.getChosenDevice()
                 database.saveDevices(cameraDetails, gimbalDetails)
+
+                this.activity.finish()
             }
 
             btnCancel.setOnClickListener {
 
                 Log.d("CANCEL", "Camera chosen: ${database.getCamera().deviceName.toString()}")
-//                cancel()
+                this.activity.finish()
             }
 
         }
 
-        /*
-        * Don't save the settings and finish() the current activity
-        * */
-        fun cancel() {
 
-            this.activity.finish()
-        }
     }
 
     class UiController(

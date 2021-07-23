@@ -5,11 +5,13 @@ import android.graphics.Color
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.view.setPadding
 import java.util.ArrayList
+import kotlin.reflect.KFunction1
 
 
 class UIController(
-    val button: Button,
+    var button: Button,
     val adaptiveParameterButtonBar: AdaptiveParameterButtonBar
 ){
 
@@ -17,7 +19,7 @@ class UIController(
     var feature = Feature.ANY
     var parameters: MutableList<String>? = null
     var onParameterClick: ((parameter: String) -> Unit)? = null // Refactor to have one callback for any type of UI touch
-    var onCommandClick: (() -> Unit)? = null
+    var onCommandClick: ((command: String) -> Unit)? = null
     var selectedParameter = ""
 
     val selectedColor = "#25c433"
@@ -73,12 +75,17 @@ class UIController(
     * @param {() -> Unit)} onCommandClick The callback to be executed once the user has physically clicked on the command button.
     * @param {() -> Unit)} onParameterClick The callback to be executed once the user has physically clicked on a parameter from the adaptive button bar.
     * */
-    fun setFeature(feature: Feature, parameters: MutableList<String>, onCommandClick: () -> Unit, onParameterClick: (parameter: String) -> Unit) {
+    fun setFeature(feature: Feature, parameters: MutableList<String>, onCommandClick: (command: String) -> Unit, onParameterClick: (parameter: String) -> Unit) {
 
         this.parameters = parameters
 
         this.feature = feature
-        this.button.setText(this.feature.toString())
+        this.button.apply {
+            setText(feature.toString())
+            setOnClickListener {
+                onCommandClick(feature.toString().lowercase())
+            }
+        }
 
         this.onCommandClick = onCommandClick
         this.onParameterClick = onParameterClick
@@ -194,32 +201,30 @@ class AdaptiveParameterButtonBar(
         // Create buttons with text acquired from parameters list
         parameters!!.forEach {
 
-            // Create button
-            var newButton = Button(this.context)
-            newButton.setText(it)
-
-            // Set constraints
-            newButton.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT)
-
-            // Add to view
-            this.layout.addView(newButton)
-
-            // Add to map
-            this.buttons.put(it, newButton)
-
-            // Add listener to button
             // REFACTOR
-            newButton.setOnClickListener {
+            // Create button
+            var newButton = Button(this.context).apply {
 
-                val btn = it as Button
-                val parameter = btn.text.toString()
+                setText(it)
 
-                if (onParameterClick != null) {
-                    onParameterClick(parameter) // REFACTOR: Pass in parameter as an argument
+                // Set constraints
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT)
+                
+                setOnClickListener {
+
+                    val btn = it as Button
+                    val parameter = btn.text.toString()
+
+                    if (onParameterClick != null) {
+                        onParameterClick(parameter) // REFACTOR: Pass in parameter as an argument
+                    }
                 }
             }
+
+            this.layout.addView(newButton) // Add to view
+            this.buttons.put(it, newButton) // Add to map
 
         }
 

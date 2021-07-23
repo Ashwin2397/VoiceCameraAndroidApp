@@ -45,7 +45,7 @@ interface Gimbal {
     * @param {Float} roll Rotate about central point
     * @param {Integer} isIncremental 1 for incremental, 0 for absolute
     * */
-    fun move(yaw: Float, pitch: Float, roll: Float, isIncremental: Int): Unit
+    fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int): Unit
 
 }
 

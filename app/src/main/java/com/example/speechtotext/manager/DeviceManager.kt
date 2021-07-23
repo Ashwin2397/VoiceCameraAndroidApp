@@ -45,7 +45,8 @@ class SystemManager: Serializable {
             isHttpDevice.put(it.key,
                 mapOf<ConnectionType, Boolean>(
                     ConnectionType.BLUETOOTH to false,
-                    ConnectionType.HTTP to true
+                    ConnectionType.HTTP to true,
+                    ConnectionType.NATIVE to false
                 ).get(it.value.getConnectionType())!!
             )
         }
@@ -120,7 +121,9 @@ class FeaturesManager(
 
 }
 
-
+/*
+* This should adopt the factory design pattern and replace the controllers map from the main activity
+* */
 class DeviceManager{
 
     var gimbal:Device? = null
@@ -130,13 +133,15 @@ class DeviceManager{
 
         DeviceName.DJI_RS_2 to DJIGimbalController(),
         DeviceName.PILOTFLY to PilotflyGimbalController(),
+        DeviceName.NO_OP_GIMBAL to NoOpGimbalController()
 
     )
 
     val cameras = mutableMapOf<DeviceName, Device>(
 
         DeviceName.CANON to CanonCameraController(),
-        DeviceName.NATIVE to NativeCameraController()
+        DeviceName.NATIVE to NativeCameraController(),
+        DeviceName.NO_OP_CAMERA to NoOpCameraController()
     )
 
 

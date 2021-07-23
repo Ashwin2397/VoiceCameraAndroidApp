@@ -53,7 +53,7 @@ class B {
 
     }
 }
-class Model(val textView: TextView): SpeechToTextEngineObserver{
+class Model: SpeechToTextEngineObserver{
 
     private var observers: ArrayList<Observer> = ArrayList()
 
@@ -80,8 +80,6 @@ class Model(val textView: TextView): SpeechToTextEngineObserver{
     }
     override fun newWord(word: String) {
 
-
-        textView.setText(word)
         this.notifyObservers(word)
     }
 
@@ -96,6 +94,7 @@ interface SpeechToTextEngineObserver {
 interface Observer {
 
     fun newWord(word: String)
+    fun getUIController(): UIController?
     fun setUIController(uiController: UIController)
     fun getControlParameters(): MutableList<String>
     fun onCommandClick()
