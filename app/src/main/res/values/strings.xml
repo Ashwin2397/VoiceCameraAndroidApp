@@ -3,13 +3,15 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="cameras">
-        <item>NATIVE</item>
         <item>CANON</item>
+        <item>NATIVE</item>
+        <item>NO_OP_CAMERA</item>
     </string-array>
 
     <string-array name="gimbals">
         <item>DJI_RS_2</item>
         <item>PILOTFLY</item>
+        <item>NO_OP_GIMBAL</item>
     </string-array>
 
 </resources>
