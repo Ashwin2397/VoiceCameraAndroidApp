@@ -7,10 +7,17 @@ import com.example.speechtotext.Feature
 
 class PilotflyGimbalController: Device, Gimbal {
 
+    private val singleton = PilotflyGimbalController()
+
     val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
     private val connectionType = ConnectionType.BLUETOOTH
     private val deviceName = DeviceName.PILOTFLY
     var context: Context? = null
+
+    fun getInstance(): PilotflyGimbalController {
+
+        return this.singleton
+    }
 
     override fun setApplicationContext(context: Context) {
         this.context = context

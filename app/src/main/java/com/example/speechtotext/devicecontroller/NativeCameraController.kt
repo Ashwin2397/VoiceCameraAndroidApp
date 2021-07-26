@@ -58,10 +58,17 @@ import com.example.speechtotext.Feature
 
 class NativeCameraController: Device, Camera {
 
+    private val singleton = NativeCameraController()
+
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.ZOOM)
     private val connectionType = ConnectionType.NATIVE
     private val deviceName = DeviceName.NATIVE
     var context: Context? = null
+
+    fun getInstance(): NativeCameraController {
+
+        return this.singleton
+    }
 
     override fun setApplicationContext(context: Context) {
         this.context = context

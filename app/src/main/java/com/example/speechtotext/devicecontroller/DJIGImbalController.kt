@@ -20,6 +20,8 @@ import kotlin.math.roundToInt
 
 class DJIGimbalController: Device, Gimbal, Serializable {
 
+    private val singleton = DJIGimbalController()
+
     private val deviceName = DeviceName.DJI_RS_2
     private val connectionType = ConnectionType.HTTP
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
@@ -35,6 +37,11 @@ class DJIGimbalController: Device, Gimbal, Serializable {
     private var ip = "192.168.0.106";
     var BASE_URL = "http://${ip}:8080/"
     val RANGE:Float = 10F
+
+    fun getInstance(): DJIGimbalController {
+
+        return this.singleton
+    }
 
     override fun setApplicationContext(context: Context) {
         this.context = context

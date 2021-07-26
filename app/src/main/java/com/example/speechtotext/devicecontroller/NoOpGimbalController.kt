@@ -8,6 +8,8 @@ import com.example.speechtotext.Feature
 
 class NoOpGimbalController: Device, Gimbal {
 
+    private val singleton = NoOpGimbalController()
+
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
     private val deviceName = DeviceName.NO_OP_GIMBAL
     private val connectionType = ConnectionType.NATIVE
@@ -15,6 +17,11 @@ class NoOpGimbalController: Device, Gimbal {
 
 
     var textView: TextView? = null
+
+    fun getInstance(): NoOpGimbalController {
+
+        return this.singleton
+    }
     override fun setApplicationContext(context: Context) {
         this.context = context
     }

@@ -25,6 +25,8 @@ import java.io.Serializable
 
 class NoOpCameraController: Device, Camera {
 
+    private val singleton = NoOpCameraController()
+
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.MODE, Feature.ZOOM, Feature.FOCUS, Feature.APERTURE)
     private val deviceName = DeviceName.NO_OP_CAMERA
     private val connectionType = ConnectionType.NATIVE
@@ -33,6 +35,10 @@ class NoOpCameraController: Device, Camera {
 
     var context: Context? = null
 
+    fun getInstance(): NoOpCameraController {
+
+        return this.singleton
+    }
     override fun setApplicationContext(context: Context) {
         this.context = context
     }

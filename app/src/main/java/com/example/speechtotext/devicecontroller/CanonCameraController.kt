@@ -41,12 +41,12 @@ import java.io.Serializable
 
 class CanonCameraController: Device, Camera, Serializable {
 
+    private val singleton = CanonCameraController()
+
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.MODE, Feature.ZOOM, Feature.FOCUS, Feature.APERTURE)
     private val deviceName = DeviceName.CANON
     private val connectionType = ConnectionType.HTTP
     var context: Context? = null
-
-
 
     val httpNetworkManager = null // API Interface
     val featureURL = mapOf<Feature, String>(
@@ -68,6 +68,11 @@ class CanonCameraController: Device, Camera, Serializable {
         Request.Builder()
             .url("http://${ip}:8080/ccapi/ver100/shooting/liveview/flip/")
             .build()
+    }
+
+    fun getInstance(): CanonCameraController {
+
+        return this.singleton
     }
 
     override fun setApplicationContext(context: Context) {
