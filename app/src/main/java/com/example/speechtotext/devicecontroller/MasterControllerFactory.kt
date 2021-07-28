@@ -23,7 +23,7 @@ class MasterControllerFactory {
         return controllers.get(deviceName) as Gimbal
     }
 
-    fun getDevice(deviceName: DeviceName): Device {
+    fun getDeviceInstance(deviceName: DeviceName): Device {
 
         return controllers.get(deviceName) as Device
     }

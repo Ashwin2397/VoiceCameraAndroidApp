@@ -189,10 +189,6 @@ object CanonCameraController: Device, Camera, Serializable {
         })
     }
 
-    override fun shoot(optionalWord: Word?) {
-        TODO("Not yet implemented")
-    }
-
     /*
     * Sends HTTP shoot request to camera to grab a picture.
     * Uses retrofit.

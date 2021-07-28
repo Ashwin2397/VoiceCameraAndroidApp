@@ -101,10 +101,6 @@ object NativeCameraController: Device, Camera {
     override fun getLiveviewFlip(callback: (bitmap: Bitmap?) -> Unit) {
     }
 
-    override fun shoot(optionalWord: Word?) {
-        TODO("Not yet implemented")
-    }
-
     override fun shoot() {
     }
 

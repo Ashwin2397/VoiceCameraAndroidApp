@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
+import com.example.speechtotext.Word
 
 /*
 * TODO:
