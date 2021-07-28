@@ -19,6 +19,7 @@ import com.example.speechtotext.devicecontroller.*
 import com.example.speechtotext.manager.SystemManager
 import kotlinx.android.synthetic.main.activity_configuration.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.ref.WeakReference
 import java.util.*
 
 
@@ -30,8 +31,8 @@ import java.util.*
 * - Create a button toggle class
 * - Create toggle function for STT
 * - When camera gets disconnected, must report to user and stop polling camera for the view
-* - Refactor controllers map and abstract it to another class that uses a factory design pattern
-* - Refactor all controllers to adopt the singleton design pattern
+* - Refactor factory map and abstract it to another class that uses a factory design pattern
+* - Refactor all factory to adopt the singleton design pattern
 * - Reset all views before starting a new activity
 *   - Experienced a bug that basically impaired all command buttons when I clicked on a command button, navigated to config view and navigated back.
 * */
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity(){
     val stt by lazy {
         SpeechToTextEngine(applicationContext)
     }
-    var observers = mutableMapOf<Feature, Observer>(
+    var observers = mutableMapOf<Feature, Any>(
         Feature.SHOOT to ShootObserver(),
         Feature.ZOOM to ZoomObserver(),
         Feature.APERTURE to ApertureObserver(),
@@ -68,69 +69,10 @@ class MainActivity : AppCompatActivity(){
     var buttons = mutableMapOf<Feature, Button>()
 
     // REFACTOR: Use factory design pattern
-    val controllers = mutableMapOf<DeviceName, Any>(
-        DeviceName.CANON to CanonCameraController(),
-        DeviceName.NATIVE to NativeCameraController(),
-        DeviceName.DJI_RS_2 to DJIGimbalController(),
-        DeviceName.PILOTFLY to PilotflyGimbalController(),
-        DeviceName.NO_OP_CAMERA to NoOpCameraController(),
-        DeviceName.NO_OP_GIMBAL to NoOpGimbalController()
-    )
+    val factory = MasterControllerFactory()
 
     var screenChanged = false
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun onResume() {
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        super.onResume()
-
-        // Refactor screenChanged boolean, might not need it
-        if (screenChanged) {
-
-            Toast.makeText(this, "RESUME", Toast.LENGTH_SHORT).show()
-
-            // Check db for controls
-            Log.d(TAG, "You are back to main activity")
-            Log.d(TAG, "Camera chosen: ${db.getCamera()}; Gimbal chosen: ${db.getGimbal()}")
-            Log.d(TAG, "Controls chosen: ${db.getControls()}")
-
-            // Update controls being rendered
-            chosenControls = db.getControls()
-
-            // Update camera controller
-            chosenCamera = db.getCamera().deviceName
-            val cameraController = controllers.get(chosenCamera) as Device
-            cameraController.setIp(db.getCamera().ipAddress)
-
-            // Update gimbal controller
-            chosenGimbal = db.getGimbal().deviceName
-            val gimbalController = controllers.get(chosenGimbal) as Device
-            gimbalController.setIp(db.getGimbal().ipAddress)
-
-            if (chosenCamera == DeviceName.NO_OP_CAMERA) {
-                (controllers.get(chosenCamera) as NoOpCameraController).textView = transcription
-
-                transcription.setZ(2.toFloat())
-
-            }
-
-            if (chosenGimbal == DeviceName.NO_OP_GIMBAL) {
-                (controllers.get(chosenGimbal) as NoOpGimbalController).textView = transcription
-                transcription.apply {
-                    setZ(2.toFloat())
-                    textSize = 20F
-                    setTextColor(Color.parseColor("#ffffff"))
-                    setBackgroundColor(Color.parseColor("#0f0f0f"))
-                }
-
-            }
-            createButtons()
-            initializeObservers()
-
-            screenChanged = false
-        }
-
-    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -153,15 +95,16 @@ class MainActivity : AppCompatActivity(){
 
         }
 
-        controllers.forEach {
+        factory.controllers.forEach {
             (it.value as Device).setApplicationContext(applicationContext)
         }
+
 
         // Create buttons
         createButtons()
         initializeObservers()
 
-        stt.initialize(true, model)
+        stt.initialize(false, model)
 
         // Must start STT via user interaction
         startTranscription.setOnClickListener {
@@ -183,12 +126,84 @@ class MainActivity : AppCompatActivity(){
 
         btnConnectCamera.setOnClickListener {
 
-            val camera = controllers.get(chosenCamera) as com.example.speechtotext.devicecontroller.Camera
+            val camera = factory.getCameraInstance(chosenCamera)
 
             camera?.configureLiveview(this@MainActivity::setImageView)
 
         }
 
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        // To ensure that the stt does not remain on when a user navigates to another activity
+
+
+
+
+
+
+        
+        stt.closeStream()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun onResume() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        super.onResume()
+
+        if (stt.isActive) {
+
+            stt.openStream()
+        }
+
+        // Refactor screenChanged boolean, might not need it
+        if (screenChanged) {
+
+            Toast.makeText(this, "RESUME", Toast.LENGTH_SHORT).show()
+
+            // Check db for controls
+            Log.d(TAG, "You are back to main activity")
+            Log.d(TAG, "Camera chosen: ${db.getCamera()}; Gimbal chosen: ${db.getGimbal()}")
+            Log.d(TAG, "Controls chosen: ${db.getControls()}")
+
+            // Update controls being rendered
+            chosenControls = db.getControls()
+
+            // Update camera controller
+            chosenCamera = db.getCamera().deviceName
+            val cameraController = factory.getDeviceInstance(chosenCamera)
+            cameraController.setIp(db.getCamera().ipAddress)
+
+            // Update gimbal controller
+            chosenGimbal = db.getGimbal().deviceName
+            val gimbalController = factory.getDeviceInstance(chosenGimbal)
+            gimbalController.setIp(db.getGimbal().ipAddress)
+
+            if (chosenCamera == DeviceName.NO_OP_CAMERA) {
+                (factory.controllers.get(chosenCamera) as NoOpCameraController).textView = WeakReference(transcription)
+
+                transcription.setZ(2.toFloat())
+
+            }
+
+            if (chosenGimbal == DeviceName.NO_OP_GIMBAL) {
+                (factory.controllers.get(chosenGimbal) as NoOpGimbalController).textView = WeakReference(transcription)
+                transcription.apply {
+                    setZ(2.toFloat())
+                    textSize = 20F
+                    setTextColor(Color.parseColor("#ffffff"))
+                    setBackgroundColor(Color.parseColor("#0f0f0f"))
+                }
+
+            }
+            createButtons()
+            initializeObservers()
+
+            screenChanged = false
+        }
 
     }
 
@@ -285,7 +300,7 @@ class MainActivity : AppCompatActivity(){
         model.removeAllObservers()
         observers!!.forEach {
 
-            val observer = it.value
+            val observer = it.value as Observer
 
             var isChosenControl = buttons.containsKey(it.key)
             if (isChosenControl) {
@@ -304,8 +319,15 @@ class MainActivity : AppCompatActivity(){
                 val uiController = observer.getUIController()
 
                 uiController!!.setFeature(it.key, observer.getControlParameters(), model::newWord, observer::onParameterClick)
-                observer.setCameraController(controllers.get(chosenCamera)!! as com.example.speechtotext.devicecontroller.Camera)
-                observer.setGimbalController(controllers.get(chosenGimbal)!! as Gimbal)
+                observer.setCameraController(factory.getCameraInstance(chosenCamera))
+                observer.setGimbalController(factory.getGimbalInstance(chosenGimbal))
+
+                if (it.value is ShootObserver) {
+
+                    val shootObserver  = it.value as ShootObserver
+
+                    shootObserver.setFsmStates()
+                }
                 model.addObserver(observer)
             }
         }
