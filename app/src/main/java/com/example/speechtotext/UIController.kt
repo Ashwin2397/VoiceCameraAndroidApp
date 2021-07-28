@@ -11,10 +11,10 @@ import kotlin.reflect.KFunction1
 
 
 class UIController(
-    var button: Button,
     val adaptiveParameterButtonBar: AdaptiveParameterButtonBar
 ){
 
+    lateinit var button: Button
     var selected = false
     var feature = Feature.ANY
     var parameters: MutableList<String>? = null
@@ -32,7 +32,7 @@ class UIController(
     * @param {Boolean} isUITouch Boolean indicating if the user input is touch
     * */
     // REFACTOR: Temporarily removed parameter
-    fun selectCommand() {
+    fun selectCommand(optionalWord: Word) {
 
         this.selected = true
 
@@ -62,9 +62,9 @@ class UIController(
    * Called by the STT Observer.
    * Note: Each button in bar already has on click listener.
    * */
-    fun selectParameter(isUITouch: Boolean, parameter: String) {
+    fun selectParameter(parameter: Word) {
 
-        this.adaptiveParameterButtonBar.select(parameter)
+        this.adaptiveParameterButtonBar.select(parameter.value)
 
     }
 
@@ -83,6 +83,8 @@ class UIController(
         this.button.apply {
             setText(feature.toString())
             setOnClickListener {
+
+                // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
                 onCommandClick(feature.toString().lowercase())
             }
         }
@@ -97,7 +99,7 @@ class UIController(
     * Runs upon selection of button.
     * Users can select a parameter from bar or speak it.
     * */
-    fun showParameterButtonBar() {
+    fun showParameterButtonBar(optionalWord: Word) {
 
         this.adaptiveParameterButtonBar.show(this.parameters, this.onParameterClick)
 
@@ -214,6 +216,7 @@ class AdaptiveParameterButtonBar(
                 
                 setOnClickListener {
 
+                    // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
                     val btn = it as Button
                     val parameter = btn.text.toString()
 
