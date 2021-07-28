@@ -4,23 +4,17 @@ import android.content.Context
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
+import java.lang.ref.WeakReference
 
-class PilotflyGimbalController: Device, Gimbal {
-
-    private val singleton = PilotflyGimbalController()
+object PilotflyGimbalController: Device, Gimbal {
 
     val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
     private val connectionType = ConnectionType.BLUETOOTH
     private val deviceName = DeviceName.PILOTFLY
-    var context: Context? = null
-
-    fun getInstance(): PilotflyGimbalController {
-
-        return this.singleton
-    }
+    lateinit var context: WeakReference<Context>
 
     override fun setApplicationContext(context: Context) {
-        this.context = context
+        this.context = WeakReference(context)
     }
 
     override fun getDeviceName(): DeviceName {

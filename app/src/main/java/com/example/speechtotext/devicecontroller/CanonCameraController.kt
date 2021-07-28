@@ -21,6 +21,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.io.Serializable
+import java.lang.ref.WeakReference
 
 /*
 * TODO:
@@ -39,14 +40,12 @@ import java.io.Serializable
 * */
 
 
-class CanonCameraController: Device, Camera, Serializable {
-
-    private val singleton = CanonCameraController()
+object CanonCameraController: Device, Camera, Serializable {
 
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.MODE, Feature.ZOOM, Feature.FOCUS, Feature.APERTURE)
     private val deviceName = DeviceName.CANON
     private val connectionType = ConnectionType.HTTP
-    var context: Context? = null
+    lateinit var context: WeakReference<Context>
 
     val httpNetworkManager = null // API Interface
     val featureURL = mapOf<Feature, String>(
@@ -70,13 +69,9 @@ class CanonCameraController: Device, Camera, Serializable {
             .build()
     }
 
-    fun getInstance(): CanonCameraController {
-
-        return this.singleton
-    }
 
     override fun setApplicationContext(context: Context) {
-        this.context = context
+        this.context = WeakReference(context)
     }
 
     override fun setIp(ip: String) {
@@ -192,6 +187,10 @@ class CanonCameraController: Device, Camera, Serializable {
 
             }
         })
+    }
+
+    override fun shoot(optionalWord: Word?) {
+        TODO("Not yet implemented")
     }
 
     /*

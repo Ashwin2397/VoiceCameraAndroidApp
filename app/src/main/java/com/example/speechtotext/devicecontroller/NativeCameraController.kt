@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
+import com.example.speechtotext.Word
+import java.lang.ref.WeakReference
 
 //
 //import android.content.Context
@@ -56,22 +58,15 @@ import com.example.speechtotext.Feature
 //
 //    }
 
-class NativeCameraController: Device, Camera {
-
-    private val singleton = NativeCameraController()
+object NativeCameraController: Device, Camera {
 
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.ZOOM)
     private val connectionType = ConnectionType.NATIVE
     private val deviceName = DeviceName.NATIVE
-    var context: Context? = null
-
-    fun getInstance(): NativeCameraController {
-
-        return this.singleton
-    }
+    lateinit var context: WeakReference<Context>
 
     override fun setApplicationContext(context: Context) {
-        this.context = context
+        this.context = WeakReference(context)
     }
 
     override fun getDeviceName(): DeviceName {
@@ -104,6 +99,10 @@ class NativeCameraController: Device, Camera {
     }
 
     override fun getLiveviewFlip(callback: (bitmap: Bitmap?) -> Unit) {
+    }
+
+    override fun shoot(optionalWord: Word?) {
+        TODO("Not yet implemented")
     }
 
     override fun shoot() {

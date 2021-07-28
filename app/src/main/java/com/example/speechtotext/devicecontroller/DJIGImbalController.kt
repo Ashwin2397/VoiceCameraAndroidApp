@@ -16,17 +16,15 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.io.Serializable
 import java.lang.Exception
+import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
 
-class DJIGimbalController: Device, Gimbal, Serializable {
-
-    private val singleton = DJIGimbalController()
+object DJIGimbalController: Device, Gimbal, Serializable {
 
     private val deviceName = DeviceName.DJI_RS_2
     private val connectionType = ConnectionType.HTTP
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
-    var context: Context? = null
-
+    lateinit var context: WeakReference<Context>
 
     val featureURL = mapOf<Feature, String>(
 
@@ -38,13 +36,8 @@ class DJIGimbalController: Device, Gimbal, Serializable {
     var BASE_URL = "http://${ip}:8080/"
     val RANGE:Float = 10F
 
-    fun getInstance(): DJIGimbalController {
-
-        return this.singleton
-    }
-
     override fun setApplicationContext(context: Context) {
-        this.context = context
+        this.context = WeakReference(context)
     }
 
     override fun setIp(ip: String) {
@@ -89,7 +82,7 @@ class DJIGimbalController: Device, Gimbal, Serializable {
 
         }catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "DJI Gimbal not connected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this.context.get(), "DJI Gimbal not connected", Toast.LENGTH_SHORT).show()
         }
 
     }

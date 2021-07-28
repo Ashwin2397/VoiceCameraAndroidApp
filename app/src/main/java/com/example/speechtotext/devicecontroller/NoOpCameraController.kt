@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
+import com.example.speechtotext.Word
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.w3c.dom.Text
@@ -22,26 +23,21 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import java.io.IOException
 import java.io.Serializable
+import java.lang.ref.WeakReference
 
-class NoOpCameraController: Device, Camera {
-
-    private val singleton = NoOpCameraController()
+object NoOpCameraController: Device, Camera {
 
     val featuresAvailable = arrayListOf<Feature>(Feature.SHOOT, Feature.MODE, Feature.ZOOM, Feature.FOCUS, Feature.APERTURE)
     private val deviceName = DeviceName.NO_OP_CAMERA
     private val connectionType = ConnectionType.NATIVE
 
-    var textView: TextView? = null
+    lateinit var textView: WeakReference<TextView>
+    lateinit var context: WeakReference<Context>
 
-    var context: Context? = null
-
-    fun getInstance(): NoOpCameraController {
-
-        return this.singleton
-    }
     override fun setApplicationContext(context: Context) {
-        this.context = context
+        this.context = WeakReference(context)
     }
+
     override fun setIp(ip: String) {
     }
 
@@ -91,13 +87,17 @@ class NoOpCameraController: Device, Camera {
 
     }
 
+    override fun shoot(optionalWord: Word?) {
+        TODO("Not yet implemented")
+    }
+
     /*
     * Sends HTTP shoot request to camera to grab a picture.
     * Uses retrofit.
     * */
     override fun shoot(): Unit {
 
-        textView?.text = "SHOOT"
+        this.textView.get()?.text = "SHOOT"
 
     }
 
@@ -107,7 +107,7 @@ class NoOpCameraController: Device, Camera {
     * */
     override fun setZoom(zoomFactor: String): Unit {
 
-       textView?.text = "ZOOM: ${zoomFactor}"
+       this.textView.get()?.text = "ZOOM: ${zoomFactor}"
     }
 
     /*
@@ -116,7 +116,7 @@ class NoOpCameraController: Device, Camera {
     * */
     override fun setAperture(apertureFactor: String): Unit {
 
-        textView?.text = "APERTURE: ${apertureFactor}"
+        this.textView.get()?.text = "APERTURE: ${apertureFactor}"
     }
 
     /*
@@ -125,7 +125,7 @@ class NoOpCameraController: Device, Camera {
     * */
     override fun setFocusType(focusType: String): Unit {
 
-        textView?.text = "FOCUS_TYPE: ${focusType}"
+        this.textView.get()?.text = "FOCUS_TYPE: ${focusType}"
     }
 
 }

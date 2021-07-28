@@ -5,25 +5,19 @@ import android.widget.TextView
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
+import java.lang.ref.WeakReference
 
-class NoOpGimbalController: Device, Gimbal {
-
-    private val singleton = NoOpGimbalController()
+object NoOpGimbalController: Device, Gimbal {
 
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
     private val deviceName = DeviceName.NO_OP_GIMBAL
     private val connectionType = ConnectionType.NATIVE
-    var context: Context? = null
 
+    lateinit var context: WeakReference<Context>
+    lateinit var textView: WeakReference<TextView>
 
-    var textView: TextView? = null
-
-    fun getInstance(): NoOpGimbalController {
-
-        return this.singleton
-    }
     override fun setApplicationContext(context: Context) {
-        this.context = context
+        this.context = WeakReference(context)
     }
 
     override fun getDeviceName(): DeviceName {
@@ -58,7 +52,7 @@ class NoOpGimbalController: Device, Gimbal {
     }
 
     override fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int) {
-        textView?.text = "YAW: ${yaw}\nPITCH: ${pitch}\nROLL: ${roll}\n"
+        this.textView.get()?.text = "YAW: ${yaw}\nPITCH: ${pitch}\nROLL: ${roll}\n"
 
     }
 }
