@@ -1,10 +1,7 @@
     package com.example.speechtotext
 
-import android.content.Context
-import android.widget.TextView
 import com.example.speechtotext.devicecontroller.Camera
 import com.example.speechtotext.devicecontroller.Gimbal
-import com.example.speechtotext.devicecontroller.PilotflyGimbalController
 import kotlin.collections.ArrayList
 
 
@@ -54,7 +51,7 @@ class B {
 
     }
 }
-class Model: SpeechToTextEngineObserver{
+object Model: SpeechToTextEngineObserver{
 
     private var observers: ArrayList<Observer> = ArrayList()
 
@@ -79,6 +76,7 @@ class Model: SpeechToTextEngineObserver{
 
         observers.clear()
     }
+
     override fun newWord(word: String) {
 
         this.notifyObservers(word)
@@ -96,6 +94,7 @@ interface Observer {
 
     fun newWord(word: String)
     fun getUIController(): UIController?
+    fun getWord(): Word
     fun setUIController(uiController: UIController)
     fun getControlParameters(): MutableList<String>
     fun onCommandClick()
@@ -115,9 +114,9 @@ data class Word(
 class State(
     val state: Int,
     val input: Map<InputType, Int>,
-    val callbacks: Array<() -> Unit>,
-
-){
+    val callbacks: Array<(optionalWord: Word) -> Unit>,
+    val observer: Observer,
+    ){
 
     /*
     * Returns the new state that based on the given input type
@@ -135,7 +134,7 @@ class State(
     fun runCallbacks() {
 
         this.callbacks.forEach {
-            it()
+            it(observer.getWord())
         }
     }
 
