@@ -4,9 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.TextView
-import com.example.speechtotext.devicecontroller.Camera
-import com.example.speechtotext.devicecontroller.CanonCameraController
-import com.example.speechtotext.devicecontroller.Gimbal
+import com.example.speechtotext.devicecontroller.*
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -25,37 +23,58 @@ class ShootObserver: Observer {
     private var gimbalController: Gimbal? = null
     var uiController:UIController? = null
 
-    val states by lazy {
-
-        mapOf<Int, State>(
-            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
-            1 to State(1, mapOf(), arrayOf(uiController!!::selectCommand,
-                cameraController!!::shoot, this::reset)),
-            )
-    }
 
     val parameters = mutableListOf<String>()
-    val consecutiveWords = mapOf<String, Word>()
 
-    val command = "shoot" // Change to list
+    val command = Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA)
+    // Change to list
+
+    var fsm = FSM(
+        consecutiveWords = mapOf<String, Word>(),
+        command = this.command
+    )
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
+    /*
+    * Run only after setting uiController and cameraController/gimbalController.
+    * Run everytime after any controllers have been changed.
+    * */
+    fun setFsmStates() {
+
+        this.fsm.states = mapOf(
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
+            1 to State(1, mapOf(), arrayOf(uiController!!::selectCommand,
+                cameraController!!::shoot, this::reset)),
+        )
+
+    }
+
     override fun setCameraController(cameraController: Camera) {
         this.cameraController = cameraController
+    }
+
+    fun getCameraController(): Camera? {
+        return this.cameraController
     }
 
     override fun setGimbalController(gimbalController: Gimbal) {
         this.gimbalController = gimbalController
     }
 
+    fun getGimbalController(): Gimbal? {
+        return this.gimbalController
+    }
+
     override fun setUIController(uiController: UIController) {
 
         this.uiController = uiController
     }
+
     override fun getUIController(): UIController? {
         return this.uiController
     }
+
 
     override fun getControlParameters(): MutableList<String> {
 
@@ -64,67 +83,19 @@ class ShootObserver: Observer {
 
     override fun newWord(word: String) {
 
-        // Log.d(this.TAG, word)
-        val parsedWord = this.parseWord(word)
-        this.currentWord = parsedWord // Save word to be used by cb
-
-        val currentStateObject = this.states[this.currentState]
-
-        val newState = currentStateObject!!.newWord(parsedWord.inputType)
-
-        changeState(newState)
+       fsm.newWord(word)
 
     }
 
-    fun changeState(newState: Int) {
-
-        val currentStateObject = this.states[this.currentState]
-
-        val newStateObject = this.states[newState]
-
-        val hasStateChanged = newState != this.currentState
-        if (hasStateChanged) {
-
-            this.currentState = newState;
-
-            newStateObject!!.runCallbacks();
-
-        }
-
-
-    }
-    fun parseWord(word: String): Word {
-
-        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
-
-        val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
-        val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
-        val isNumericalParameter = numericalParameters[word] != null
-
-        if (isOurCommand) {
-            parsedWord = firstCommands[word]!!
-        }else if (isConsecutiveWord) {
-            parsedWord = this.consecutiveWords[word]!!
-        }else if (isOtherCommand) {
-            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
-        }else if (isNumericalParameter) {
-            parsedWord = numericalParameters[word]!!
-        }
-
-        return parsedWord
-    }
-
-    fun reset() {
+    fun reset(optionalWord: Word?) {
 
 //        timer.schedule(TimerTask {}, 100)
-        this.currentState = 0
+        fsm.currentState = 0
 
         // Does'nt work unless you run on ui thread, which I have not figured out yet
         val mainLooper = Looper.getMainLooper()
 
-        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+        if (fsm.currentWord.inputType == InputType.OTHER_COMMAND) {
             uiController!!.reset()
         }else {
 
@@ -147,7 +118,7 @@ class ShootObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -163,21 +134,28 @@ class ZoomObserver: Observer {
 
     private var cameraController: Camera? = null
     private var gimbalController: Gimbal? = null
-
     var uiController:UIController? = null
 
     val states by lazy {
         mapOf<Int, State>(
-            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset)),
-            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar)),
-            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::zoom, this::reset)),
+            0 to State(0, mapOf(InputType.COMMAND_1 to 1), arrayOf(this::reset), this as Observer),
+            1 to State(1, mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0), arrayOf(uiController!!::selectCommand, uiController!!::showParameterButtonBar), this as Observer),
+            2 to State(2, mapOf(), arrayOf(this::selectParameter, this::zoom, this::reset), this as Observer),
         )
     }
 
-    val parameters = mutableListOf<String>("0", "25", "50", "75", "100")
-    val consecutiveWords = mapOf<String, Word>()
 
-    val command = "zoom"
+    val parameters = mutableListOf<String>("0", "25", "50", "75", "100")
+
+    val command = Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA)
+
+    var fsm = FSM(
+        consecutiveWords = mapOf<String, Word>(),
+        command = this.command
+    )
+
+    var consecutiveWords = mapOf<String, Word>()
+
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -202,10 +180,6 @@ class ZoomObserver: Observer {
         return this.parameters
     }
 
-    private fun selectParameter() {
-        this.uiController!!.selectParameter(false, this.currentWord.value)
-    }
-
     override fun newWord(word: String) {
 
         // Log.d(this.TAG, word)
@@ -218,6 +192,10 @@ class ZoomObserver: Observer {
 
         changeState(newState)
 
+    }
+
+    private fun selectParameter(optionalWord: Word) {
+        this.uiController!!.selectParameter(optionalWord)
     }
 
     fun changeState(newState: Int) {
@@ -242,9 +220,9 @@ class ZoomObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -269,7 +247,7 @@ class ZoomObserver: Observer {
         return parsedWord
     }
 
-    fun reset() {
+    fun reset(optionalWord: Word) {
 
 //        timer.schedule(TimerTask {}, 100)
         this.currentState = 0
@@ -294,7 +272,7 @@ class ZoomObserver: Observer {
         }
     }
 
-    fun zoom() {
+    fun zoom(optionalWord: Word) {
         Log.d(TAG, "ZOOM: " + this.currentWord.value)
 
         this.cameraController?.setZoom(this.currentWord.value)
@@ -302,7 +280,7 @@ class ZoomObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -338,7 +316,7 @@ class ApertureObserver: Observer {
     val parameters = mutableListOf<String>("3.4", "4.0", "4.5", "5.0", "5.6", "6.3", "7.1", "8.0")
     val consecutiveWords = mapOf<String, Word>()
 
-    val command = "aperture"
+    val command = Word("aperture", Feature.APERTURE, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -402,9 +380,9 @@ class ApertureObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -462,7 +440,7 @@ class ApertureObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -501,7 +479,7 @@ class FocusObserver: Observer {
         "spot" to Word("spot", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
         )
 
-    val command = "focus"
+    val command = Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -565,9 +543,9 @@ class FocusObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
         val isNumericalParameter = numericalParameters[word] != null
 
         if (isOurCommand) {
@@ -616,7 +594,7 @@ class FocusObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -654,7 +632,7 @@ class ModeObserver: Observer {
         "movie" to Word("movie", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
     )
 
-    val command = "mode"
+    val command = Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -718,9 +696,9 @@ class ModeObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
         val isNumericalParameter = numericalParameters[word] != null
 
         if (isOurCommand) {
@@ -767,7 +745,7 @@ class ModeObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -799,7 +777,7 @@ class LeftObserver: Observer {
     val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     val consecutiveWords = mapOf<String, Word>()
 
-    val command = "left"
+    val command = Word("left", Feature.LEFT, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -863,9 +841,9 @@ class LeftObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -924,7 +902,7 @@ class LeftObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -956,7 +934,7 @@ class RightObserver: Observer {
     val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     val consecutiveWords = mapOf<String, Word>()
 
-    val command = "right"
+    val command = Word("right", Feature.RIGHT, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -1020,9 +998,9 @@ class RightObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -1082,7 +1060,7 @@ class RightObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -1114,7 +1092,7 @@ class UpObserver: Observer {
     val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     val consecutiveWords = mapOf<String, Word>()
 
-    val command = "up"
+    val command = Word("up", Feature.UP, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -1177,9 +1155,9 @@ class UpObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -1239,7 +1217,7 @@ class UpObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -1271,7 +1249,7 @@ class DownObserver: Observer {
     val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     val consecutiveWords = mapOf<String, Word>()
 
-    val command = "down"
+    val command = Word("down", Feature.DOWN, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -1335,9 +1313,9 @@ class DownObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -1397,7 +1375,7 @@ class DownObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -1429,7 +1407,7 @@ class RollObserver: Observer {
     val parameters = mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     val consecutiveWords = mapOf<String, Word>()
 
-    val command = "roll"
+    val command = Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA)
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
@@ -1493,9 +1471,9 @@ class RollObserver: Observer {
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -1554,7 +1532,7 @@ class RollObserver: Observer {
 
     override fun onCommandClick() {
 
-        newWord(this.command)
+        newWord(this.command.value)
     }
 
     override fun onParameterClick(parameter: String) {
@@ -1568,15 +1546,14 @@ class RollObserver: Observer {
 
 
 class FSM(
-    val states: Map<Int, State>,
     val consecutiveWords: Map<String, Word>,
-    val command: String,
-    val feature: Feature
+    val command: Word,
 ){
+
+    var states = mapOf<Int, State>()
 
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
-
 
     fun newWord(word: String) {
 
@@ -1592,8 +1569,6 @@ class FSM(
     }
 
     fun changeState(newState: Int) {
-
-        val currentStateObject = this.states[this.currentState]
 
         val newStateObject = this.states[newState]
 
@@ -1613,9 +1588,9 @@ class FSM(
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -1634,11 +1609,116 @@ class FSM(
             parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
         }else if (isNumericalParameter) {
 //            parsedWord = numericalParameters[word]!!
-            parsedWord = Word(word, feature, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+            parsedWord = Word(word, command.feature, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
         }
 
         return parsedWord
     }
 
 
+}
+
+class FSMObserver(
+    val uiController: UIController,
+    val command: Word,
+    val consecutiveWords: Map<String, Word>,
+    ){
+
+    lateinit var states: Map<Int, State> // Init later
+    var currentState = 0
+    var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
+
+    fun newWord(word: String) {
+
+
+        val parsedWord = this.parseWord(word)
+        this.currentWord = parsedWord // Save word to be used by cb
+
+        val currentStateObject = this.states[this.currentState]
+
+        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+
+        changeState(newState)
+
+    }
+
+    fun parseWord(word: String): Word {
+
+        var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
+
+        val isDefinedCommand = firstCommands[word] != null
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
+        val isConsecutiveWord = this.consecutiveWords[word] != null
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
+//        val isNumericalParameter = numericalParameters[word] != null
+        var isNumericalParameter = false
+
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isOurCommand) {
+            parsedWord = firstCommands[word]!!
+        }else if (isConsecutiveWord) {
+            parsedWord = this.consecutiveWords[word]!!
+        }else if (isOtherCommand) {
+            parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
+        }else if (isNumericalParameter) {
+//            parsedWord = numericalParameters[word]!!
+            parsedWord = Word(word, Feature.MODE, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+        }
+
+        return parsedWord
+    }
+
+    fun changeState(newState: Int) {
+
+        val newStateObject = this.states[newState]
+
+        val hasStateChanged = newState != this.currentState
+        if (hasStateChanged) {
+
+            this.currentState = newState;
+            newStateObject!!.runCallbacks();
+        }
+    }
+
+    fun reset(optionalWord: Word) {
+
+//        timer.schedule(TimerTask {}, 100)
+        this.currentState = 0
+
+        // Does'nt work unless you run on ui thread, which I have not figured out yet
+        val mainLooper = Looper.getMainLooper()
+
+        if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
+            uiController!!.reset()
+        }else {
+
+            Thread(Runnable {
+
+                Timer("Reset UI", false).schedule(1000) {
+
+                    Handler(mainLooper).post {
+
+                        uiController!!.reset()
+                    }
+                }
+            }).start()
+        }
+    }
+
+    fun onCommandClick() {
+
+        newWord(this.command.value)
+    }
+
+    fun onParameterClick(parameter: String) {
+
+        newWord(parameter)
+
+    }
 }

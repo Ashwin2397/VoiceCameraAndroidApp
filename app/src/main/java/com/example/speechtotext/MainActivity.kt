@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity(){
     val db by lazy {
         Database(this)
     }
-    val model = Model()
 
     val stt by lazy {
         SpeechToTextEngine(applicationContext)
@@ -104,7 +103,7 @@ class MainActivity : AppCompatActivity(){
         createButtons()
         initializeObservers()
 
-        stt.initialize(false, model)
+        stt.initialize(false, Model)
 
         // Must start STT via user interaction
         startTranscription.setOnClickListener {
@@ -145,7 +144,7 @@ class MainActivity : AppCompatActivity(){
 
 
 
-        
+
         stt.closeStream()
     }
 
@@ -297,8 +296,8 @@ class MainActivity : AppCompatActivity(){
         chosenCamera = db.getCamera().deviceName
         chosenGimbal = db.getGimbal().deviceName
 
-        model.removeAllObservers()
-        observers!!.forEach {
+        Model.removeAllObservers()
+        observers.forEach {
 
             val observer = it.value as Observer
 
@@ -318,7 +317,7 @@ class MainActivity : AppCompatActivity(){
                 }
                 val uiController = observer.getUIController()
 
-                uiController!!.setFeature(it.key, observer.getControlParameters(), model::newWord, observer::onParameterClick)
+                uiController!!.setFeature(it.key, observer.getControlParameters(), Model::newWord, observer::onParameterClick)
                 observer.setCameraController(factory.getCameraInstance(chosenCamera))
                 observer.setGimbalController(factory.getGimbalInstance(chosenGimbal))
 
@@ -328,7 +327,7 @@ class MainActivity : AppCompatActivity(){
 
                     shootObserver.setFsmStates()
                 }
-                model.addObserver(observer)
+                Model.addObserver(observer)
             }
         }
     }
