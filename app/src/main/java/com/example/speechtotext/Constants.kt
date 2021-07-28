@@ -69,6 +69,7 @@ val firstCommands = mapOf<String, Word>(
     "zoom" to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
     "boom" to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
     "doom" to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
+    "resume" to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
     "shoot" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
     "soot" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
     "chute" to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
