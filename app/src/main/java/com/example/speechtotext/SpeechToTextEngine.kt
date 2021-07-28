@@ -56,17 +56,17 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
     fun openStream() {
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(applicationContext)
-
         speechRecognizer!!.setRecognitionListener(this)
-
         speechRecognizer!!.startListening(sttIntent!!)
 
     }
 
     fun closeStream() {
 
-        speechRecognizer!!.stopListening()
-        speechRecognizer!!.destroy()
+        speechRecognizer?.stopListening()
+        speechRecognizer?.cancel()
+        speechRecognizer?.destroy()
+        speechRecognizer = null
     }
 
     /*Speech Listener Methods*/
@@ -106,7 +106,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
         val result = results.getStringArrayList("results_recognition")
 
         Log.d(TAG, "onResults; Results: " + results.toString() )
-        if (!result.isNullOrEmpty()) {
+        if (!result.isNullOrEmpty() && !isOnPartial) {
 
             // Most probable recognized text is in the first position.
             val recognizedText = result[0].lowercase()
