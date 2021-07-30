@@ -4,7 +4,6 @@ import android.content.Context
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
-import com.example.speechtotext.ZoomObserver
 import com.example.speechtotext.devicecontroller.*
 import java.io.Serializable
 import java.util.*
@@ -132,17 +131,17 @@ class DeviceManager(val context: Context){
 
     val gimbals = mutableMapOf<DeviceName, Device>(
 
-        DeviceName.DJI_RS_2 to DJIGimbalController(),
-        DeviceName.PILOTFLY to PilotflyGimbalController(),
-        DeviceName.NO_OP_GIMBAL to NoOpGimbalController()
+        DeviceName.DJI_RS_2 to DJIGimbalController,
+        DeviceName.PILOTFLY to PilotflyGimbalController,
+        DeviceName.NO_OP_GIMBAL to NoOpGimbalController
 
     )
 
     val cameras = mutableMapOf<DeviceName, Device>(
 
-        DeviceName.CANON to CanonCameraController(),
-        DeviceName.NATIVE to NativeCameraController(),
-        DeviceName.NO_OP_CAMERA to NoOpCameraController()
+        DeviceName.CANON to CanonCameraController,
+        DeviceName.NATIVE to NativeCameraController,
+        DeviceName.NO_OP_CAMERA to NoOpCameraController
     )
 
 
