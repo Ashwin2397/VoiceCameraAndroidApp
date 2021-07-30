@@ -37,6 +37,7 @@ import java.lang.ref.WeakReference
 * - Add error handling so as to prevent crash from failing, this includes the uses of Toasts
 * - Change all methods to accept strings only, to accomodate the STTE
 * - Implement "mode" to toggle between movie and photo
+* - Find a way to chain the requests and only send a request once another has been completed?
 * */
 
 

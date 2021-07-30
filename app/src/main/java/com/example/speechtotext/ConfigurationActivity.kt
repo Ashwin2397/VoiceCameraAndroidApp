@@ -4,13 +4,13 @@ import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.speechtotext.manager.Features
 import com.example.speechtotext.manager.FeaturesManager
 import kotlinx.android.synthetic.main.activity_configuration.*
 
@@ -36,15 +36,15 @@ class ConfigurationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_configuration)
 
-        val featuresManager = intent.getSerializableExtra("EXTRA_FEATURES_MANAGER") as FeaturesManager
+        val features = intent.getSerializableExtra("EXTRA_FEATURES") as Features
 
         val cameraUiController = UiController(
             DeviceType.CAMERA,
             spCameras,
             etCameraIp,
             llCameraControls,
-            featuresManager.availableCameraFeatures,
-            featuresManager.isHttpDevice,
+            features.availableCameraFeatures,
+            features.isHttpDevice,
             applicationContext
         )
 
@@ -55,8 +55,8 @@ class ConfigurationActivity : AppCompatActivity() {
             spGimbals,
             etGimbalIp,
             llGimbalControls,
-            featuresManager.availableGimbalFeatures,
-            featuresManager.isHttpDevice,
+            features.availableGimbalFeatures,
+            features.isHttpDevice,
             applicationContext
         )
 
@@ -70,144 +70,6 @@ class ConfigurationActivity : AppCompatActivity() {
             gimbalUiController
             ).init()
 
-
-
-//
-//        btnLoad.setOnClickListener {
-//
-//            Log.d("CANCEL", "Camera chosen: ${Database(this).getCamera()}; Gimbal chosen: ${Database(this).getGimbal()}")
-//            Log.d("CANCEL", "Controls chosen: ${Database(this).getControls()}")
-//
-////                cancel()
-//        }
-
-//        val uiControllerCamera = UiController(
-//            spCameras,
-//            etCameraIp,
-//            llCameraControls,
-//            mutableMapOf<String, ArrayList<Feature>>(
-//                "Canon Camera" to arrayListOf(
-//                    Feature.APERTURE,
-//                    Feature.FOCUS,
-//                    Feature.SHOOT,
-//                    Feature.ZOOM,
-//                    Feature.MODE
-//                ),
-//                "Native Camera" to arrayListOf(
-//                    Feature.APERTURE,
-//                    Feature.FOCUS,
-//
-//                ),
-//            ),
-//            mutableMapOf<String, Boolean>(
-//                "Canon Camera" to true,
-//                "Native Camera" to false
-//            ),
-//           applicationContext
-//        )
-//
-//        uiControllerCamera.init()
-
-//        val uiControllerGimbal = UiController(
-//            spGimbals,
-//            etGimbalIp,
-//            llGimbalControls,
-//            mutableMapOf<String, ArrayList<Feature>>(
-//                "DJI Ronin" to arrayListOf(
-//                    Feature.MOVE
-//                ),
-//                "Pilotfly" to arrayListOf(
-//                    Feature.MOVE
-//                    ),
-//            ),
-//            mutableMapOf<String, Boolean>(
-//                "DJI Ronin" to true,
-//                "Pilotfly" to false
-//            ),
-//            applicationContext
-//        )
-//
-//        uiControllerGimbal.init()
-//
-//        var cameraSwitches = mutableMapOf<Feature, Switch>()
-//        var gimbalSwitches = mutableMapOf<Feature, Switch>()
-//
-//
-//        canonSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-//
-//            Log.d("CANON_SWITCH", "CAnon button clicked ")
-//
-//            if (isChecked) {
-//                llControls.removeAllViews()
-//
-//                featuresManager.availableCameraFeatures.get(DeviceName.CANON)?.forEach {
-//
-//                    // Remove current controls
-//
-//                    val switch = Switch(this)
-//
-//                    switch.layoutParams = LinearLayout.LayoutParams(
-//                        LinearLayout.LayoutParams.WRAP_CONTENT,
-//                        ViewGroup.LayoutParams.WRAP_CONTENT)
-//
-//                    switch.text = it.toString()
-//
-//                    cameraSwitches.put(it, switch)
-//
-//                    llControls.addView(switch)
-//                }
-//            }
-//
-//        }
-//
-//        roninGimbalSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-//
-//            if (isChecked && !hasAdded) {
-//
-//                featuresManager.availableGimbalFeatures.get(DeviceName.DJI_RS_2)?.forEach {
-//
-//                    // Remove current controls
-//
-//                    val switch = Switch(this)
-//
-//                    switch.layoutParams = LinearLayout.LayoutParams(
-//                        LinearLayout.LayoutParams.WRAP_CONTENT,
-//                        ViewGroup.LayoutParams.WRAP_CONTENT)
-//
-//                    switch.text = it.toString()
-//
-//                    gimbalSwitches.put(it, switch)
-//
-//                    llControls.addView(switch)
-//
-//                }
-//
-//                hasAdded = true
-//            }
-//
-//        }
-//
-//        saveBtn.setOnClickListener {
-//
-//
-//        }
-
-//        spCameras.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//
-//            override fun onItemSelected(
-//                parent: AdapterView<*>?,
-//                view: View?,
-//                position: Int,
-//                id: Long
-//            ) {
-//
-//                Toast.makeText(applicationContext, "Selected item: ${parent?.getItemAtPosition(position).toString()}", Toast.LENGTH_SHORT).show()
-//            }
-//
-//            override fun onNothingSelected(parent: AdapterView<*>?) {
-//
-//            }
-//        }
 
     }
 
