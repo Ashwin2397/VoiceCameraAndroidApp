@@ -30,6 +30,8 @@ object MasterCamera {
 
         factory.getCameraInstance(chosenCamera).setFocusType(word.value)
     }
+
+    fun setMode(word: Word) {}
 }
 
 object MasterGimbal {
@@ -40,6 +42,6 @@ object MasterGimbal {
     fun move(word: Word) {
 
         // Implement logic later on ...
-        factory.getGimbalInstance(chosenGimbal).move("","", "", 1)
+        factory.getGimbalInstance(chosenGimbal).move(word.value,"0", "0", 1)
     }
 }

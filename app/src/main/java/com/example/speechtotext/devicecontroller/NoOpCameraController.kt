@@ -87,10 +87,6 @@ object NoOpCameraController: Device, Camera {
 
     }
 
-    override fun shoot(optionalWord: Word?) {
-        TODO("Not yet implemented")
-    }
-
     /*
     * Sends HTTP shoot request to camera to grab a picture.
     * Uses retrofit.
