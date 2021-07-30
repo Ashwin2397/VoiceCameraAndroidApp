@@ -80,18 +80,25 @@ class UIController(
         this.parameters = parameters
 
         this.feature = feature
-        this.button.apply {
-            setText(feature.toString())
-            setOnClickListener {
-
-                // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
-                onCommandClick(feature.toString().lowercase())
-            }
-        }
 
         this.onCommandClick = onCommandClick
         this.onParameterClick = onParameterClick
 
+    }
+
+    fun setCommandButton(button: Button) {
+
+        this.button = button
+
+        this.button.apply {
+            setText(feature.toString())
+            setOnClickListener {
+
+                Model.newWord(feature.toString().lowercase())
+                // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
+//                onCommandClick?.let { it1 -> it1(feature.toString().lowercase()) }
+            }
+        }
     }
 
     /*
@@ -220,9 +227,10 @@ class AdaptiveParameterButtonBar(
                     val btn = it as Button
                     val parameter = btn.text.toString()
 
-                    if (onParameterClick != null) {
-                        onParameterClick(parameter) // REFACTOR: Pass in parameter as an argument
-                    }
+                    Model.newWord(parameter)
+//                    if (onParameterClick != null) {
+//                        onParameterClick(parameter) // REFACTOR: Pass in parameter as an argument
+//                    }
                 }
             }
 
