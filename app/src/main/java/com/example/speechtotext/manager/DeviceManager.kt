@@ -15,11 +15,11 @@ import kotlin.collections.ArrayList
 * cameras and gimbals that were available. Maybe when porting it over, we can do that.
 */
 
-class SystemManager(val context: Context): Serializable {
+class SystemManager: Serializable {
 
-    val deviceManager = DeviceManager(context)
+    val deviceManager = MasterControllerFactory()
 
-    fun getFeaturesManager(): FeaturesManager {
+    fun getFeatures(): Features {
 
         var availableCameraFeatures = mutableMapOf<DeviceName, ArrayList<Feature>>()
         var availableGimbalFeatures = mutableMapOf<DeviceName, ArrayList<Feature>>()
@@ -52,13 +52,19 @@ class SystemManager(val context: Context): Serializable {
         }
 
 
-        var featuresManager = FeaturesManager(availableCameraFeatures, availableGimbalFeatures, isHttpDevice)
+        var features = Features(availableCameraFeatures, availableGimbalFeatures, isHttpDevice)
 
-        return featuresManager
+        return features
     }
 
 
 }
+
+data class Features(
+    val availableCameraFeatures: Map<DeviceName, ArrayList<Feature>>,
+    val availableGimbalFeatures: Map<DeviceName, ArrayList<Feature>>,
+    val isHttpDevice: Map<DeviceName, Boolean>
+): Serializable
 
 /*
 * Manages all the UI components that are selected and to be rendered
@@ -118,72 +124,5 @@ class FeaturesManager(
         this.chosenGimbalFeatures.add(gimbalFeature)
     }
 
-
-}
-
-/*
-* This should adopt the factory design pattern and replace the controllers map from the main activity
-* */
-class DeviceManager(val context: Context){
-
-    var gimbal:Device? = null
-    var camera:Device? = null
-
-    val gimbals = mutableMapOf<DeviceName, Device>(
-
-        DeviceName.DJI_RS_2 to DJIGimbalController,
-        DeviceName.PILOTFLY to PilotflyGimbalController,
-        DeviceName.NO_OP_GIMBAL to NoOpGimbalController
-
-    )
-
-    val cameras = mutableMapOf<DeviceName, Device>(
-
-        DeviceName.CANON to CanonCameraController,
-        DeviceName.NATIVE to NativeCameraController,
-        DeviceName.NO_OP_CAMERA to NoOpCameraController
-    )
-
-
-    /*
-    * Connects the chosen gimbal and specifies it as the current gimbal of choice.
-    * @param {String} gimbal The chosen gimbal.
-    */
-    fun connectGimbal(gimbal: DeviceName) {
-
-        this.gimbal = this.gimbals[gimbal]
-
-    }
-
-    /*
-    * Connects the chosen camera and specifies it as the current camera of choice.
-    * @param {String} camera The chosen camera.
-    */
-    fun connectCamera(camera: DeviceName) {
-
-        this.camera = this.cameras[camera]
-
-    }
-
-    /*
-    * Returns all the gimbals that is available for use by user.
-    * @return list of all gimbals
-    * NOTE: Needs refactoring to only return enums rather than the controllers too.
-    */
-    fun availableGimbals(): Map<DeviceName, Device>{
-
-        return this.gimbals
-    }
-
-    /*
-    * Returns all the cameras that is available for use by user.
-    * @return list of all cameras.
-    * NOTE: Needs refactoring to only return enums rather than the controllers too.
-    */
-    fun availableCameras(): Map<DeviceName, Device>{
-
-        return this.cameras
-
-    }
 
 }

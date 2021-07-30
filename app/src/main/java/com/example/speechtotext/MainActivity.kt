@@ -279,22 +279,25 @@ class MainActivity : AppCompatActivity(){
 
         Toast.makeText(this, "MAIN", Toast.LENGTH_SHORT).show()
 
-        val systemManager = SystemManager(applicationContext)
-        val featuresManager = systemManager.getFeaturesManager()
+        val systemManager = SystemManager()
+        val features = systemManager.getFeatures()
 
         // To render the configuration view
         configurationButton?.setOnClickListener{
 
             screenChanged = true
             Intent(this, ConfigurationActivity::class.java).also {
-               it.putExtra("EXTRA_FEATURES_MANAGER", featuresManager)
+               it.putExtra("EXTRA_FEATURES", features)
                startActivity(it)
            }
 
         }
 
         factory.controllers.forEach {
-            (it.value as Device).setApplicationContext(applicationContext)
+
+            it.value.forEach {
+                (it.value as Device).setApplicationContext(applicationContext)
+            }
         }
 
         initObservers()
@@ -386,14 +389,14 @@ class MainActivity : AppCompatActivity(){
             MasterGimbal.chosenGimbal = chosenGimbal
 
             if (chosenCamera == DeviceName.NO_OP_CAMERA) {
-                (factory.controllers.get(chosenCamera) as NoOpCameraController).textView = WeakReference(transcription)
+                (factory.controllers.get(DeviceType.CAMERA)!!.get(chosenCamera) as NoOpCameraController).textView = WeakReference(transcription)
 
                 transcription.setZ(2.toFloat())
 
             }
 
             if (chosenGimbal == DeviceName.NO_OP_GIMBAL) {
-                (factory.controllers.get(chosenGimbal) as NoOpGimbalController).textView = WeakReference(transcription)
+                (factory.controllers.get(DeviceType.GIMBAL)!!.get(chosenGimbal) as NoOpGimbalController).textView = WeakReference(transcription)
                 transcription.apply {
                     setZ(2.toFloat())
                     textSize = 20F
