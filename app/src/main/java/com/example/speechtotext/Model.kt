@@ -53,14 +53,14 @@ class B {
 }
 object Model: SpeechToTextEngineObserver{
 
-    private var observers: ArrayList<Observer> = ArrayList()
+    private var observers: ArrayList<FSMObserver> = ArrayList()
 
-    fun addObserver(observer: Observer) {
+    fun addObserver(observer: FSMObserver) {
 
         this.observers.add(observer)
     }
 
-    fun removeObserver(observer: Observer) {
+    fun removeObserver(observer: FSMObserver) {
 
         this.observers.remove(observer)
     }
@@ -115,7 +115,6 @@ class State(
     val state: Int,
     val input: Map<InputType, Int>,
     val callbacks: Array<(optionalWord: Word) -> Unit>,
-    val observer: Observer,
     ){
 
     /*
@@ -131,10 +130,10 @@ class State(
     /*
 	* Runs all callbacks once state has been attained for the first time
     */
-    fun runCallbacks() {
+    fun runCallbacks(word: Word) {
 
         this.callbacks.forEach {
-            it(observer.getWord())
+            it(word)
         }
     }
 
