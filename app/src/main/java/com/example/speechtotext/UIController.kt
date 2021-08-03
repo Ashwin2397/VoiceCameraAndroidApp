@@ -64,8 +64,9 @@ class UIController(
    * */
     fun selectParameter(parameter: Word) {
 
-        this.adaptiveParameterButtonBar.select(parameter.value)
-
+        this.selectedParameter = parameter.value
+        this.button.setText("${feature}: ${selectedParameter}")
+        this.adaptiveParameterButtonBar.select(selectedParameter)
     }
 
     /*
@@ -79,6 +80,11 @@ class UIController(
 
         this.parameters = parameters
 
+        if (parameters.count() > 0) {
+
+            this.selectedParameter = parameters.get(0) // Set default selection
+        }
+
         this.feature = feature
 
         this.onCommandClick = onCommandClick
@@ -91,7 +97,7 @@ class UIController(
         this.button = button
 
         this.button.apply {
-            setText(feature.toString())
+            setText("${feature}: ${selectedParameter}")
             setOnClickListener {
 
                 Model.newWord(feature.toString().lowercase())
@@ -108,7 +114,7 @@ class UIController(
     * */
     fun showParameterButtonBar(optionalWord: Word) {
 
-        this.adaptiveParameterButtonBar.show(this.parameters, this.onParameterClick)
+        this.adaptiveParameterButtonBar.show(this.selectedParameter, this.parameters, this.onParameterClick)
 
     }
 
@@ -204,7 +210,7 @@ class AdaptiveParameterButtonBar(
     * @param {ArrayList<String>} parameters A list of parameters that represents each parameter.
     * @param {(() -> Unit)?} onParameterClick Execute this callback upon selection of parameter via UI touch.
     * */
-    fun show(parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?) {
+    fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?) {
 
 
         // Create buttons with text acquired from parameters list
@@ -236,9 +242,9 @@ class AdaptiveParameterButtonBar(
 
             this.layout.addView(newButton) // Add to view
             this.buttons.put(it, newButton) // Add to map
-
         }
 
+        select(selectedParameter)
     }
 
     /*
