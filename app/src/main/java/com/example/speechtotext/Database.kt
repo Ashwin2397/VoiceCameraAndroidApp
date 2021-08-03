@@ -2,6 +2,7 @@ package com.example.speechtotext
 
 import android.app.Activity
 import android.content.Context
+import java.io.Serializable
 
 /*
 * NOTE:
@@ -10,7 +11,7 @@ import android.content.Context
 * */
 class Database(
     val activity: Activity
-){
+): Serializable {
 
     val sharedPreferences by lazy {
         activity
@@ -62,6 +63,19 @@ class Database(
         return features
     }
 
+    fun getDevice(deviceType: DeviceType): DeviceDetails {
+
+        lateinit var deviceDetails: DeviceDetails
+
+        when(deviceType) {
+
+            DeviceType.GIMBAL -> deviceDetails = getGimbal()
+            DeviceType.CAMERA -> deviceDetails = getCamera()
+        }
+
+        return deviceDetails
+    }
+
     fun getCamera(): DeviceDetails {
 
         return DeviceDetails(
@@ -91,4 +105,4 @@ class Database(
 data class DeviceDetails(
     val deviceName: DeviceName,
     val ipAddress: String
-)
+): Serializable

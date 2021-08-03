@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.iterator
 import com.example.speechtotext.manager.Features
 import com.example.speechtotext.manager.FeaturesManager
 import kotlinx.android.synthetic.main.activity_configuration.*
@@ -36,7 +37,9 @@ class ConfigurationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_configuration)
 
+        // All features of all devices
         val features = intent.getSerializableExtra("EXTRA_FEATURES") as Features
+        val database = Database(this)
 
         val cameraUiController = UiController(
             DeviceType.CAMERA,
@@ -45,7 +48,8 @@ class ConfigurationActivity : AppCompatActivity() {
             llCameraControls,
             features.availableCameraFeatures,
             features.isHttpDevice,
-            applicationContext
+            applicationContext,
+            database
         )
 
         cameraUiController.init()
@@ -57,7 +61,8 @@ class ConfigurationActivity : AppCompatActivity() {
             llGimbalControls,
             features.availableGimbalFeatures,
             features.isHttpDevice,
-            applicationContext
+            applicationContext,
+            database
         )
 
         gimbalUiController.init()
@@ -65,6 +70,7 @@ class ConfigurationActivity : AppCompatActivity() {
         CommitView(
             btnSave,
             btnCancel,
+            database,
             this,
             cameraUiController,
             gimbalUiController
@@ -76,12 +82,11 @@ class ConfigurationActivity : AppCompatActivity() {
     class CommitView(
         val btnSave: Button,
         val btnCancel: Button,
+        val database: Database,
         val activity: Activity,
         val cameraUiController: UiController,
         val gimbalUiController: UiController
     ){
-
-        val database = Database(activity)
 
         /*
         * Add click listeners for both btnSave and btnCancel
@@ -119,7 +124,8 @@ class ConfigurationActivity : AppCompatActivity() {
         val llControls: LinearLayout,
         val deviceControls: Map<DeviceName, ArrayList<Feature>>,
         val deviceHasIp: Map<DeviceName , Boolean>,
-        val context: Context
+        val context: Context,
+        val database: Database
     ){
 
         var chosenDevice = ""
@@ -129,6 +135,7 @@ class ConfigurationActivity : AppCompatActivity() {
         val NUMBER_ROWS = 3
         fun init() {
 
+            setDefaultItem()
             this.spDevice.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
                 override fun onItemSelected(
@@ -155,6 +162,24 @@ class ConfigurationActivity : AppCompatActivity() {
 
         }
 
+        private fun setDefaultItem() {
+
+            var position = 0
+            var savedDeviceName = database.getDevice(deviceType).deviceName.toString()
+            val count = this.spDevice.adapter.count
+            while (position < count) {
+
+                var itemAtPosition = this.spDevice.getItemAtPosition(position)
+                var isSavedDevice = itemAtPosition == savedDeviceName
+                if (isSavedDevice) {
+
+                    this.spDevice.setSelection(position)
+                    break
+                }
+                position++
+            }
+        }
+
         private fun setIpView() {
 
             val hasIp = deviceHasIp.get(stringToEnum.get(chosenDevice)) ?: false
@@ -166,10 +191,14 @@ class ConfigurationActivity : AppCompatActivity() {
                     false to InputType.TYPE_NULL,
                     true to InputType.TYPE_CLASS_TEXT
                 ).get(hasIp)!!
+
+                setText(database.getDevice(deviceType).ipAddress)
             }
         }
 
         private fun displayControls() {
+
+            val savedControls = database.getControls()
 
             this.llControls.removeAllViews()
             chosenControls.clear()
@@ -192,13 +221,20 @@ class ConfigurationActivity : AppCompatActivity() {
                     this.llControls.addView(verticalLinearLayout)
                 }
 
+
                 val newFeature = CheckBox(context)
+                    .apply {
 
-                newFeature.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT)
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT)
+                        text = it.toString()
 
-                newFeature.text = it.toString()
+                        val isSavedControl = it in savedControls
+                        if (isSavedControl) {
+                            this.isChecked = true
+                        }
+                    }
 
                 chosenControls.put(it, newFeature)
 
