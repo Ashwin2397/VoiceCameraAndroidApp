@@ -18,12 +18,14 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
     private var sttIntent: Intent? = null
     private var speechRecognizer: SpeechRecognizer? = null
     var isOnPartial:Boolean = false
+    var isOnStable: Boolean = false
     var model: SpeechToTextEngineObserver? = null
     var isActive = false
 
-    fun initialize(isOnPartial: Boolean, model: SpeechToTextEngineObserver) {
+    fun initialize(isOnPartial: Boolean, isOnStable: Boolean, model: SpeechToTextEngineObserver) {
 
         this.isOnPartial = isOnPartial
+        this.isOnStable = isOnStable
         this.model = model
 
         sttIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -105,37 +107,44 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
 
         val result = results.getStringArrayList("results_recognition")
 
+
         Log.d(TAG, "onResults; Results: " + results.toString() )
         if (!result.isNullOrEmpty() && !isOnPartial) {
 
             // Most probable recognized text is in the first position.
-            val recognizedText = result[0].lowercase()
+            val recognizedText = result[0]
 
             // Give each word to callback
             notifyModel(recognizedText)
 
-            // Restart engine
-            speechRecognizer!!.startListening(sttIntent!!)
 
         }
+
+        // Restart engine
+        speechRecognizer!!.startListening(sttIntent!!)
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
 
         val result = partialResults?.getStringArrayList("results_recognition")
+        val unstable = partialResults?.getStringArrayList("android.speech.extra.UNSTABLE_TEXT")
 
         Log.d(TAG, "onPartialResults; Results: " + partialResults?.toString() )
-        if (!result.isNullOrEmpty()) {
+
+        var recognizedText: String = ""
+        if (!result.isNullOrEmpty() && result[0] != "") {
 
             // Most probable recognized text is in the first position.
-            val recognizedText = result[0].lowercase()
+            recognizedText = result[0]
+        }else if (!unstable.isNullOrEmpty() && isOnStable){
 
-            if (isOnPartial) {
-
-                notifyModel(recognizedText)
-            }
+            recognizedText = unstable[0]
+        }
 
 
+        if (isOnPartial) {
+
+            notifyModel(recognizedText)
         }
     }
 

@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
@@ -264,7 +265,7 @@ class MainActivity : AppCompatActivity(){
     var chosenCamera = DeviceName.CANON
     var chosenGimbal = DeviceName.DJI_RS_2
 
-    var buttons = mutableMapOf<Feature, Button>()
+    var buttons = mutableMapOf<Feature, View>()
 
     // REFACTOR: Use factory design pattern
     val factory = MasterControllerFactory()
@@ -278,6 +279,14 @@ class MainActivity : AppCompatActivity(){
         setContentView(R.layout.activity_main)
 
         Toast.makeText(this, "MAIN", Toast.LENGTH_SHORT).show()
+
+//        imageView.setOnClickListener {
+//
+//        }
+
+//        btnUp.setOnClickListener {
+//            Toast.makeText(this, "Hi there pundeh", Toast.LENGTH_SHORT).show()
+//        }
 
         val systemManager = SystemManager()
         val features = systemManager.getFeatures()
@@ -308,7 +317,10 @@ class MainActivity : AppCompatActivity(){
 
 //        initializeObservers()
 
-        stt.initialize(false, Model)
+        // Definitely alot faster on partial results
+        // With isOnUnstable definitely produces unstable results
+            // Example: "25" => "2", "20", "25" ...
+        stt.initialize(true, false, Model)
 
         // Must start STT via user interaction
         startTranscription.setOnClickListener {
@@ -343,13 +355,6 @@ class MainActivity : AppCompatActivity(){
         super.onPause()
 
         // To ensure that the stt does not remain on when a user navigates to another activity
-
-
-
-
-
-
-
         stt.closeStream()
     }
 
@@ -486,7 +491,7 @@ class MainActivity : AppCompatActivity(){
 
                 verticalLinearLayout!!.addView(newButton)
 
-                buttons.put(it, newButton)
+                buttons.put(it, newButton as View)
                 i+= 1
             }
         }
@@ -496,7 +501,12 @@ class MainActivity : AppCompatActivity(){
 
         commandButtonCreatorLayout.removeAllViews()
         buttons.clear()
-        buttons.put(Feature.SHOOT, shootImage)
+        buttons.put(Feature.SHOOT, shootImage as View)
+
+//        if (Feature.UP in chosenControls) {
+//            buttons.put(Feature.UP, btnUp as View)
+//        }
+
     }
 
     // Run only once when app starts
@@ -504,7 +514,16 @@ class MainActivity : AppCompatActivity(){
 
         features.forEach {
 
-            val uiController = UIController(AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
+            var uiController:UIController? = null
+            if(it.key == Feature.ZOOM || it.key == Feature.RIGHT) {
+
+            uiController = UIController(AdaptiveParameterGaugeBar(parameterButtonCreatorLayout, applicationContext))
+
+            }else {
+
+            uiController = UIController(AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
+            }
+
             uiController.setFeature(it.key, parameters.get(it.key) ?: mutableListOf<String>(), Model::newWord, Model::newWord)
 
             val obs = FSMObserver(uiController, it.value, consecutiveWords.get(it.key) ?: mapOf<String, Word>())
@@ -525,7 +544,7 @@ class MainActivity : AppCompatActivity(){
         Model.removeAllObservers()
         buttons.forEach {
 
-            observers.get(it.key)!!.uiController.setCommandButton(it.value)
+            observers.get(it.key)!!.uiController.setCommandButton(it.value as Button)
             Model.addObserver(observers.get(it.key)!!)
         }
     }
