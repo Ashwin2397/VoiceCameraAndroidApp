@@ -2,16 +2,16 @@ package com.example.speechtotext
 
 import android.content.Context
 import android.graphics.Color
+import android.util.DisplayMetrics
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.core.view.setPadding
-import java.util.ArrayList
-import kotlin.reflect.KFunction1
+import com.github.anastr.speedviewlib.ProgressiveGauge
+import java.util.*
 
 
 class UIController(
-    val adaptiveParameterButtonBar: AdaptiveParameterButtonBar
+    val adaptiveParameterBar: AdaptiveParameterBar,
 ){
 
     lateinit var button: Button
@@ -66,7 +66,7 @@ class UIController(
 
         this.selectedParameter = parameter.value
         this.button.setText("${feature}: ${selectedParameter}")
-        this.adaptiveParameterButtonBar.select(selectedParameter)
+        this.adaptiveParameterBar.select(selectedParameter)
     }
 
     /*
@@ -114,7 +114,7 @@ class UIController(
     * */
     fun showParameterButtonBar(optionalWord: Word) {
 
-        this.adaptiveParameterButtonBar.show(this.selectedParameter, this.parameters, this.onParameterClick)
+        this.adaptiveParameterBar.show(this.selectedParameter, this.parameters, this.onParameterClick)
 
     }
 
@@ -122,7 +122,7 @@ class UIController(
     * Hides the parameter button bar.
     * */
     fun hideParameterButtonBar() {
-        this.adaptiveParameterButtonBar.hide()
+        this.adaptiveParameterBar.hide()
     }
 
     /*
@@ -148,29 +148,86 @@ class UIController(
     }
 }
 
+interface AdaptiveParameterBar {
 
-class DynamicButton(
-    val applicationContext: Context
-){
-    val button = Button(applicationContext)
-
-    fun setText(text: String) {
-
-        button.setText(text)
-    }
-
-    fun select() {}
-
-    fun addOnClickListener(callback: () -> Unit) {
-//        callback(button.text)
-    }
+    fun select(parameter: String)
+    fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?)
+    fun hide()
 
 }
 
+class AdaptiveParameterGaugeBar(
+    val layout: LinearLayout,
+    val context: Context,
+): AdaptiveParameterBar {
+
+    val progressiveGauge = ProgressiveGauge(context, null, 0)
+    val TAG = "PROGRESSIVE_GAUGE"
+    /*
+    * Initialize guage meter upon object instantiation
+    * */
+    init {
+
+        val params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        params.apply {
+            width = 500
+            height = 500
+            leftMargin = 100
+            bottomMargin = convertDpToPixel(15f).toInt()
+        }
+
+        progressiveGauge.apply {
+
+            withTremble = false
+            unitUnderSpeedText = false
+            unit = ""
+            layoutParams = params
+        }
+    }
+    /*
+    * Moves the guage meter to the specified amount
+    * @param {String} parameter The amount by which to move to
+    * */
+    override fun select(parameter: String) {
+
+        progressiveGauge.speedTo(parameter.toFloat(), 500)
+    }
+
+    /*
+    * Use the supplied list of parameters and displays it.
+    * @param {String} selectedParameter The currently selected parameter to display to user.
+    * @param {ArrayList<String>} parameters A list of parameters that represents each parameter.
+    * @param {(() -> Unit)?} onParameterClick Execute this callback upon selection of parameter via UI touch.
+    * */
+    override fun show(
+        selectedParameter: String,
+        parameters: MutableList<String>?,
+        onParameterClick: ((parameter: String) -> Unit)?,
+    ) {
+
+        // Display current parameter
+        progressiveGauge.speedTo(selectedParameter.toFloat(), 0)
+        layout.addView(progressiveGauge)
+    }
+
+    override fun hide() {
+
+        layout.removeView(progressiveGauge)
+    }
+
+    private fun convertDpToPixel(dp: Float): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+    }
+
+
+}
 class AdaptiveParameterButtonBar(
     val layout: LinearLayout,
-    val context: Context
-){
+    val context: Context,
+): AdaptiveParameterBar{
 
     var buttons = mutableMapOf<String, Button>()
     val selectedColor = "#25c433"
@@ -182,7 +239,7 @@ class AdaptiveParameterButtonBar(
     * Selection can be done via STT Observer or UI click.
     * @param {String} parameter The parameter that has been selected
     * */
-    fun select(parameter: String) {
+    override fun select(parameter: String) {
 
         // REFACTOR:
         // - I do this because the parameter is an integer but the value of the displayed button is a float
@@ -206,11 +263,12 @@ class AdaptiveParameterButtonBar(
     }
 
     /*
-    * Use the supplied list of parameters and display it.
+    * Use the supplied list of parameters and displays it.
+    * @param {String} selectedParameter The currently selected parameter to display to user.
     * @param {ArrayList<String>} parameters A list of parameters that represents each parameter.
     * @param {(() -> Unit)?} onParameterClick Execute this callback upon selection of parameter via UI touch.
     * */
-    fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?) {
+    override fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?) {
 
 
         // Create buttons with text acquired from parameters list
@@ -250,7 +308,7 @@ class AdaptiveParameterButtonBar(
     /*
     * "Hides" the currently showing parameter bar by destroying it.
     * */
-    fun hide() {
+    override fun hide() {
 
         // Rm all buttons from view
         this.buttons.forEach {
