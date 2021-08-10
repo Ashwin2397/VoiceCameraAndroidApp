@@ -2,6 +2,7 @@ package com.example.speechtotext.manager
 
 import android.content.Context
 import com.example.speechtotext.ConnectionType
+import com.example.speechtotext.DeviceDetails
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
 import com.example.speechtotext.devicecontroller.*
@@ -82,6 +83,9 @@ class FeaturesManager(
         "zoom" to ZoomObserver()
     )
     */
+
+    lateinit var cameraDetails: DeviceDetails
+    lateinit var gimbalDetails: DeviceDetails
 
     var chosenCamera: DeviceName = DeviceName.CANON     // REFACTOR: System manager will provide this after fetching data from DB
     var cameraIp = ""

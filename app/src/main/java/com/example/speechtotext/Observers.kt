@@ -2,9 +2,6 @@ package com.example.speechtotext
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.widget.TextView
-import com.example.speechtotext.devicecontroller.*
 import java.util.Timer
 import kotlin.concurrent.schedule
 

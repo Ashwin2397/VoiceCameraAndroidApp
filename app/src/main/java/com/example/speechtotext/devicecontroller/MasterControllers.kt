@@ -9,6 +9,8 @@ object MasterCamera {
     val factory = MasterControllerFactory()
     var chosenCamera = DeviceName.CANON
 
+
+
     fun shoot(word: Word) {
 
         factory.getCameraInstance(chosenCamera).shoot()
