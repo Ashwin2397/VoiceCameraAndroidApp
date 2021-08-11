@@ -261,9 +261,8 @@ class MainActivity : AppCompatActivity(){
 //        Feature.ROLL to RollObserver(),
 //    )
 
+    var staticFeatures = mutableListOf(Feature.SHOOT, Feature.INCREMENTAL_MOVEMENT, Feature.ABSOLUTE_MOVEMENT)
     var chosenControls = mutableListOf<Feature>()
-    var chosenCamera = DeviceName.CANON
-    var chosenGimbal = DeviceName.DJI_RS_2
 
     var buttons = mutableMapOf<Feature, View>()
 
@@ -291,17 +290,8 @@ class MainActivity : AppCompatActivity(){
         val systemManager = SystemManager()
         val features = systemManager.getFeatures()
 
-        // To render the configuration view
-        configurationButton?.setOnClickListener{
 
-            screenChanged = true
-            Intent(this, ConfigurationActivity::class.java).also {
-               it.putExtra("EXTRA_FEATURES", features)
-               startActivity(it)
-           }
-
-        }
-
+        // Initialize all controllers for the first time
         factory.controllers.forEach {
 
             it.value.forEach {
@@ -309,13 +299,10 @@ class MainActivity : AppCompatActivity(){
             }
         }
 
+        // Initialize all required instances
         initObservers()
-
-        // Create buttons
-        createButtons()
-        setButtons()
-
-//        initializeObservers()
+        initButtons()
+        initControllers()
 
         // Definitely alot faster on partial results
         // With isOnUnstable definitely produces unstable results
@@ -342,20 +329,21 @@ class MainActivity : AppCompatActivity(){
 
         btnConnectCamera.setOnClickListener {
 
-            val camera = factory.getCameraInstance(chosenCamera)
-
+            val camera = factory.getCameraInstance(MasterCamera.chosenCamera)
             camera?.configureLiveview(this@MainActivity::setImageView)
 
         }
 
+        // To render the configuration view
+        configurationButton?.setOnClickListener{
 
-    }
+            screenChanged = true
+            Intent(this, ConfigurationActivity::class.java).also {
+                it.putExtra("EXTRA_FEATURES", features)
+                startActivity(it)
+            }
 
-    override fun onPause() {
-        super.onPause()
-
-        // To ensure that the stt does not remain on when a user navigates to another activity
-        stt.closeStream()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -378,45 +366,60 @@ class MainActivity : AppCompatActivity(){
             Log.d(TAG, "Camera chosen: ${db.getCamera()}; Gimbal chosen: ${db.getGimbal()}")
             Log.d(TAG, "Controls chosen: ${db.getControls()}")
 
-            // Update controls being rendered
-            chosenControls = db.getControls()
-
-            // Update camera controller
-            chosenCamera = db.getCamera().deviceName
-            val cameraController = factory.getDeviceInstance(chosenCamera)
-            cameraController.setIp(db.getCamera().ipAddress)
-            MasterCamera.chosenCamera = chosenCamera
-
-            // Update gimbal controller
-            chosenGimbal = db.getGimbal().deviceName
-            val gimbalController = factory.getDeviceInstance(chosenGimbal)
-            gimbalController.setIp(db.getGimbal().ipAddress)
-            MasterGimbal.chosenGimbal = chosenGimbal
-
-            if (chosenCamera == DeviceName.NO_OP_CAMERA) {
-                (factory.controllers.get(DeviceType.CAMERA)!!.get(chosenCamera) as NoOpCameraController).textView = WeakReference(transcription)
-
-                transcription.setZ(2.toFloat())
-
-            }
-
-            if (chosenGimbal == DeviceName.NO_OP_GIMBAL) {
-                (factory.controllers.get(DeviceType.GIMBAL)!!.get(chosenGimbal) as NoOpGimbalController).textView = WeakReference(transcription)
-                transcription.apply {
-                    setZ(2.toFloat())
-                    textSize = 20F
-                    setTextColor(Color.parseColor("#ffffff"))
-                    setBackgroundColor(Color.parseColor("#0f0f0f"))
-                }
-
-            }
-            createButtons()
-//            initializeObservers()
-            setButtons()
+            initControllers()
+            initButtons()
 
             screenChanged = false
         }
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        // To ensure that the stt does not remain on when a user navigates to another activity
+        stt.closeStream()
+    }
+
+    /*
+    * Handles ALL activity results that get sent to this activity.
+    * */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PilotflyGimbalController.REQUEST_ENABLE_BT && resultCode == AppCompatActivity.RESULT_OK) {
+            PilotflyGimbalController.scanLeDevice()
+        }
+    }
+
+    /*
+    * Sets the chosenCamera and MasterGimbal.chosenGimbal by retrieving from the database
+    * */
+    fun initControllers() {
+
+        MasterGimbal.chosenGimbal = db.getGimbal().deviceName
+        MasterCamera.chosenCamera = db.getCamera().deviceName
+
+        val cameraController = factory.getDeviceInstance(MasterCamera.chosenCamera)
+        cameraController.setIp(db.getCamera().ipAddress)
+
+        val gimbalController = factory.getDeviceInstance(MasterGimbal.chosenGimbal)
+        gimbalController.setIp(db.getGimbal().ipAddress)
+
+        connectDevices()
+    }
+
+    fun connectDevices() {
+
+        MasterCamera.connectDevice(this@MainActivity)
+        MasterGimbal.connectDevice(this@MainActivity)
+    }
+
+    fun initButtons() {
+
+        // Create buttons
+        createButtons()
+        setButtons()
     }
 
     fun setImageView(camera: com.example.speechtotext.devicecontroller.Camera) {
@@ -457,6 +460,7 @@ class MainActivity : AppCompatActivity(){
     fun createButtons() {
 
         removeButtons()
+
         val NUMBER_ROWS = 5
         var verticalLinearLayout:LinearLayout? = null
         var i = 0
@@ -465,7 +469,7 @@ class MainActivity : AppCompatActivity(){
         chosenControls.forEach {
 
 
-            if (it.toString() != "SHOOT") {
+            if (it !in staticFeatures) {
 
                 if (i%NUMBER_ROWS == 0) {
 
@@ -531,6 +535,7 @@ class MainActivity : AppCompatActivity(){
             observers.put(it.key, obs)
         }
 
+        // Set states for each observer
         observers.forEach{
 
             it.value.states = observerStates.get(it.key)!!
@@ -548,45 +553,4 @@ class MainActivity : AppCompatActivity(){
             Model.addObserver(observers.get(it.key)!!)
         }
     }
-
-//    fun initializeObservers() {
-//
-//        chosenCamera = db.getCamera().deviceName
-//        chosenGimbal = db.getGimbal().deviceName
-//
-//        Model.removeAllObservers()
-//        observers.forEach {
-//
-//            val observer = it.value as Observer
-//
-//            var isChosenControl = buttons.containsKey(it.key)
-//            if (isChosenControl) {
-//
-//
-//                if (observer.getUIController() == null) {
-//
-//                    val uiController = UIController(buttons[it.key]!!, AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
-//
-//                    observer.setUIController(uiController)
-//
-//                }else{
-//
-//                    observer.getUIController()!!.button = buttons[it.key]!!
-//                }
-//                val uiController = observer.getUIController()
-//
-//                uiController!!.setFeature(it.key, observer.getControlParameters(), Model::newWord, observer::onParameterClick)
-//                observer.setCameraController(factory.getCameraInstance(chosenCamera))
-//                observer.setGimbalController(factory.getGimbalInstance(chosenGimbal))
-//
-//                if (it.value is ShootObserver) {
-//
-//                    val shootObserver  = it.value as ShootObserver
-//
-//                    shootObserver.setFsmStates()
-//                }
-//                Model.addObserver(observer)
-//            }
-//        }
-//    }
 }

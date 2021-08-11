@@ -1,10 +1,15 @@
 package com.example.speechtotext.devicecontroller
 
 import android.content.Context
+import android.graphics.Color
+import android.os.Build
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import com.example.speechtotext.ConnectionType
 import com.example.speechtotext.DeviceName
 import com.example.speechtotext.Feature
+import com.example.speechtotext.MainActivity
+import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 
 object NoOpGimbalController: Device, Gimbal {
@@ -25,8 +30,16 @@ object NoOpGimbalController: Device, Gimbal {
 
     }
 
-    override fun connectDevice() {
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun connectDevice(mainActivity: MainActivity) {
 
+        textView = WeakReference(mainActivity.transcription)
+        mainActivity.transcription.apply {
+            setZ(2.toFloat())
+            textSize = 20F
+            setTextColor(Color.parseColor("#ffffff"))
+            setBackgroundColor(Color.parseColor("#0f0f0f"))
+        }
     }
 
     override fun getConnectionType(): ConnectionType {

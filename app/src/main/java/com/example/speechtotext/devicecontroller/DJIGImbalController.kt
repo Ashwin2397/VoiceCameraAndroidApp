@@ -48,7 +48,7 @@ object DJIGimbalController: Device, Gimbal, Serializable {
         return this.deviceName
     }
 
-    override fun connectDevice() {
+    override fun connectDevice(mainActivity: MainActivity) {
     }
 
     override fun getConnectionType(): ConnectionType {

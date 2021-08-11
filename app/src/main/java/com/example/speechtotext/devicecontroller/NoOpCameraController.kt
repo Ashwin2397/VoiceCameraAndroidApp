@@ -3,12 +3,12 @@ package com.example.speechtotext.devicecontroller
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.util.Log
 import android.widget.TextView
-import com.example.speechtotext.ConnectionType
-import com.example.speechtotext.DeviceName
-import com.example.speechtotext.Feature
-import com.example.speechtotext.Word
+import androidx.annotation.RequiresApi
+import com.example.speechtotext.*
+import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.w3c.dom.Text
@@ -45,8 +45,11 @@ object NoOpCameraController: Device, Camera {
         return this.deviceName
     }
 
-    override fun connectDevice() {
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun connectDevice(mainActivity: MainActivity) {
 
+        textView = WeakReference(mainActivity.transcription)
+        mainActivity.transcription.setZ(2.toFloat()) // I didnt need to explicit state that this runs on the UI thread for some reason ...
     }
 
     override fun getConnectionType(): ConnectionType {

@@ -83,7 +83,7 @@ object CanonCameraController: Device, Camera, Serializable {
         return this.deviceName
     }
 
-    override fun connectDevice() {
+    override fun connectDevice(mainActivity: MainActivity) {
 
     }
 

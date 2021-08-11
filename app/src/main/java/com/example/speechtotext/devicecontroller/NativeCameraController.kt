@@ -2,10 +2,7 @@ package com.example.speechtotext.devicecontroller
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.example.speechtotext.ConnectionType
-import com.example.speechtotext.DeviceName
-import com.example.speechtotext.Feature
-import com.example.speechtotext.Word
+import com.example.speechtotext.*
 import java.lang.ref.WeakReference
 
 //
@@ -73,7 +70,7 @@ object NativeCameraController: Device, Camera {
         return this.deviceName
     }
 
-    override fun connectDevice() {
+    override fun connectDevice(mainActivity: MainActivity) {
     }
 
     override fun getConnectionType(): ConnectionType {

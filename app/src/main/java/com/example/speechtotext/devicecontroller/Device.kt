@@ -2,10 +2,7 @@ package com.example.speechtotext.devicecontroller
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.example.speechtotext.ConnectionType
-import com.example.speechtotext.DeviceName
-import com.example.speechtotext.Feature
-import com.example.speechtotext.Word
+import com.example.speechtotext.*
 
 /*
 * TODO:
@@ -17,7 +14,7 @@ import com.example.speechtotext.Word
 
 interface Device {
     fun getDeviceName(): DeviceName
-    fun connectDevice(): Unit
+    fun connectDevice(mainActivity: MainActivity): Unit
     fun getConnectionType(): ConnectionType
 
     /*
