@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Color
 import android.util.DisplayMetrics
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.view.marginBottom
 import com.github.anastr.speedviewlib.ProgressiveGauge
 import java.util.*
 
@@ -218,12 +220,12 @@ class AdaptiveParameterGaugeBar(
         layout.removeView(progressiveGauge)
     }
 
-    private fun convertDpToPixel(dp: Float): Float {
+    fun convertDpToPixel(dp: Float): Float {
         return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
-
-
 }
+
+
 class AdaptiveParameterButtonBar(
     val layout: LinearLayout,
     val context: Context,
@@ -276,14 +278,25 @@ class AdaptiveParameterButtonBar(
 
             // REFACTOR
             // Create button
+            var layoutParameters = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            layoutParameters.bottomMargin = convertDpToPixel(8f).toInt()
+
             var newButton = Button(this.context).apply {
 
                 setText(it)
 
                 // Set constraints
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT)
+                layoutParams = layoutParameters
+
+                minWidth = 0
+                minimumWidth = 0
+                minHeight = 0
+                minimumHeight = 0
+
+
                 
                 setOnClickListener {
 
@@ -317,6 +330,10 @@ class AdaptiveParameterButtonBar(
 
         // rm all buttons from map
         this.buttons = mutableMapOf<String, Button>()
+    }
+
+    fun convertDpToPixel(dp: Float): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 
 }
