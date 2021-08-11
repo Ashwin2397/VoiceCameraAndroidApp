@@ -190,7 +190,7 @@ TODO:
 
                 </Button>
 
-                <Button
+                <ToggleButton
                     android:id="@+id/btnRight"
                     android:minHeight="0dp"
                     android:minWidth="0dp"
@@ -198,6 +198,8 @@ TODO:
                     android:layout_height="wrap_content"
                     android:background="@drawable/ic_right"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    android:textOn=""
+                    android:textOff=""
                     android:layout_column="3"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
@@ -206,7 +208,7 @@ TODO:
 
 
                     tools:ignore="MissingConstraints">
-                </Button>
+                </ToggleButton>
             </TableRow>
             <TableRow
                 android:layout_width="match_parent"
