@@ -41,13 +41,14 @@ interface Device {
 interface Gimbal {
 
     /*
-    * Moves gimbal incrementally with the provided angles.
-    * @param {Float} yaw Horizontal rotation
-    * @param {Float} pitch Vertical rotation
-    * @param {Float} roll Rotate about central point
-    * @param {Integer} isIncremental 1 for incremental, 0 for absolute
+    * Moves gimbal incrementally with the provided angles in it's specified ranges.
+    * Yaw: Horizontal rotation, [-180, 180]
+    * Pitch: Vertical rotation, [-90, 90]
+    * Roll: Rotate about central point, [-90, 90]
+    * @param {Map<MasterGimbal.Axis, Int>} coordinates The coordinates that the gimbal has to move to.
+    * @param {Boolean} isAbsolute We wil always send true and handle the logic for both cases in MasterGimbal.
     * */
-    fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int): Unit
+    fun move(coordinates: Map<MasterGimbal.Axis, Int>, isAbsolute: Boolean): Unit
 
 }
 

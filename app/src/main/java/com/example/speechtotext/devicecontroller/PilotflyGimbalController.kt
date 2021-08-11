@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import com.example.speechtotext.*
 import java.lang.ref.WeakReference
 
@@ -122,8 +121,8 @@ object PilotflyGimbalController: Device, Gimbal {
     override fun setIp(ip: String) {
     }
 
-    override fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int) {
+    override fun move(coordinates: Map<MasterGimbal.Axis, Int>, isAbsolute: Boolean) {
 
-        bleService.sendCommand()
+        bleService.sendCommand(coordinates)
     }
 }

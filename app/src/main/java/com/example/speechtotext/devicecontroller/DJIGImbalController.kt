@@ -13,7 +13,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import java.io.Serializable
 import java.lang.Exception
 import java.lang.ref.WeakReference
@@ -55,7 +54,7 @@ object DJIGimbalController: Device, Gimbal, Serializable {
         return this.connectionType
     }
 
-    override fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int) {
+    override fun move(coordinates: Map<MasterGimbal.Axis, Int>, isAbsolute: Boolean) {
 
         try {
             val url = this.BASE_URL
@@ -66,7 +65,16 @@ object DJIGimbalController: Device, Gimbal, Serializable {
                 .build()
                 .create(DJIGimbalAPIInterface :: class.java)
 
-            val data = retroFitBuilder.moveGimbal(MoveGimbal(yaw = convert(yaw), pitch = convert(pitch), roll = convert(roll), isAbsolute = isAbsolute.toString(), timeForAction = "10"))
+            val data = retroFitBuilder.moveGimbal(MoveGimbal(
+                yaw = convert(coordinates[MasterGimbal.Axis.YAW]!!),
+                pitch = convert(coordinates[MasterGimbal.Axis.PITCH]!!),
+                roll = convert(coordinates[MasterGimbal.Axis.ROLL]!!),
+                isAbsolute = when (isAbsolute) {
+                    true -> "1"
+                    else -> "0"
+                },
+                timeForAction = "10"
+            ))
 
             data.enqueue(object: Callback<Empty?> {
                 override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
@@ -87,7 +95,8 @@ object DJIGimbalController: Device, Gimbal, Serializable {
 
     }
 
-    private fun convert(angle: String): String {
+    //REFACTOR_CRITICAL: I don't know if this works with the new range that I defined...
+    private fun convert(angle: Int): String {
 
         return ((angle.toFloat()/RANGE)*1800).roundToInt().toString()
     }

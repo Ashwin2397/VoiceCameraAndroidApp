@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.speechtotext.devicecontroller.MasterGimbal
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -83,14 +84,16 @@ class BluetoothLeService : Service() {
 
     }
 
+    // REFACTOR_CRITICAL: Use coordinates map to send the appropriate coordinates to the Pilotfly gimbal.
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    fun sendCommand() {
+    fun sendCommand(coordinates: Map<MasterGimbal.Axis, Int>) {
 
         val cmd = CommandBuilder() //REFACTOR_CRITICAL: Command Builder is not able to handle zero!!!
 
         if (i >= testCommands.size) {
             i = 0
         }
+
         cmd.setRoll(testCommands.get(i)) // TEST, 'i' variable just simulates change in command
 
         characteristic.setValue(cmd.build())
