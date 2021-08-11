@@ -96,6 +96,8 @@ TODO:
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginLeft="15dp"
+            android:layout_marginBottom="15dp"
             >
             <TableRow
                 android:layout_width="match_parent"
@@ -113,6 +115,13 @@ TODO:
                     android:background="@drawable/ic_up"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_column="1"
+                    android:layout_span="2"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetRight="0dp"
+                    android:insetLeft="0dp"
+
+
                     tools:ignore="MissingConstraints">
 
                 </Button>
@@ -121,26 +130,83 @@ TODO:
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                >
 
-                <ImageView
+                <Button
+                    android:id="@+id/btnLeft"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_left"
+                    android:background="@drawable/ic_left"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_column="0"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetRight="0dp"
+                    android:insetLeft="0dp"
+
+
                     tools:ignore="MissingConstraints">
 
-                </ImageView>
+                </Button>
 
-                <ImageView
+                <Button
+                    android:id="@+id/btnRollLeft"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_right"
+                    android:background="@drawable/ic_left"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_column="1"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetRight="0dp"
+                    android:insetLeft="0dp"
+
+
+                    tools:ignore="MissingConstraints">
+
+                </Button>
+
+                <Button
+                    android:id="@+id/btnRollRight"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_right"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_column="2"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetRight="0dp"
+                    android:insetLeft="0dp"
+
+
                     tools:ignore="MissingConstraints">
 
-                </ImageView>
+                </Button>
+
+                <Button
+                    android:id="@+id/btnRight"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_right"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_column="3"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetRight="0dp"
+                    android:insetLeft="0dp"
+
+
+                    tools:ignore="MissingConstraints">
+                </Button>
             </TableRow>
             <TableRow
                 android:layout_width="match_parent"
@@ -149,15 +215,23 @@ TODO:
                 android:orientation="horizontal"
                 >
 
-                <ImageView
+                <Button
+                    android:id="@+id/btnDown"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_down"
+                    android:background="@drawable/ic_down"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_column="1"
-                    tools:ignore="MissingConstraints">
+                    android:layout_span="2"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetRight="0dp"
+                    android:insetLeft="0dp"
 
-                </ImageView>
+                    tools:ignore="MissingConstraints">
+                </Button>
 
             </TableRow>
         </TableLayout>
@@ -230,13 +304,22 @@ TODO:
 
     <LinearLayout
         android:id="@+id/parameterButtonCreatorLayout"
-        android:layout_marginLeft="90dp"
+        android:layout_marginLeft="180dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
+
         android:orientation="horizontal">
 
     </LinearLayout>
+<!--    <LinearLayout-->
+<!--        android:layout_marginLeft="90dp"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:gravity="center"-->
+<!--        android:orientation="horizontal">-->
+
+<!--    </LinearLayout>-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>
