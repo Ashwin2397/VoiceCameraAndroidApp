@@ -518,14 +518,14 @@ class MainActivity : AppCompatActivity(){
 
         features.forEach {
 
-            var uiController:UIController? = null
-            if(it.key == Feature.ZOOM || it.key == Feature.RIGHT) {
+            val uiController = when(it.key) {
 
-            uiController = UIController(AdaptiveParameterGaugeBar(parameterButtonCreatorLayout, applicationContext))
-
-            }else {
-
-            uiController = UIController(AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
+                Feature.ZOOM, Feature.RIGHT -> {
+                    UIController(AdaptiveParameterGaugeBar(parameterButtonCreatorLayout, applicationContext))
+                }
+                else -> {
+                    UIController(AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
+                }
             }
 
             uiController.setFeature(it.key, parameters.get(it.key) ?: mutableListOf<String>(), Model::newWord, Model::newWord)
