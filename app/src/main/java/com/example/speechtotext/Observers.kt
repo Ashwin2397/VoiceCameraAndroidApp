@@ -98,15 +98,4 @@ class FSMObserver(
             }).start()
         }
     }
-
-    fun onCommandClick() {
-
-        newWord(this.command.value)
-    }
-
-    fun onParameterClick(parameter: String) {
-
-        newWord(parameter)
-
-    }
 }
