@@ -56,7 +56,7 @@ class FSMObserver(
             parsedWord = Word("", Feature.ANY, InputType.OTHER_COMMAND, DeviceType.ANY)
         }else if (isNumericalParameter) {
 //            parsedWord = numericalParameters[word]!!
-            parsedWord = Word(word, Feature.MODE, InputType.NUMERICAL_PARAMETER, DeviceType.CAMERA)
+            parsedWord = Word(word, command.feature, InputType.NUMERICAL_PARAMETER, command.deviceType)
         }
 
         return parsedWord
