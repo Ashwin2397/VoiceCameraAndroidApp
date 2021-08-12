@@ -35,9 +35,9 @@ class FSMObserver(
         var parsedWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED);
 
         val isDefinedCommand = firstCommands[word] != null
-        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value
+        val isOurCommand = isDefinedCommand && firstCommands[word]?.value == this.command.value // IF list, then check if it is in list
         val isConsecutiveWord = this.consecutiveWords[word] != null
-        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value;
+        val isOtherCommand = isDefinedCommand && firstCommands[word]?.value != this.command.value; // If list, then check if not in list
 //        val isNumericalParameter = numericalParameters[word] != null
         var isNumericalParameter = false
 
@@ -83,7 +83,7 @@ class FSMObserver(
         val mainLooper = Looper.getMainLooper()
 
         if (this.currentWord.inputType == InputType.OTHER_COMMAND) {
-            uiController!!.reset()
+            uiController!!.reset() // If it is list, then reset all the buttons in uiController
         }else {
 
             Thread(Runnable {
