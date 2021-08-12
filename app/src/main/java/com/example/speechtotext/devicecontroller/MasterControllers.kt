@@ -46,7 +46,7 @@ object MasterGimbal {
     val factory = MasterControllerFactory()
     var chosenGimbal = DeviceName.DJI_RS_2
 
-    var isAbsolute = true // If incremental is set, then it changes to false
+    var isAbsolute = false // If incremental is set, then it changes to false
 
     val RANGE = IntRange(0, 10)
 
@@ -80,7 +80,7 @@ object MasterGimbal {
 
         coordinates[axis] = parseIsAbsolute(axis, vectorValue, word)
 
-        factory.getGimbalInstance(chosenGimbal).move(coordinates, true)
+        factory.getGimbalInstance(chosenGimbal).move(coordinates, isAbsolute)
     }
 
     fun parseMultiplier(axis: MasterGimbal.Axis, word: Word): Float {
