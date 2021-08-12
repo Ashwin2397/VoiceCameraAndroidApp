@@ -74,19 +74,81 @@ object MasterGimbal {
     * */
     fun move(word: Word) {
 
-        val vectorValue = parseVector(word)
         val axis = parseAxis(word)
+        val multiplier = parseMultiplier(axis, word) // This assumes that all numerical parameters are within the range [1,10]
+        val vectorValue = parseVector(word, multiplier)
 
-        coordinates[axis] = vectorValue
+        coordinates[axis] = parseIsAbsolute(axis, vectorValue, word)
 
-        // REFACTOR_CRITICAL: For now, we always assume it's ABSOLUTE, until I figure it out
-//        if(isAbsolute) {
-//
-//        }else{
-//
-//        }
+        factory.getGimbalInstance(chosenGimbal).move(coordinates, true)
+    }
 
-        factory.getGimbalInstance(chosenGimbal).move(coordinates, isAbsolute)
+    fun parseMultiplier(axis: MasterGimbal.Axis, word: Word): Float {
+
+        return when(axis) {
+
+            Axis.PITCH, Axis.ROLL -> (1F.div(10)).times(90)
+            Axis.YAW -> (1F.div(10)).times(180)
+            else -> 0F
+        }
+    }
+
+    fun parseIsAbsolute(axis: Axis, vectorValue: Int, word: Word): Int {
+
+        var coordinate = vectorValue
+
+        val isIncremental = !isAbsolute
+        if(isIncremental) {
+
+            coordinate = vectorValue + coordinates[axis]!!
+            val boundary = parseBoundary(word)
+
+            val hasExceedRange = coordinate.absoluteValue > boundary
+            if (hasExceedRange) {
+
+                coordinate = when(word.feature) {
+
+                    Feature.RIGHT -> coordinate - 360
+                    Feature.LEFT -> coordinate + 360
+                    Feature.ROLL_LEFT, Feature.DOWN -> -90
+                    Feature.ROLL_RIGHT, Feature.UP -> 90
+                    else -> 0
+                }
+            }
+        }
+
+        return coordinate
+    }
+
+
+    /*
+    * 1. Calculates the given vector value
+    * 2. Checks if it is within its range of values for the given direction.
+    * 3. Sets the new value for the appropriate axis.
+    * @param {Word} word The Word object that contains the feature attribute and the value.
+    * @return The vector value of the given word.
+    * */
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun parseVector(word: Word, multiplier: Float): Int {
+
+        val direction = parseDirection(word)
+
+        // REFACTOR_CRITICAL: Run time exception for when the word cannot be parsed to an Integer.
+        val magnitude = word.value.toInt()
+
+        val boundary = parseBoundary(word)
+
+        return min((magnitude.absoluteValue).times(multiplier).toInt(), boundary)*direction
+    }
+
+    fun parseBoundary(word: Word): Int {
+
+        return when(word.feature) {
+
+            Feature.UP, Feature.DOWN, Feature.ROLL_RIGHT, Feature.ROLL_LEFT, Feature.ROLL -> 90
+            Feature.LEFT, Feature.RIGHT -> 180
+            else -> 0
+        }
     }
 
     /*
@@ -114,31 +176,5 @@ object MasterGimbal {
             else -> Axis.UNDEFINED
         }
     }
-
-    /*
-    * 1. Calculates the given vector value
-    * 2. Checks if it is within its range of values for the given direction.
-    * 3. Sets the new value for the appropriate axis.
-    * @param {Word} word The Word object that contains the feature attribute and the value.
-    * @return The vector value of the given word.
-    * */
-    @RequiresApi(Build.VERSION_CODES.N)
-    fun parseVector(word: Word): Int {
-
-        val direction = parseDirection(word)
-
-        // REFACTOR_CRITICAL: Run time exception for when the word cannot be parsed to an Integer.
-        val magnitude = word.value.toInt()
-
-        val range = when(word.feature) {
-
-            Feature.UP, Feature.DOWN, Feature.ROLL_RIGHT, Feature.ROLL_LEFT, Feature.ROLL -> 90
-            Feature.LEFT, Feature.RIGHT -> 180
-            else -> 0
-        }
-
-        return min(magnitude.absoluteValue, range)*direction
-    }
-
 
 }

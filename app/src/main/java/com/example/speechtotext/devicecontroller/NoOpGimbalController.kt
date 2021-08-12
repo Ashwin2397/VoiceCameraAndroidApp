@@ -64,8 +64,8 @@ object NoOpGimbalController: Device, Gimbal {
 
     }
 
-    override fun move(yaw: String, pitch: String, roll: String, isAbsolute: Int) {
-        this.textView.get()?.text = "YAW: ${yaw}\nPITCH: ${pitch}\nROLL: ${roll}\n"
+    override fun move(coordinates: Map<MasterGimbal.Axis, Int>, isAbsolute: Boolean) {
+        this.textView.get()?.text = "YAW: ${coordinates[MasterGimbal.Axis.YAW]}\nPITCH: ${coordinates[MasterGimbal.Axis.PITCH]}\nROLL: ${coordinates[MasterGimbal.Axis.ROLL]}\n"
 
     }
 }

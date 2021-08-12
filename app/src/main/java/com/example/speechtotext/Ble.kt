@@ -27,7 +27,7 @@ class BluetoothLeService : Service() {
     val CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
     var i = 0
-    var testCommands = arrayListOf(45, 90, 1, -45, -90)
+    var testCommands = arrayListOf(72, 34, 56, 23, 12, 90, 3, 11, 87, 25, 62)
 
     fun initialize(): Boolean {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -88,20 +88,27 @@ class BluetoothLeService : Service() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     fun sendCommand(coordinates: Map<MasterGimbal.Axis, Int>) {
 
-        val cmd = CommandBuilder() //REFACTOR_CRITICAL: Command Builder is not able to handle zero!!!
+        val commandBuilder = CommandBuilder() //REFACTOR_CRITICAL: Command Builder is not able to handle zero!!!
 
-        if (i >= testCommands.size) {
-            i = 0
-        }
 
-        cmd.setRoll(testCommands.get(i)) // TEST, 'i' variable just simulates change in command
+        commandBuilder.setRoll(coordinates[MasterGimbal.Axis.ROLL]!!) // TEST, 'i' variable just simulates change in command
+        commandBuilder.setPitch(coordinates[MasterGimbal.Axis.PITCH]!!)
+        commandBuilder.setYaw(coordinates[MasterGimbal.Axis.YAW]!!)
 
-        characteristic.setValue(cmd.build())
+//        if (i >= testCommands.size) {
+//            i = 0
+//        }
+//        commandBuilder.setRoll(0) // TEST, 'i' variable just simulates change in command
+//        commandBuilder.setPitch(testCommands[i])
+//        commandBuilder.setYaw(0)
+//        i += 1
+
+
+        characteristic.setValue(commandBuilder.build())
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
 
         bluetoothGatt.writeCharacteristic(characteristic)
 
-        i += 1
     }
     override fun onBind(intent: Intent): IBinder? {
         return binder
@@ -147,6 +154,7 @@ fun String.decodeHex(): ByteArray {
 }
 class CommandBuilder {
 
+    private val TAG = "COMMAND_BUILDER"
     val START_CHARACTER = "3E"
     val MOVE_CMD_ID = "43"
     val PAYLOAD_SIZE = "0D"
@@ -196,6 +204,7 @@ class CommandBuilder {
 //            }
             // Assumes that the first byte is 0x00, which is not exactly good
             payloadChecksum += parseLong(convertedAngle.slice(IntRange(2,3)), 16).toInt()
+            payloadChecksum += parseLong(convertedAngle.slice(IntRange(0,1)), 16).toInt()
 
             // For each byte in speed
             SPEED.decodeHex().forEach {
@@ -205,10 +214,24 @@ class CommandBuilder {
             command += SPEED + convertedAngle
         }
 
-        command += (payloadChecksum%256).hexString()
+        command += parsePayloadChecksum(payloadChecksum)
+
+        Log.d(TAG, command)
 
         return command.decodeHex()
 
+    }
+
+    fun parsePayloadChecksum(payloadChecksum: Int): String {
+
+        var payloadChecksumHexString = (payloadChecksum%256).hexString()
+
+        val needsPadding = payloadChecksumHexString.length < 2
+        if (needsPadding) {
+
+            payloadChecksumHexString = "0" + payloadChecksumHexString
+        }
+        return payloadChecksumHexString
     }
 
     /*
