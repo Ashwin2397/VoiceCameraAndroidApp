@@ -1,10 +1,12 @@
 package com.example.speechtotext
 
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -219,7 +221,7 @@ class MainActivity : AppCompatActivity(){
                     mapOf<Int, State>(
                         0 to State(0,
                             mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.ROLL)!!::reset)),
+                            arrayOf(observers.get(Feature.ROLL)!!::reset)), // If it is list, then reset all the buttons
                         1 to State(1,
                             mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
                             arrayOf(observers.get(Feature.ROLL)!!.uiController!!::selectCommand,
@@ -229,9 +231,8 @@ class MainActivity : AppCompatActivity(){
                             arrayOf(observers.get(Feature.ROLL)!!.uiController!!::selectParameter,
                                 MasterGimbal::move,
                                 observers.get(Feature.ROLL)!!::reset)),
-                    ),
-
-            )
+                    )
+        )
     }
 
     val parameters = mutableMapOf<Feature, MutableList<String>>(
@@ -239,11 +240,11 @@ class MainActivity : AppCompatActivity(){
         Feature.FOCUS to mutableListOf<String>("point", "face", "spot"),
         Feature.MODE to mutableListOf<String>("photo", "movie"),
         Feature.APERTURE to mutableListOf<String>("3.4", "4.0", "4.5", "5.0", "5.6", "6.3", "7.1", "8.0"),
-        Feature.LEFT to mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.RIGHT to mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.UP to mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.DOWN to mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.ROLL to mutableListOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+        Feature.LEFT to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+        Feature.RIGHT to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+        Feature.UP to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+        Feature.DOWN to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+        Feature.ROLL to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     )
 
     /*REFACTOR END*/
@@ -307,7 +308,7 @@ class MainActivity : AppCompatActivity(){
         // Definitely alot faster on partial results
         // With isOnUnstable definitely produces unstable results
             // Example: "25" => "2", "20", "25" ...
-        stt.initialize(true, false, Model)
+        stt.initialize(false, false, Model)
 
         // Must start STT via user interaction
         startTranscription.setOnClickListener {
@@ -506,6 +507,7 @@ class MainActivity : AppCompatActivity(){
         commandButtonCreatorLayout.removeAllViews()
         buttons.clear()
         buttons.put(Feature.SHOOT, shootImage as View)
+        buttons.put(Feature.RIGHT, btnRight as View)
 
 //        if (Feature.UP in chosenControls) {
 //            buttons.put(Feature.UP, btnUp as View)
@@ -520,7 +522,7 @@ class MainActivity : AppCompatActivity(){
 
             val uiController = when(it.key) {
 
-                Feature.ZOOM, Feature.RIGHT -> {
+                Feature.ZOOM -> {
                     UIController(AdaptiveParameterGaugeBar(parameterButtonCreatorLayout, applicationContext))
                 }
                 else -> {

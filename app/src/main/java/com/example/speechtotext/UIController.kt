@@ -28,6 +28,7 @@ class UIController(
     val deSelectedColor = "#c4c4c0"
 
 
+
     /*
     * Renders "selected" button view for command.
     * Called by on click handler and by the STT Observer.
@@ -39,7 +40,15 @@ class UIController(
         this.selected = true
 
         // Render button selected by changing its color
-        button.setBackgroundColor(Color.parseColor(this.selectedColor))
+
+        if(this.feature == Feature.RIGHT) {
+            
+            button.setBackgroundResource(R.drawable.ic_right_selected)
+        }else{
+
+            button.setBackgroundColor(Color.parseColor(this.selectedColor))
+
+        }
 
 
     }
@@ -56,6 +65,13 @@ class UIController(
 
         // Render button selected by changing its color
         button.setBackgroundColor(Color.parseColor(this.deSelectedColor))
+
+
+        //REFACTOR_CRITICAL: Remove this, it is here for testing
+        if(this.feature == Feature.RIGHT) {
+            button.setText("")
+            button.setBackgroundResource(R.drawable.ic_right)
+        }
 
     }
 
@@ -99,7 +115,13 @@ class UIController(
         this.button = button
 
         this.button.apply {
-            setText("${feature}: ${selectedParameter}")
+
+            //REFACTOR_CRITICAL: Remove this, it is here for testing
+            if(feature != Feature.RIGHT){
+                setText("${feature}: ${selectedParameter}")
+
+            }
+
             setOnClickListener {
 
                 Model.newWord(feature.toString().lowercase())
