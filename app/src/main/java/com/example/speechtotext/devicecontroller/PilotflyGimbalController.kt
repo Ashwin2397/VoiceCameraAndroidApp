@@ -123,6 +123,10 @@ object PilotflyGimbalController: Device, Gimbal {
 
     override fun move(coordinates: Map<MasterGimbal.Axis, Int>, isAbsolute: Boolean) {
 
-        bleService.sendCommand(coordinates)
+        // This gimbal is kindda wierd, Up is negative and Down is positive
+        var adjustedCoordinates = coordinates.toMutableMap()
+        adjustedCoordinates[MasterGimbal.Axis.PITCH] = adjustedCoordinates[MasterGimbal.Axis.PITCH]!!.times(-1)
+
+        bleService.sendCommand(adjustedCoordinates)
     }
 }
