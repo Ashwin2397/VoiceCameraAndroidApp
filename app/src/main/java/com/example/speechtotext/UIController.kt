@@ -4,10 +4,9 @@ import android.content.Context
 import android.graphics.Color
 import android.util.DisplayMetrics
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.core.view.marginBottom
+import android.widget.ToggleButton
 import com.github.anastr.speedviewlib.ProgressiveGauge
 import java.util.*
 
@@ -27,7 +26,7 @@ class UIController(
     val selectedColor = "#25c433"
     val deSelectedColor = "#c4c4c0"
 
-
+    val gimbalButtons = mutableListOf(Feature.RIGHT, Feature.LEFT, Feature.UP, Feature.DOWN, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE)
 
     /*
     * Renders "selected" button view for command.
@@ -41,9 +40,9 @@ class UIController(
 
         // Render button selected by changing its color
 
-        if(this.feature == Feature.RIGHT) {
+        if (feature in gimbalButtons) {
             
-            button.setBackgroundResource(R.drawable.ic_right_selected)
+            (button as ToggleButton).isChecked = true
         }else{
 
             button.setBackgroundColor(Color.parseColor(this.selectedColor))
@@ -63,14 +62,16 @@ class UIController(
 
         this.selected = false
 
-        // Render button selected by changing its color
-        button.setBackgroundColor(Color.parseColor(this.deSelectedColor))
 
 
         //REFACTOR_CRITICAL: Remove this, it is here for testing
-        if(this.feature == Feature.RIGHT) {
-            button.setText("")
-            button.setBackgroundResource(R.drawable.ic_right)
+        if(this.feature in gimbalButtons) {
+            (button as ToggleButton).isChecked = false
+
+        }else{
+
+            // Render button selected by changing its color
+            button.setBackgroundColor(Color.parseColor(this.deSelectedColor))
         }
 
     }
@@ -83,7 +84,11 @@ class UIController(
     fun selectParameter(parameter: Word) {
 
         this.selectedParameter = parameter.value
-        this.button.setText("${feature}: ${selectedParameter}")
+        if (feature !in gimbalButtons) {
+            this.button.setText("${feature}: ${selectedParameter}") // Do not do this for the gimbal buttons
+
+
+        }
         this.adaptiveParameterBar.select(selectedParameter)
     }
 
@@ -117,14 +122,22 @@ class UIController(
         this.button.apply {
 
             //REFACTOR_CRITICAL: Remove this, it is here for testing
-            if(feature != Feature.RIGHT){
+            if(feature !in gimbalButtons){
                 setText("${feature}: ${selectedParameter}")
 
             }
 
             setOnClickListener {
 
-                Model.newWord(feature.toString().lowercase())
+                val words = feature.toString().split("_")
+                var wordsString = ""
+
+                words.forEach {
+                    wordsString += it + " "
+                }
+
+                SpeechToTextEngine.notifyModel(wordsString)
+//                Model.newWord(feature.toString().lowercase())
                 // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
 //                onCommandClick?.let { it1 -> it1(feature.toString().lowercase()) }
             }

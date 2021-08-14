@@ -1,12 +1,9 @@
 package com.example.speechtotext
 
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -48,10 +45,6 @@ class MainActivity : AppCompatActivity(){
         Database(this)
     }
 
-    val stt by lazy {
-        SpeechToTextEngine(applicationContext)
-    }
-
     /*REFACTOR START*/
     val observers = mutableMapOf<Feature, FSMObserver>(
     )
@@ -66,7 +59,8 @@ class MainActivity : AppCompatActivity(){
         Feature.RIGHT to Word("right", Feature.RIGHT, InputType.COMMAND_1, DeviceType.CAMERA),
         Feature.UP to Word("up", Feature.UP, InputType.COMMAND_1, DeviceType.CAMERA),
         Feature.DOWN to Word("down", Feature.DOWN, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.ROLL to Word("roll", Feature.LEFT, InputType.COMMAND_1, DeviceType.CAMERA),
+        Feature.ROLL_NEGATIVE to Word("roll", Feature.ROLL_NEGATIVE, InputType.COMMAND_1, DeviceType.CAMERA),
+        Feature.ROLL_POSITIVE to Word("roll", Feature.ROLL_POSITIVE, InputType.COMMAND_1, DeviceType.CAMERA),
     )
 
     val consecutiveWords = mapOf<Feature, Map<String, Word>>(
@@ -78,6 +72,12 @@ class MainActivity : AppCompatActivity(){
         Feature.MODE to mapOf<String, Word>(
             "photo" to Word("photo", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
             "movie" to Word("movie", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
+        ),
+        Feature.ROLL_NEGATIVE to mapOf<String, Word>(
+            "negative" to Word("negative", Feature.ROLL_NEGATIVE, InputType.PARAMETER, DeviceType.CAMERA),
+        ),
+        Feature.ROLL_POSITIVE to mapOf<String, Word>(
+            "positive" to Word("positive", Feature.ROLL_POSITIVE, InputType.PARAMETER, DeviceType.CAMERA),
         ),
     )
 
@@ -217,21 +217,43 @@ class MainActivity : AppCompatActivity(){
                                 MasterGimbal::move,
                                 observers.get(Feature.DOWN)!!::reset)),
                     ),
-            Feature.ROLL to
+            Feature.ROLL_NEGATIVE to
                     mapOf<Int, State>(
                         0 to State(0,
                             mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.ROLL)!!::reset)), // If it is list, then reset all the buttons
+                            arrayOf(observers.get(Feature.ROLL_NEGATIVE)!!::reset)), // If it is list, then reset all the buttons
                         1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.ROLL)!!.uiController!!::selectCommand,
-                                observers.get(Feature.ROLL)!!.uiController!!::showParameterButtonBar)),
+                            mapOf(InputType.PARAMETER to 2),
+                            arrayOf()),
                         2 to State(2,
+                            mapOf(InputType.NUMERICAL_PARAMETER to 3, InputType.OTHER_COMMAND to 0),
+                            arrayOf(observers.get(Feature.ROLL_NEGATIVE)!!.uiController!!::selectCommand,
+                                observers.get(Feature.ROLL_NEGATIVE)!!.uiController!!::showParameterButtonBar)),
+                        3 to State(3,
                             mapOf(),
-                            arrayOf(observers.get(Feature.ROLL)!!.uiController!!::selectParameter,
+                            arrayOf(observers.get(Feature.ROLL_NEGATIVE)!!.uiController!!::selectParameter,
                                 MasterGimbal::move,
-                                observers.get(Feature.ROLL)!!::reset)),
+                                observers.get(Feature.ROLL_NEGATIVE)!!::reset)),
+                    ),
+            Feature.ROLL_POSITIVE to
+                    mapOf<Int, State>(
+                        0 to State(0,
+                            mapOf(InputType.COMMAND_1 to 1),
+                            arrayOf(observers.get(Feature.ROLL_POSITIVE)!!::reset)), // If it is list, then reset all the buttons
+                        1 to State(1,
+                            mapOf(InputType.PARAMETER to 2),
+                            arrayOf()),
+                        2 to State(2,
+                            mapOf(InputType.NUMERICAL_PARAMETER to 3, InputType.OTHER_COMMAND to 0),
+                            arrayOf(observers.get(Feature.ROLL_POSITIVE)!!.uiController!!::selectCommand,
+                                observers.get(Feature.ROLL_POSITIVE)!!.uiController!!::showParameterButtonBar)),
+                        3 to State(3,
+                            mapOf(),
+                            arrayOf(observers.get(Feature.ROLL_POSITIVE)!!.uiController!!::selectParameter,
+                                MasterGimbal::move,
+                                observers.get(Feature.ROLL_POSITIVE)!!::reset)),
                     )
+
         )
     }
 
@@ -244,25 +266,13 @@ class MainActivity : AppCompatActivity(){
         Feature.RIGHT to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
         Feature.UP to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
         Feature.DOWN to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.ROLL to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+        Feature.ROLL_NEGATIVE to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+        Feature.ROLL_POSITIVE to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
     )
 
     /*REFACTOR END*/
 
-//    var observers = mutableMapOf<Feature, Any>(
-//        Feature.SHOOT to ShootObserver(),
-//        Feature.ZOOM to ZoomObserver(),
-//        Feature.APERTURE to ApertureObserver(),
-//        Feature.FOCUS to FocusObserver(),
-//        Feature.MODE to ModeObserver(),
-//        Feature.LEFT to LeftObserver(),
-//        Feature.RIGHT to RightObserver(),
-//        Feature.UP to UpObserver(),
-//        Feature.DOWN to DownObserver(),
-//        Feature.ROLL to RollObserver(),
-//    )
-
-    var staticFeatures = mutableListOf(Feature.SHOOT, Feature.INCREMENTAL_MOVEMENT, Feature.ABSOLUTE_MOVEMENT)
+    var staticFeatures = mutableListOf(Feature.SHOOT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.LEFT, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE, Feature.INCREMENTAL_MOVEMENT, Feature.ABSOLUTE_MOVEMENT)
     var chosenControls = mutableListOf<Feature>()
 
     var buttons = mutableMapOf<Feature, View>()
@@ -308,18 +318,19 @@ class MainActivity : AppCompatActivity(){
         // Definitely alot faster on partial results
         // With isOnUnstable definitely produces unstable results
             // Example: "25" => "2", "20", "25" ...
-        stt.initialize(false, false, Model)
+        SpeechToTextEngine.applicationContext = WeakReference(applicationContext)
+        SpeechToTextEngine.initialize(false, false, Model)
 
         // Must start STT via user interaction
         startTranscription.setOnClickListener {
 
-            startTranscription.text = "VOICE CONTROL: ${mapOf(true to "ON", false to "OFF").get(!stt.isActive)}"
+            startTranscription.text = "VOICE CONTROL: ${mapOf(true to "ON", false to "OFF").get(!SpeechToTextEngine.isActive)}"
 
             try {
                 val permissions: Array<String> = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.INTERNET)
                 requestPermissions( permissions, 101)
 
-                stt.toggleStream()
+                SpeechToTextEngine.toggleStream()
 
             }catch (e: ActivityNotFoundException){
                 Toast.makeText(this, "Your device does not support STT.", Toast.LENGTH_LONG).show()
@@ -352,9 +363,9 @@ class MainActivity : AppCompatActivity(){
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         super.onResume()
 
-        if (stt.isActive) {
+        if (SpeechToTextEngine.isActive) {
 
-            stt.openStream()
+            SpeechToTextEngine.openStream()
         }
 
         // Refactor screenChanged boolean, might not need it
@@ -379,7 +390,7 @@ class MainActivity : AppCompatActivity(){
         super.onPause()
 
         // To ensure that the stt does not remain on when a user navigates to another activity
-        stt.closeStream()
+        SpeechToTextEngine.closeStream()
     }
 
     /*
@@ -462,7 +473,7 @@ class MainActivity : AppCompatActivity(){
 
         removeButtons()
 
-        val NUMBER_ROWS = 5
+        val NUMBER_ROWS = 4
         var verticalLinearLayout:LinearLayout? = null
         var i = 0
 
@@ -474,11 +485,15 @@ class MainActivity : AppCompatActivity(){
 
                 if (i%NUMBER_ROWS == 0) {
 
-                    verticalLinearLayout = LinearLayout(applicationContext)
-                    verticalLinearLayout!!.layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT)
-                    verticalLinearLayout!!.orientation = LinearLayout.VERTICAL
+                    verticalLinearLayout = LinearLayout(applicationContext).apply {
+
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT)
+
+                        orientation = LinearLayout.VERTICAL
+
+                    }
 
                     commandButtonCreatorLayout.addView(verticalLinearLayout)
                 }
@@ -491,6 +506,7 @@ class MainActivity : AppCompatActivity(){
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)
+
 
                 }
 
@@ -507,7 +523,15 @@ class MainActivity : AppCompatActivity(){
         commandButtonCreatorLayout.removeAllViews()
         buttons.clear()
         buttons.put(Feature.SHOOT, shootImage as View)
+        buttons.put(Feature.UP, btnUp as View)
         buttons.put(Feature.RIGHT, btnRight as View)
+        buttons.put(Feature.DOWN, btnDown as View)
+        buttons.put(Feature.LEFT, btnLeft as View)
+        buttons.put(Feature.ROLL_NEGATIVE, btnRollLeft as View)
+        buttons.put(Feature.ROLL_POSITIVE, btnRollRight as View)
+
+//        buttons.put(Feature.RIGHT, btnRight as View)
+//        buttons.put(Feature.RIGHT, btnRight as View)
 
 //        if (Feature.UP in chosenControls) {
 //            buttons.put(Feature.UP, btnUp as View)
