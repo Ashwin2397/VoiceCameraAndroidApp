@@ -8,13 +8,16 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.TextView
+import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.coroutines.suspendCoroutine
 
 
-class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
+object SpeechToTextEngine: RecognitionListener {
 
     val TAG = "SPEECH_ENGINE"
+
+    lateinit var applicationContext: WeakReference<Context>
     private var sttIntent: Intent? = null
     private var speechRecognizer: SpeechRecognizer? = null
     var isOnPartial:Boolean = false
@@ -41,7 +44,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
         sttIntent!!.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
         sttIntent!!.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-            applicationContext.getPackageName());
+            applicationContext.get()?.getPackageName());
     }
 
     fun toggleStream() {
@@ -57,7 +60,7 @@ class SpeechToTextEngine(val applicationContext: Context): RecognitionListener {
 
     fun openStream() {
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(applicationContext)
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(applicationContext.get())
         speechRecognizer!!.setRecognitionListener(this)
         speechRecognizer!!.startListening(sttIntent!!)
 
