@@ -38,6 +38,15 @@ object Model: SpeechToTextEngineObserver{
 
 }
 
+    data class NewWord(
+        val value: String,
+        var feature: Feature,
+        val header: Header,
+        val inputType: InputType,
+        val deviceType: DeviceType,
+        val parents: List<Header>
+    )
+
 interface SpeechToTextEngineObserver {
 
     fun newWord(word: String)
@@ -63,6 +72,7 @@ data class Word(
     val inputType: InputType,
     val deviceType: DeviceType
 )
+
 
 class State(
     val state: Int,

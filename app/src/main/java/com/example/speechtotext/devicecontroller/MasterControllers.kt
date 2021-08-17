@@ -8,6 +8,19 @@ import kotlin.math.absoluteValue
 
 object MasterCamera {
 
+    var children = mutableListOf<Word>(
+        Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
+        Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
+        Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
+    )
+
+    var featureToFun = mapOf<Feature, (word: Word) -> Unit>(
+
+        Feature.ZOOM to this::setZoom,
+        Feature.FOCUS to this::setFocusType,
+        Feature.MODE to this::setMode
+    )
+
     val factory = MasterControllerFactory()
     var chosenCamera = DeviceName.CANON
 
@@ -42,6 +55,15 @@ object MasterCamera {
 }
 
 object MasterGimbal {
+
+    var children = mutableListOf<Word>(
+        Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
+    )
+
+    var featureToFun = mapOf<Feature, (word: Word) -> Unit>(
+
+        Feature.MOVE to this::move
+    )
 
     val factory = MasterControllerFactory()
     var chosenGimbal = DeviceName.DJI_RS_2

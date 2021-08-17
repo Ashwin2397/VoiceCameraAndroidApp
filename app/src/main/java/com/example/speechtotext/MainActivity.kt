@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity(){
         }
 
         // Initialize all required instances
-        initObservers()
+//        initObservers()
         initButtons()
         initControllers()
 

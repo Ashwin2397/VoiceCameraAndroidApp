@@ -1,7 +1,12 @@
 package com.example.speechtotext
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -97,5 +102,129 @@ class FSMObserver(
                 }
             }).start()
         }
+    }
+}
+
+class DynamicObserver(
+    val textView: TextView,
+    val headerCreaterLayout: LinearLayout,
+    val deviceButtons: Map<DeviceType, Button>,
+    val applicationContext: Context
+){
+    private val TAG = "DYNAMIC_OBSERVER"
+
+    var selectedCommand = NewWord("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+    val uiController = NewUIController(headerCreaterLayout, deviceButtons, applicationContext, HeaderTextView(textView))
+
+    fun newWord(word: String) {
+
+
+        // Reset UI:
+        uiController.reset()
+
+        val newWord = parseWord(word)
+
+        uiController.selectDevice(newWord.deviceType)
+        uiController.showHeaders(headersToCommands.get(newWord.header), newWord)
+
+
+        when(newWord.inputType) {
+
+//            InputType.DEVICE -> {
+//
+//                // Select device button
+//                // Show all sub headers from header at top
+//                // Add all parents of header including itself to the header text view
+//
+//                uiController.selectDevice(newWord)
+//                uiController.showSubHeaders(headersToCommands.get(newWord.header))
+//                headerTextView.addParents(newWord)
+//            }
+//            InputType.HEADER -> {
+//
+//                // Select device button
+//                // Show all sub headers from header at top
+//                // Add all parents of header including itself to the header text view
+//
+//                uiController.selectHeader(newWord)
+//
+////                val commands = headersToCommands.get(newWord.header)
+////                displayCommands(commands!!)
+//
+//
+//            }
+            InputType.COMMAND -> {
+
+                // Select device button
+                // Show all sub headers in parent header
+                // Add all parents of header including to the header text view
+
+                // Select command
+                // Get parameter bar to display parameters
+                //
+
+                uiController.selectCommand(newWord)
+                uiController.displayParameters(newWord)
+
+
+                // if this command has a parameter, set selectedCommand to be this word object
+                selectedCommand = newWord
+            }
+            InputType.PARAMETER -> {
+
+                //
+                val isCommandSelected = selectedCommand.feature != Feature.UNDEFINED
+                if (isCommandSelected) {
+
+                    Log.d(TAG, "Command: ${selectedCommand.value} Parameter: ${newWord.value}")
+                    selectedCommand.feature = Feature.UNDEFINED
+
+                    // Check if given parameter from bar is within the "bounds" of the chosen command
+                    // Select parameter from bar if parameter given is within the bounds
+                    uiController.selectParameter(selectedCommand, newWord)
+
+                    // Send command and parameter to a master controller, along with the device type
+                    // Master controller would then fetch the controller to be used and give the information to achieve this
+
+                }
+                // else ignore
+
+            }
+            else -> {
+                // Ignore
+            }
+        }
+
+    }
+
+
+
+    private fun parseWord(word: String): NewWord {
+
+        var parsedWord = NewWord("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+
+        val isDefinedWord = words[word] != null
+        var isNumericalParameter = false
+        try {
+            word.toFloat()
+            isNumericalParameter = true
+        }catch (e: NumberFormatException) {
+            isNumericalParameter = false
+        }
+
+        if (isDefinedWord) {
+            parsedWord = words[word]!!
+        }else if (isNumericalParameter) {
+            parsedWord = NewWord(word, selectedCommand.feature, Header.UNDEFINED, InputType.PARAMETER, selectedCommand.deviceType, listOf())
+        }
+        return parsedWord
+    }
+
+    /*
+    * Displays commands by adding buttons to linear layout.
+    * Adds click listeners to all buttons that will send the value of it's text content to
+    * */
+    private fun displayCommands(commands: List<String>) {
+
     }
 }
