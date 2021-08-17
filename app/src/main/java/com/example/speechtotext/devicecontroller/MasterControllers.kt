@@ -24,6 +24,15 @@ object MasterCamera {
     val factory = MasterControllerFactory()
     var chosenCamera = DeviceName.CANON
 
+    fun sendCommand(command: NewWord, parameter: NewWord) {
+
+        val cb = MasterGimbal.featureToFun.get(command.feature)
+
+        if (cb != null) {
+            cb(Word(parameter.value, parameter.feature, parameter.inputType, parameter.deviceType))
+        }
+    }
+
     fun connectDevice(mainActivity: MainActivity) {
 
         (factory.controllers.get(DeviceType.CAMERA)?.get(chosenCamera) as Device).connectDevice(mainActivity)
@@ -62,7 +71,9 @@ object MasterGimbal {
 
     var featureToFun = mapOf<Feature, (word: Word) -> Unit>(
 
-        Feature.MOVE to this::move
+        Feature.MOVE to this::move,
+        Feature.PORTRAIT to this::portrait,
+        Feature.LANDSCAPE to this::landscape
     )
 
     val factory = MasterControllerFactory()
@@ -85,9 +96,26 @@ object MasterGimbal {
         Axis.YAW to 0
     )
 
+    fun sendCommand(command: NewWord, parameter: NewWord) {
+
+        val cb = featureToFun.get(command.feature)
+
+        if (cb != null) {
+            cb(Word(parameter.value, parameter.feature, parameter.inputType, parameter.deviceType))
+        }
+    }
+
     fun connectDevice(mainActivity: MainActivity) {
 
         (MasterCamera.factory.controllers.get(DeviceType.GIMBAL)?.get(chosenGimbal) as Device).connectDevice(mainActivity)
+    }
+
+    fun portrait(word: Word) {
+
+    }
+
+    fun landscape(word: Word) {
+
     }
 
     /*

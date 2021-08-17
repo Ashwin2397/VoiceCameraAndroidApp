@@ -160,12 +160,15 @@ class AdaptiveParameterGaugeBar(
     lateinit var layout: LinearLayout
     lateinit var context: Context
 
-    val progressiveGauge = ProgressiveGauge(context, null, 0)
+    lateinit var progressiveGauge:ProgressiveGauge
+
     val TAG = "PROGRESSIVE_GAUGE"
     /*
     * Initialize guage meter upon object instantiation
     * */
-    init {
+    fun initialize() {
+
+        val progressiveGauge = ProgressiveGauge(context, null, 0)
 
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,

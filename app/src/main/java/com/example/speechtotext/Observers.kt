@@ -7,6 +7,9 @@ import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.example.speechtotext.devicecontroller.Device
+import com.example.speechtotext.devicecontroller.MasterCamera
+import com.example.speechtotext.devicecontroller.MasterGimbal
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -177,7 +180,6 @@ class DynamicObserver(
                 if (isCommandSelected) {
 
                     Log.d(TAG, "Command: ${selectedCommand.value} Parameter: ${newWord.value}")
-                    selectedCommand.feature = Feature.UNDEFINED
 
                     // Check if given parameter from bar is within the "bounds" of the chosen command
                     // Select parameter from bar if parameter given is within the bounds
@@ -185,7 +187,15 @@ class DynamicObserver(
 
                     // Send command and parameter to a master controller, along with the device type
                     // Master controller would then fetch the controller to be used and give the information to achieve this
-
+                    when(newWord.deviceType) {
+                        DeviceType.GIMBAL -> {
+                            MasterGimbal.sendCommand(selectedCommand, newWord)
+                        }
+                        DeviceType.CAMERA -> {
+                            MasterCamera.sendCommand(selectedCommand, newWord)
+                        }
+                    }
+                    selectedCommand.feature = Feature.UNDEFINED
                 }
                 // else ignore
 

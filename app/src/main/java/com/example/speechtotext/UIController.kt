@@ -3,6 +3,7 @@ package com.example.speechtotext
 import android.content.Context
 import android.graphics.Color
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
@@ -18,6 +19,8 @@ class NewUIController(
     val applicationContext: Context,
     val headerTextView: HeaderTextView
 ){
+
+    private val TAG = "UICONTROLLER"
 
     val selectedColor = "#25c433"
     val unselectedColor = "#FF6200EE"
@@ -58,10 +61,11 @@ class NewUIController(
 
         if (hasParameters) {
 
-            val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails.adaptiveParameterBarType)
-            adaptiveParameterBar?.show(parameterDetails.parameters)
+//            val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails.adaptiveParameterBarType)
+//            adaptiveParameterBar?.show(parameterDetails.parameters)
         }
 
+        Log.d(TAG, "Display parameters for: ${word.feature}")
     }
 
     fun select(word: NewWord) {}

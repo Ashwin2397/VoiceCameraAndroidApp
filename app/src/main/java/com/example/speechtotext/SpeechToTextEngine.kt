@@ -22,10 +22,10 @@ object SpeechToTextEngine: RecognitionListener {
     private var speechRecognizer: SpeechRecognizer? = null
     var isOnPartial:Boolean = false
     var isOnStable: Boolean = false
-    var model: SpeechToTextEngineObserver? = null
+    var model: DynamicObserver? = null
     var isActive = false
 
-    fun initialize(isOnPartial: Boolean, isOnStable: Boolean, model: SpeechToTextEngineObserver) {
+    fun initialize(isOnPartial: Boolean, isOnStable: Boolean, model: DynamicObserver) {
 
         this.isOnPartial = isOnPartial
         this.isOnStable = isOnStable
@@ -43,7 +43,8 @@ object SpeechToTextEngine: RecognitionListener {
 
         sttIntent!!.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
-        sttIntent!!.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
+        sttIntent!!.putExtra(
+            RecognizerIntent.EXTRA_CALLING_PACKAGE,
             applicationContext.get()?.getPackageName());
     }
 
