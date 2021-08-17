@@ -290,13 +290,15 @@ class MainActivity : AppCompatActivity(){
 
         Toast.makeText(this, "MAIN", Toast.LENGTH_SHORT).show()
 
-//        imageView.setOnClickListener {
-//
-//        }
-
-//        btnUp.setOnClickListener {
-//            Toast.makeText(this, "Hi there pundeh", Toast.LENGTH_SHORT).show()
-//        }
+        val observer = DynamicObserver(
+            textViewHeaders,
+            commandButtonCreatorLayout,
+            mapOf(
+                DeviceType.CAMERA to btnCamera,
+                DeviceType.GIMBAL to btnGimbal
+            ),
+            applicationContext
+        )
 
         val systemManager = SystemManager()
         val features = systemManager.getFeatures()
@@ -310,16 +312,14 @@ class MainActivity : AppCompatActivity(){
             }
         }
 
+
         // Initialize all required instances
-//        initObservers()
-        initButtons()
-        initControllers()
 
         // Definitely alot faster on partial results
         // With isOnUnstable definitely produces unstable results
             // Example: "25" => "2", "20", "25" ...
         SpeechToTextEngine.applicationContext = WeakReference(applicationContext)
-        SpeechToTextEngine.initialize(false, false, Model)
+        SpeechToTextEngine.initialize(false, false, observer)
 
         // Must start STT via user interaction
         startTranscription.setOnClickListener {
@@ -378,8 +378,9 @@ class MainActivity : AppCompatActivity(){
             Log.d(TAG, "Camera chosen: ${db.getCamera()}; Gimbal chosen: ${db.getGimbal()}")
             Log.d(TAG, "Controls chosen: ${db.getControls()}")
 
+            // Only change controllers
+            // Dont bother with the controls
             initControllers()
-            initButtons()
 
             screenChanged = false
         }
@@ -427,13 +428,6 @@ class MainActivity : AppCompatActivity(){
         MasterGimbal.connectDevice(this@MainActivity)
     }
 
-    fun initButtons() {
-
-        // Create buttons
-        createButtons()
-        setButtons()
-    }
-
     fun setImageView(camera: com.example.speechtotext.devicecontroller.Camera) {
 
         Timer().scheduleAtFixedRate(object : TimerTask() {
@@ -469,114 +463,4 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
-    fun createButtons() {
-
-        removeButtons()
-
-        val NUMBER_ROWS = 4
-        var verticalLinearLayout:LinearLayout? = null
-        var i = 0
-
-        chosenControls = db.getControls()
-        chosenControls.forEach {
-
-
-            if (it !in staticFeatures) {
-
-                if (i%NUMBER_ROWS == 0) {
-
-                    verticalLinearLayout = LinearLayout(applicationContext).apply {
-
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT)
-
-                        orientation = LinearLayout.VERTICAL
-
-                    }
-
-                    commandButtonCreatorLayout.addView(verticalLinearLayout)
-                }
-
-
-                var newButton = Button(applicationContext).apply {
-                    setText(it.toString())
-
-                    // Set constraints
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT)
-
-
-                }
-
-                verticalLinearLayout!!.addView(newButton)
-
-                buttons.put(it, newButton as View)
-                i+= 1
-            }
-        }
-    }
-
-    fun removeButtons() {
-
-        commandButtonCreatorLayout.removeAllViews()
-        buttons.clear()
-        buttons.put(Feature.SHOOT, shootImage as View)
-        buttons.put(Feature.UP, btnUp as View)
-        buttons.put(Feature.RIGHT, btnRight as View)
-        buttons.put(Feature.DOWN, btnDown as View)
-        buttons.put(Feature.LEFT, btnLeft as View)
-        buttons.put(Feature.ROLL_NEGATIVE, btnRollLeft as View)
-        buttons.put(Feature.ROLL_POSITIVE, btnRollRight as View)
-
-//        buttons.put(Feature.RIGHT, btnRight as View)
-//        buttons.put(Feature.RIGHT, btnRight as View)
-
-//        if (Feature.UP in chosenControls) {
-//            buttons.put(Feature.UP, btnUp as View)
-//        }
-
-    }
-
-    // Run only once when app starts
-    fun initObservers() {
-
-        features.forEach {
-
-            val uiController = when(it.key) {
-
-                Feature.ZOOM -> {
-                    UIController(AdaptiveParameterGaugeBar(parameterButtonCreatorLayout, applicationContext))
-                }
-                else -> {
-                    UIController(AdaptiveParameterButtonBar(parameterButtonCreatorLayout, applicationContext))
-                }
-            }
-
-            uiController.setFeature(it.key, parameters.get(it.key) ?: mutableListOf<String>(), Model::newWord, Model::newWord)
-
-            val obs = FSMObserver(uiController, it.value, consecutiveWords.get(it.key) ?: mapOf<String, Word>())
-
-            observers.put(it.key, obs)
-        }
-
-        // Set states for each observer
-        observers.forEach{
-
-            it.value.states = observerStates.get(it.key)!!
-        }
-
-    }
-
-    // Run everytime the controls change
-    fun setButtons() {
-
-        Model.removeAllObservers()
-        buttons.forEach {
-
-            observers.get(it.key)!!.uiController.setCommandButton(it.value as Button)
-            Model.addObserver(observers.get(it.key)!!)
-        }
-    }
 }
