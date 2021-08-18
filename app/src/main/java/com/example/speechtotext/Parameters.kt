@@ -34,21 +34,31 @@ class HeaderTextView(
 interface AdaptiveParameterBar {
 
     fun select(parameter: String)
-    fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?)
+    fun show(parameterDetails: ParameterDetails, onParameterClick: ((parameter: String) -> Unit)?)
     fun hide()
 
 }
+enum class AdaptiveParameterBarType {
+    BUTTON,
+    GAUGE
+}
+
+data class ParameterDetails(
+    val adaptiveParameterBarType: AdaptiveParameterBarType,
+    var numericalParameters: IntRange? = null, // IntRange for Gauge and List<String> for Button
+    var stringParameters: List<String>? = null,
+    var currentNumericalSelection: Int? = null,
+    var currentStringSelection: String? = null
+)
 
 class AdaptiveParameterButtonBar(
 ): AdaptiveParameterBar{
 
-    var parameters = mutableListOf<String>()
     lateinit var layout: LinearLayout
     lateinit var context: Context
 
     var buttons = mutableMapOf<String, Button>()
     val selectedColor = "#25c433"
-    var parameterSelected = false
 
     /*
     * Renders the selected view for the specified button.
@@ -85,8 +95,10 @@ class AdaptiveParameterButtonBar(
     * @param {ArrayList<String>} parameters A list of parameters that represents each parameter.
     * @param {(() -> Unit)?} onParameterClick Execute this callback upon selection of parameter via UI touch.
     * */
-    override fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?) {
+    override fun show(parameterDetails: ParameterDetails, onParameterClick: ((parameter: String) -> Unit)?) {
 
+        val parameters = parameterDetails.stringParameters
+        val selectedParameter = parameterDetails.currentStringSelection
 
         // Create buttons with text acquired from parameters list
         parameters!!.forEach {
@@ -130,7 +142,7 @@ class AdaptiveParameterButtonBar(
             this.buttons.put(it, newButton) // Add to map
         }
 
-        select(selectedParameter)
+        select(selectedParameter!!)
     }
 
     /*
@@ -156,7 +168,6 @@ class AdaptiveParameterButtonBar(
 class AdaptiveParameterGaugeBar(
 ): AdaptiveParameterBar {
 
-    var parameters = IntRange(0, 0)
     lateinit var layout: LinearLayout
     lateinit var context: Context
 
@@ -205,13 +216,22 @@ class AdaptiveParameterGaugeBar(
     * @param {(() -> Unit)?} onParameterClick Execute this callback upon selection of parameter via UI touch.
     * */
     override fun show(
-        selectedParameter: String,
-        parameters: MutableList<String>?,
+        parameterDetails: ParameterDetails,
         onParameterClick: ((parameter: String) -> Unit)?,
     ) {
 
+        val range = parameterDetails.numericalParameters
+        val selectedParameter = parameterDetails.currentNumericalSelection
+
+        progressiveGauge.apply {
+
+            minSpeed = range!!.first.toFloat()
+            maxSpeed= range.last.toFloat()
+
+            speedTo(selectedParameter!!.toFloat(), 0)
+        }
+
         // Display current parameter
-        progressiveGauge.speedTo(selectedParameter.toFloat(), 0)
         layout.addView(progressiveGauge)
     }
 
@@ -224,5 +244,4 @@ class AdaptiveParameterGaugeBar(
         return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 }
-
 

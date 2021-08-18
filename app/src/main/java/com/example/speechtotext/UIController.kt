@@ -12,7 +12,6 @@ import com.github.anastr.speedviewlib.ProgressiveGauge
 import java.util.*
 
 
-
 class NewUIController(
     val headerCreaterLayout: LinearLayout,
     val deviceButtons: Map<DeviceType, Button>,
@@ -24,22 +23,15 @@ class NewUIController(
 
     val selectedColor = "#25c433"
     val unselectedColor = "#FF6200EE"
-    enum class AdaptiveParameterBarType {
-        BUTTON,
-        GAUGE
-    }
 
-    data class ParameterDetails(
-        val adaptiveParameterBarType: AdaptiveParameterBarType,
-        val parameters: Any // IntRange for Gauge and List<String> for Button
-    )
+
 
     // Move this to the master controller
     var featuresToParameters = mapOf<Feature, ParameterDetails>(
-        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, IntRange(0, 10)),
-        Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, listOf("movie", "photo")),
-        Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, listOf("point", "face", "spot")),
-        Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, IntRange(0, 10)),
+        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("movie", "photo"), currentStringSelection =  "photo"),
+        Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("point", "face", "spot"), currentStringSelection = "point"),
+        Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
     )
 
     val adaptiveParameterBars = mapOf<AdaptiveParameterBarType, AdaptiveParameterBar>(
@@ -104,14 +96,20 @@ class NewUIController(
             // Add button to linear layout
             // Add click listeners to report to Model it's text content
 
+            val buttonText = it
             var newButton = Button(applicationContext).apply {
-                setText(it.toString())
+                setText(buttonText)
 
                 // Set constraints
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
+
+                setOnClickListener {
+                    SpeechToTextEngine.notifyModel(buttonText)
+                }
             }
+
 
             headerCreaterLayout.addView(newButton)
 
