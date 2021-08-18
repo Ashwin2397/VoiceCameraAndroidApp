@@ -21,12 +21,14 @@ object MasterCamera {
         Feature.MODE to this::setMode
     )
 
+
+
     val factory = MasterControllerFactory()
     var chosenCamera = DeviceName.CANON
 
     fun sendCommand(command: NewWord, parameter: NewWord) {
 
-        val cb = MasterGimbal.featureToFun.get(command.feature)
+        val cb = featureToFun.get(command.feature)
 
         if (cb != null) {
             cb(Word(parameter.value, parameter.feature, parameter.inputType, parameter.deviceType))

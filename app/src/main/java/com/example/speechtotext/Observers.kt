@@ -112,11 +112,13 @@ class DynamicObserver(
     val textView: TextView,
     val headerCreaterLayout: LinearLayout,
     val deviceButtons: Map<DeviceType, Button>,
+    val masterCamera: MasterCamera,
+    val masterGimbal: MasterGimbal,
     val applicationContext: Context
 ){
     private val TAG = "DYNAMIC_OBSERVER"
 
-    var selectedCommand = NewWord("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+    var selectedCommand: NewWord? = null
     val uiController = NewUIController(headerCreaterLayout, deviceButtons, applicationContext, HeaderTextView(textView))
 
     fun newWord(word: String) {
@@ -176,26 +178,26 @@ class DynamicObserver(
             InputType.PARAMETER -> {
 
                 //
-                val isCommandSelected = selectedCommand.feature != Feature.UNDEFINED
+                val isCommandSelected = selectedCommand != null
                 if (isCommandSelected) {
 
-                    Log.d(TAG, "Command: ${selectedCommand.value} Parameter: ${newWord.value}")
+                    Log.d(TAG, "Command: ${selectedCommand!!.value} Parameter: ${newWord.value}")
 
                     // Check if given parameter from bar is within the "bounds" of the chosen command
                     // Select parameter from bar if parameter given is within the bounds
-                    uiController.selectParameter(selectedCommand, newWord)
+                    uiController.selectParameter(selectedCommand!!, newWord)
 
                     // Send command and parameter to a master controller, along with the device type
                     // Master controller would then fetch the controller to be used and give the information to achieve this
                     when(newWord.deviceType) {
                         DeviceType.GIMBAL -> {
-                            MasterGimbal.sendCommand(selectedCommand, newWord)
+                            masterGimbal.sendCommand(selectedCommand!!, newWord)
                         }
                         DeviceType.CAMERA -> {
-                            MasterCamera.sendCommand(selectedCommand, newWord)
+                            masterCamera.sendCommand(selectedCommand!!, newWord)
                         }
                     }
-                    selectedCommand.feature = Feature.UNDEFINED
+                    selectedCommand = null
                 }
                 // else ignore
 
@@ -225,7 +227,7 @@ class DynamicObserver(
         if (isDefinedWord) {
             parsedWord = words[word]!!
         }else if (isNumericalParameter) {
-            parsedWord = NewWord(word, selectedCommand.feature, Header.UNDEFINED, InputType.PARAMETER, selectedCommand.deviceType, listOf())
+            parsedWord = NewWord(word, selectedCommand?.feature ?: Feature.UNDEFINED, Header.UNDEFINED, InputType.PARAMETER, selectedCommand?.deviceType ?: DeviceType.UNDEFINED, listOf())
         }
         return parsedWord
     }

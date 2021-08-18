@@ -297,6 +297,8 @@ class MainActivity : AppCompatActivity(){
                 DeviceType.CAMERA to btnCamera,
                 DeviceType.GIMBAL to btnGimbal
             ),
+            MasterCamera,
+            MasterGimbal,
             applicationContext
         )
 

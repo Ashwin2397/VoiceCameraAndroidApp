@@ -158,7 +158,7 @@ var similarWords = mapOf<String, String>(
     "doom" to "zoom",
 )
 
-var words = mapOf<String, NewWord>(
+val words = mapOf<String, NewWord>(
 
     "camera" to NewWord("camera", Feature.UNDEFINED, Header.CAMERA, InputType.DEVICE, DeviceType.CAMERA, listOf()),
     "gimbal" to NewWord("gimbal", Feature.UNDEFINED, Header.GIMBAL, InputType.DEVICE, DeviceType.GIMBAL, listOf()),
@@ -175,3 +175,11 @@ var words = mapOf<String, NewWord>(
     "settings" to NewWord("settings", Feature.UNDEFINED, Header.SETTINGS, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
 
     )
+
+
+
+
+
+
+
+
