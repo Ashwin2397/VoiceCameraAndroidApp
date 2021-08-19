@@ -12,7 +12,7 @@ import com.github.anastr.speedviewlib.ProgressiveGauge
 class HeaderTextView(
     val textView: TextView
 ){
-    fun addParents(newWord: NewWord) {
+    fun showParentHeaders(newWord: NewWord) {
         var parents = ""
         newWord.parents.forEach {
 
@@ -43,11 +43,6 @@ enum class AdaptiveParameterBarType {
     GAUGE
 }
 
-    fun main() {
-    val a = "5"
-    a as Int
-
-}
 data class ParameterDetails(
     val adaptiveParameterBarType: AdaptiveParameterBarType,
     var numericalParameters: IntRange? = null, // IntRange for Gauge and List<String> for Button

@@ -1,16 +1,10 @@
 package com.example.speechtotext
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import com.example.speechtotext.devicecontroller.MasterCamera
 import com.example.speechtotext.devicecontroller.MasterGimbal
-import java.util.Timer
-import kotlin.concurrent.schedule
+
 //
 //class FSMObserver(
 //    val uiController: UIController,
@@ -117,14 +111,15 @@ class DynamicObserver(
 
     var selectedCommand: NewWord? = null
 
+
     fun newWord(word: String) {
 
         val newWord = parseWord(word)
 
         // Reset UI:
         uiController.reset()
-        uiController.selectDevice(newWord.deviceType)
-        uiController.showHeaders(headersToCommands.get(newWord.header), newWord)
+        uiController.selectDevice(newWord)
+        uiController.showChildHeaders(newWord)
 
 
         when(newWord.inputType) {
@@ -163,7 +158,7 @@ class DynamicObserver(
                 //
 
                 uiController.selectCommand(newWord)
-                uiController.displayParameters(newWord)
+                uiController.showParameters(newWord)
 
 
                 // if this command has a parameter, set selectedCommand to be this word object
@@ -179,21 +174,12 @@ class DynamicObserver(
 
                     // Check if given parameter from bar is within the "bounds" of the chosen command
                     // Select parameter from bar if parameter given is within the bounds
-                    uiController.selectParameter(selectedCommand!!, newWord)
+                    uiController.selectParameter(newWord)
 
                     // Send command and parameter to a master controller, along with the device type
                     // Master controller would then fetch the controller to be used and give the information to achieve this
-                    when(newWord.deviceType) {
-                        DeviceType.GIMBAL -> {
-                            masterGimbal.sendCommand(selectedCommand!!, newWord)
-                        }
-                        DeviceType.CAMERA -> {
-                            masterCamera.sendCommand(selectedCommand!!, newWord)
-                        }
-                    }
-                    selectedCommand = null
+                    sendCommand(newWord)
                 }
-                // else ignore
 
             }
             else -> {
@@ -226,11 +212,16 @@ class DynamicObserver(
         return parsedWord
     }
 
-    /*
-    * Displays commands by adding buttons to linear layout.
-    * Adds click listeners to all buttons that will send the value of it's text content to
-    * */
-    private fun displayCommands(commands: List<String>) {
+    fun sendCommand(selectedParameter: NewWord) {
 
+        when(selectedParameter.deviceType) {
+            DeviceType.GIMBAL -> {
+                masterGimbal.sendCommand(selectedCommand!!, selectedParameter)
+            }
+            DeviceType.CAMERA -> {
+                masterCamera.sendCommand(selectedCommand!!, selectedParameter)
+            }
+        }
+        selectedCommand = null
     }
 }

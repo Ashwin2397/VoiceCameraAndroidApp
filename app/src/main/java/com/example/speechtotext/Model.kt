@@ -3,40 +3,40 @@
 import com.example.speechtotext.devicecontroller.Camera
 import com.example.speechtotext.devicecontroller.Gimbal
 import kotlin.collections.ArrayList
-
-object Model: SpeechToTextEngineObserver{
-
-    private var observers: ArrayList<FSMObserver> = ArrayList()
-
-    fun addObserver(observer: FSMObserver) {
-
-        this.observers.add(observer)
-    }
-
-    fun removeObserver(observer: FSMObserver) {
-
-        this.observers.remove(observer)
-    }
-
-    fun notifyObservers(word: String) {
-
-        this.observers.forEach {
-            it.newWord(word)
-        }
-    }
-
-    fun removeAllObservers() {
-
-        observers.clear()
-    }
-
-    override fun newWord(word: String) {
-
-        this.notifyObservers(word)
-    }
-
-
-}
+//
+//object Model: SpeechToTextEngineObserver{
+//
+//    private var observers: ArrayList<FSMObserver> = ArrayList()
+//
+//    fun addObserver(observer: FSMObserver) {
+//
+//        this.observers.add(observer)
+//    }
+//
+//    fun removeObserver(observer: FSMObserver) {
+//
+//        this.observers.remove(observer)
+//    }
+//
+//    fun notifyObservers(word: String) {
+//
+//        this.observers.forEach {
+//            it.newWord(word)
+//        }
+//    }
+//
+//    fun removeAllObservers() {
+//
+//        observers.clear()
+//    }
+//
+//    override fun newWord(word: String) {
+//
+//        this.notifyObservers(word)
+//    }
+//
+//
+//}
 
     data class NewWord(
         val value: String,
