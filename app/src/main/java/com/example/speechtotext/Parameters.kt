@@ -43,19 +43,49 @@ enum class AdaptiveParameterBarType {
     GAUGE
 }
 
+    fun main() {
+    val a = "5"
+    a as Int
+
+}
 data class ParameterDetails(
     val adaptiveParameterBarType: AdaptiveParameterBarType,
     var numericalParameters: IntRange? = null, // IntRange for Gauge and List<String> for Button
     var stringParameters: List<String>? = null,
     var currentNumericalSelection: Int? = null,
     var currentStringSelection: String? = null
-)
+){
+
+    /*
+    * Checks to see if the given parameter is within the bounds provided by it's set of parameters.
+    * @param selectedParameter {String} It can be a String or a String representation of an Int.
+    * @return {Boolean} The boolean value of whether the selectedParameter is in it's bounds.
+    * */
+    fun isInBounds(selectedParameter: String): Boolean {
+
+        var isInBounds = false
+        val isNumericalParameter = numericalParameters != null
+        val isNumeric =  try {
+                (selectedParameter).toFloat()
+                true
+            }catch (e: NumberFormatException) { false }
+
+        if (isNumeric) {
+
+            isInBounds = isNumericalParameter && (selectedParameter.toFloat() <= numericalParameters!!.last && selectedParameter.toFloat() >= numericalParameters!!.first)
+
+        }else {
+            isInBounds = (stringParameters?.contains((selectedParameter)) ?: false) && !isNumericalParameter
+        }
+
+        return isInBounds
+    }
+}
 
 class AdaptiveParameterButtonBar(
-): AdaptiveParameterBar{
-
-    lateinit var layout: LinearLayout
-    lateinit var context: Context
+    val layout: LinearLayout,
+    val context: Context,
+):AdaptiveParameterBar {
 
     var buttons = mutableMapOf<String, Button>()
     val selectedColor = "#25c433"
@@ -131,10 +161,8 @@ class AdaptiveParameterButtonBar(
                     val btn = it as Button
                     val parameter = btn.text.toString()
 
-                    Model.newWord(parameter)
-//                    if (onParameterClick != null) {
-//                        onParameterClick(parameter) // REFACTOR: Pass in parameter as an argument
-//                    }
+                    SpeechToTextEngine.notifyModel(parameter)
+                    btn.setBackgroundColor(Color.parseColor(selectedColor))
                 }
             }
 
@@ -166,20 +194,19 @@ class AdaptiveParameterButtonBar(
 }
 
 class AdaptiveParameterGaugeBar(
+    val layout: LinearLayout,
+    val context: Context,
 ): AdaptiveParameterBar {
 
-    lateinit var layout: LinearLayout
-    lateinit var context: Context
 
-    lateinit var progressiveGauge:ProgressiveGauge
+    val progressiveGauge = ProgressiveGauge(context, null, 0)
 
     val TAG = "PROGRESSIVE_GAUGE"
+
     /*
     * Initialize guage meter upon object instantiation
     * */
-    fun initialize() {
-
-        val progressiveGauge = ProgressiveGauge(context, null, 0)
+    init {
 
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
