@@ -2,11 +2,15 @@ package com.example.speechtotext
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
+import java.util.*
+import kotlin.concurrent.timerTask
 
 
 class UIController(
@@ -19,6 +23,8 @@ class UIController(
 ){
 
     private val TAG = "UICONTROLLER"
+
+    var selectedCommand:NewWord? = null
 
     val selectedColor = "#25c433"
     val unselectedColor = "#FF6200EE"
@@ -49,47 +55,62 @@ class UIController(
         }
     }
     /*
-    * Displays parameters based on the value of the Word object
+    * Shows parameters based on the value of the Word object.
+    * If command has parameters => Show parameters
+    * Else => Schedule reset 
+    * @param {NewWord} word Contains the key to retrieve it's parameter details. 
     * */
-    fun displayParameters(word: NewWord) {
-
-        // If command has parameters
-        // Display parameters
-        // Else
-        // Schedule reset
-
-        val parameterDetails = featuresToParameters.get(word.feature)
+    fun showParameters(selectedCommand: NewWord) {
+        
+        val parameterDetails = featuresToParameters.get(selectedCommand.feature)
         val hasParameters = parameterDetails != null
 
         if (hasParameters) {
 
             val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails!!.adaptiveParameterBarType)
             adaptiveParameterBar?.show(parameterDetails, SpeechToTextEngine::notifyModel)
+        }else {
+            scheduleReset(selectedCommand)
         }
 
-        Log.d(TAG, "Display parameters for: ${word.feature}")
+        Log.d(TAG, "Show parameters for: ${selectedCommand.feature}")
+    }
+    
+    /*
+    * Schedules a reset after a fixed time period. 
+    * @param {NewWord} word Yet to figure out what I would need it for. 
+    * */
+    fun scheduleReset(word: NewWord) {
+
+        val mainLooper = Looper.getMainLooper()
+
+        Thread(Runnable {
+
+            Timer("Reset UI", false).schedule(timerTask {
+                Handler(mainLooper).post {
+
+                    reset()
+                }
+            }, 1000)
+        }).start()
     }
 
-    fun select(word: NewWord) {}
+    /*
+    * If command is static => select command from static map
+    * else => select command from list of displayed buttons
+    * @param {NewWord} newWord Contains the key to retrieve the button.
+    * */
+    fun selectCommand(newCommand: NewWord) {
 
-    fun selectCommand(newWord: NewWord) {
-
-        // If command is static
-        // Select command from static map
-        // else
-        // Select command from list of displayed buttons
-
-        // Display parameters
-        val static = staticButtons[newWord.feature]
-        val dynamic = dynamicButtons[newWord.value]
-        val key = newWord.feature.toString()
-        val button = (staticButtons[newWord.feature] ?: dynamicButtons[newWord.value]) as ToggleButton
+        val button = (staticButtons[newCommand.feature] ?: dynamicButtons[newCommand.value]) as ToggleButton
         button.isChecked = true
+
+        selectedCommand = newCommand
     }
 
-    fun selectDevice(deviceType: DeviceType) {
+    fun selectDevice(newWord: NewWord) {
 
-        deviceButtons.get(deviceType)?.setBackgroundColor(Color.parseColor(this.selectedColor))
+        deviceButtons.get(newWord.deviceType)?.setBackgroundColor(Color.parseColor(this.selectedColor))
     }
 
     fun unSelectDevice(deviceType: DeviceType) {
@@ -101,10 +122,12 @@ class UIController(
 
     }
 
-    fun showHeaders(subHeaders: List<String>?, newWord: NewWord) {
+    fun showChildHeaders(newWord: NewWord) {
 
-        // Show sub headers
-        subHeaders?.forEach {
+        val childHeaders = headersToCommands.get(newWord.header)
+
+        // Show child headers
+        childHeaders?.forEach {
 
             // Create button with text set to 'it'
             // Add button to linear layout
@@ -136,8 +159,11 @@ class UIController(
             headerCreaterLayout.addView(newButton)
         }
 
+    }
+
+    fun showParentHeaders(newWord: NewWord) {
         // Show parents headers in HeaderTextView too
-        headerTextView.addParents(newWord)
+        headerTextView.showParentHeaders(newWord)
     }
 
     /*
@@ -159,17 +185,30 @@ class UIController(
 
     }
 
-    fun selectParameter(selectedCommand: NewWord, parameter: NewWord) {
+    /*
+    * Checks if the given parameter is in bounds.
+    * @param selectedCommand {NewWord} The command that the user has previously selected.
+    * @param selectedParameter {NewWord} The parameter that the user has just selected.
+    * @return {Boolean} Value of in bounds check.
+    * */
+    fun isParameterInBounds(selectedParameter: NewWord): Boolean {
 
-        // Check if given parameter from bar is within the "bounds" of the chosen command
-        // Select parameter from bar if parameter given is within the bounds
-        val parameterDetails = featuresToParameters[selectedCommand.feature]
+        val parameterDetails = featuresToParameters[selectedCommand?.feature]
 
-        if (parameterDetails!!.isInBounds(parameter.value)) {
+        return parameterDetails!!.isInBounds(selectedParameter.value)
+    }
 
-            val adaptiveParameterBar = adaptiveParameterBars[parameterDetails.adaptiveParameterBarType]
-            adaptiveParameterBar!!.select(parameter.value)
-        }
+    /*
+    * Selects the given parameter from it's adaptive bar for the given command.
+    * @param selectedCommand {NewWord} The command that the user has previously selected.
+    * @param selectedParameter {NewWord} The parameter that the user has just selected.
+    * */
+    fun selectParameter(selectedParameter: NewWord) {
+
+        val parameterDetails = featuresToParameters[selectedCommand?.feature]
+
+        val adaptiveParameterBar = adaptiveParameterBars[parameterDetails?.adaptiveParameterBarType]
+        adaptiveParameterBar?.select(selectedParameter.value)
     }
 
 
