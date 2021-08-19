@@ -45,238 +45,6 @@ class MainActivity : AppCompatActivity(){
         Database(this)
     }
 
-    /*REFACTOR START*/
-    val observers = mutableMapOf<Feature, FSMObserver>(
-    )
-
-    val features = mapOf(
-        Feature.SHOOT to Word("shoot", Feature.SHOOT, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.ZOOM to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.APERTURE to Word("aperture", Feature.APERTURE, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.FOCUS to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.MODE to Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.LEFT to Word("left", Feature.LEFT, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.RIGHT to Word("right", Feature.RIGHT, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.UP to Word("up", Feature.UP, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.DOWN to Word("down", Feature.DOWN, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.ROLL_NEGATIVE to Word("roll", Feature.ROLL_NEGATIVE, InputType.COMMAND_1, DeviceType.CAMERA),
-        Feature.ROLL_POSITIVE to Word("roll", Feature.ROLL_POSITIVE, InputType.COMMAND_1, DeviceType.CAMERA),
-    )
-
-    val consecutiveWords = mapOf<Feature, Map<String, Word>>(
-        Feature.FOCUS to mapOf<String, Word>(
-            "point" to Word("point", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
-            "face" to Word("face", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
-            "spot" to Word("spot", Feature.FOCUS, InputType.PARAMETER, DeviceType.CAMERA),
-        ),
-        Feature.MODE to mapOf<String, Word>(
-            "photo" to Word("photo", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
-            "movie" to Word("movie", Feature.MODE, InputType.PARAMETER, DeviceType.CAMERA),
-        ),
-        Feature.ROLL_NEGATIVE to mapOf<String, Word>(
-            "negative" to Word("negative", Feature.ROLL_NEGATIVE, InputType.PARAMETER, DeviceType.CAMERA),
-        ),
-        Feature.ROLL_POSITIVE to mapOf<String, Word>(
-            "positive" to Word("positive", Feature.ROLL_POSITIVE, InputType.PARAMETER, DeviceType.CAMERA),
-        ),
-    )
-
-    val observerStates by lazy {
-        mapOf<Feature, Map<Int, State>>(
-            Feature.SHOOT to
-                    mapOf(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.SHOOT)!!::reset)),
-                        1 to State(1,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.SHOOT)!!.uiController!!::selectCommand,
-                                MasterCamera::shoot, observers.get(Feature.SHOOT)!!::reset)),
-                    ),
-            Feature.ZOOM to
-                    mapOf(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.ZOOM)!!::reset)),
-                        1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.ZOOM)!!.uiController!!::selectCommand,
-                                observers.get(Feature.ZOOM)!!.uiController!!::showParameterButtonBar)),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.ZOOM)!!.uiController!!::selectParameter,
-                                MasterCamera::setZoom,
-                                observers.get(Feature.ZOOM)!!::reset))
-                    ),
-            Feature.APERTURE to
-                    mapOf(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.APERTURE)!!::reset)),
-                        1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.APERTURE)!!.uiController!!::selectCommand,
-                                observers.get(Feature.APERTURE)!!.uiController!!!!::showParameterButtonBar)),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.APERTURE)!!.uiController!!::selectParameter,
-                                MasterCamera::setAperture,
-                                observers.get(Feature.APERTURE)!!::reset)),
-                    ),
-            Feature.FOCUS to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.FOCUS)!!::reset)),
-                        1 to State(
-                            1,
-                            mapOf(InputType.PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.FOCUS)!!.uiController!!::selectCommand,
-                                observers.get(Feature.FOCUS)!!.uiController!!::showParameterButtonBar)
-                        ),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.FOCUS)!!.uiController!!::selectParameter,
-                                MasterCamera::setFocusType,
-                                observers.get(Feature.FOCUS)!!::reset)),
-                    ),
-            Feature.MODE to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.MODE)!!::reset)),
-                        1 to State(
-                            1,
-                            mapOf(InputType.PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.MODE)!!.uiController!!::selectCommand,
-                                observers.get(Feature.MODE)!!.uiController!!::showParameterButtonBar)
-                        ),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.MODE)!!.uiController!!::selectParameter,
-                                MasterCamera::setMode,
-                                observers.get(Feature.MODE)!!::reset)),
-                    ),
-            Feature.LEFT to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.LEFT)!!::reset)),
-                        1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.LEFT)!!.uiController!!::selectCommand,
-                                observers.get(Feature.LEFT)!!.uiController!!::showParameterButtonBar)),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.LEFT)!!.uiController!!::selectParameter,
-                                MasterGimbal::move,
-                                observers.get(Feature.LEFT)!!::reset)),
-                    ),
-            Feature.RIGHT to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.RIGHT)!!::reset)),
-                        1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.RIGHT)!!.uiController!!::selectCommand,
-                                observers.get(Feature.RIGHT)!!.uiController!!::showParameterButtonBar)),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.RIGHT)!!.uiController!!::selectParameter,
-                                MasterGimbal::move,
-                                observers.get(Feature.RIGHT)!!::reset)),
-                    ),
-            Feature.UP to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.UP)!!::reset)),
-                        1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.UP)!!.uiController!!::selectCommand,
-                                observers.get(Feature.UP)!!.uiController!!::showParameterButtonBar)),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.UP)!!.uiController!!::selectParameter,
-                                MasterGimbal::move,
-                                observers.get(Feature.UP)!!::reset)),
-                    ),
-            Feature.DOWN to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.DOWN)!!::reset)),
-                        1 to State(1,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 2, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.DOWN)!!.uiController!!::selectCommand,
-                                observers.get(Feature.DOWN)!!.uiController!!::showParameterButtonBar)),
-                        2 to State(2,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.DOWN)!!.uiController!!::selectParameter,
-                                MasterGimbal::move,
-                                observers.get(Feature.DOWN)!!::reset)),
-                    ),
-            Feature.ROLL_NEGATIVE to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.ROLL_NEGATIVE)!!::reset)), // If it is list, then reset all the buttons
-                        1 to State(1,
-                            mapOf(InputType.PARAMETER to 2),
-                            arrayOf()),
-                        2 to State(2,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 3, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.ROLL_NEGATIVE)!!.uiController!!::selectCommand,
-                                observers.get(Feature.ROLL_NEGATIVE)!!.uiController!!::showParameterButtonBar)),
-                        3 to State(3,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.ROLL_NEGATIVE)!!.uiController!!::selectParameter,
-                                MasterGimbal::move,
-                                observers.get(Feature.ROLL_NEGATIVE)!!::reset)),
-                    ),
-            Feature.ROLL_POSITIVE to
-                    mapOf<Int, State>(
-                        0 to State(0,
-                            mapOf(InputType.COMMAND_1 to 1),
-                            arrayOf(observers.get(Feature.ROLL_POSITIVE)!!::reset)), // If it is list, then reset all the buttons
-                        1 to State(1,
-                            mapOf(InputType.PARAMETER to 2),
-                            arrayOf()),
-                        2 to State(2,
-                            mapOf(InputType.NUMERICAL_PARAMETER to 3, InputType.OTHER_COMMAND to 0),
-                            arrayOf(observers.get(Feature.ROLL_POSITIVE)!!.uiController!!::selectCommand,
-                                observers.get(Feature.ROLL_POSITIVE)!!.uiController!!::showParameterButtonBar)),
-                        3 to State(3,
-                            mapOf(),
-                            arrayOf(observers.get(Feature.ROLL_POSITIVE)!!.uiController!!::selectParameter,
-                                MasterGimbal::move,
-                                observers.get(Feature.ROLL_POSITIVE)!!::reset)),
-                    )
-
-        )
-    }
-
-    val parameters = mutableMapOf<Feature, MutableList<String>>(
-        Feature.ZOOM to mutableListOf<String>("0", "25", "50", "75", "100"),
-        Feature.FOCUS to mutableListOf<String>("point", "face", "spot"),
-        Feature.MODE to mutableListOf<String>("photo", "movie"),
-        Feature.APERTURE to mutableListOf<String>("3.4", "4.0", "4.5", "5.0", "5.6", "6.3", "7.1", "8.0"),
-        Feature.LEFT to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.RIGHT to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.UP to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.DOWN to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.ROLL_NEGATIVE to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-        Feature.ROLL_POSITIVE to mutableListOf<String>("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
-    )
-
-    /*REFACTOR END*/
-
-    var staticFeatures = mutableListOf(Feature.SHOOT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.LEFT, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE, Feature.INCREMENTAL_MOVEMENT, Feature.ABSOLUTE_MOVEMENT)
-    var chosenControls = mutableListOf<Feature>()
-
-    var buttons = mutableMapOf<Feature, View>()
-
     // REFACTOR: Use factory design pattern
     val factory = MasterControllerFactory()
 
@@ -290,13 +58,22 @@ class MainActivity : AppCompatActivity(){
 
         Toast.makeText(this, "MAIN", Toast.LENGTH_SHORT).show()
 
-        val observer = DynamicObserver(
-            textViewHeaders,
+        val uiController = UIController(
             commandButtonCreatorLayout,
+            parameterButtonCreatorLayout,
             mapOf(
                 DeviceType.CAMERA to btnCamera,
                 DeviceType.GIMBAL to btnGimbal
             ),
+            applicationContext,
+            HeaderTextView(textViewHeaders),
+            mapOf(
+                Feature.SHOOT to shootImage as Button,
+            )
+        )
+
+        val observer = DynamicObserver(
+            uiController,
             MasterCamera,
             MasterGimbal,
             applicationContext

@@ -387,11 +387,12 @@ TODO:
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                        <Button
+                        <ToggleButton
                             android:id="@+id/shootImage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Shoot" />
+                            android:textOff="shoot"
+                            android:textOn="Shoot" />
                     </TableRow>
 
                 </TableLayout>
