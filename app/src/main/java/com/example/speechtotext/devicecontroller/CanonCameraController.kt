@@ -48,7 +48,6 @@ object CanonCameraController: Device, Camera, Serializable {
     private val connectionType = ConnectionType.HTTP
     lateinit var context: WeakReference<Context>
 
-    val httpNetworkManager = null // API Interface
     val featureURL = mapOf<Feature, String>(
 
         Feature.SHOOT to "ccapi/ver100/shooting/control/shutterbutton/",
@@ -57,26 +56,19 @@ object CanonCameraController: Device, Camera, Serializable {
         Feature.APERTURE to ""
 
     )
-    private var ip = "192.168.0.107";
-    var BASE_URL = "http://" + this.ip + ":8080/"
+    var ipAddress = "192.168.0.107";
 
     val okClient by lazy {
         OkHttpClient()
     }
-
-    val okRequest by lazy {
-        Request.Builder()
-            .url("http://${ip}:8080/ccapi/ver100/shooting/liveview/flip/")
-            .build()
-    }
-
 
     override fun setApplicationContext(context: Context) {
         this.context = WeakReference(context)
     }
 
     override fun setIp(ip: String) {
-        this.ip = ip
+        this.ipAddress = ip
+
     }
 
     override fun getDeviceName(): DeviceName {
@@ -108,17 +100,12 @@ object CanonCameraController: Device, Camera, Serializable {
     }
 
     /*
-    * Gets root url of the API service
-    */
-    fun getBaseURL(): String { return this.BASE_URL }
-
-    /*
     * Gets URL of the specified service."Private" method
     * @param {Feature} The feature who's URL is needed.
     */
     private fun getURL(feature: Feature): String {
 
-        return this.BASE_URL + this.featureURL[feature]
+        return getBaseUrl() + this.featureURL[feature]
     }
 
     /*
@@ -127,7 +114,7 @@ object CanonCameraController: Device, Camera, Serializable {
     */
     fun setIP(ipAddress: String) {
 
-        this.ip = ipAddress
+        this.ipAddress = ipAddress
     }
 
     /*
@@ -136,7 +123,7 @@ object CanonCameraController: Device, Camera, Serializable {
     * */
     override fun configureLiveview(callback: (camera: Camera) -> Unit) {
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
@@ -167,7 +154,7 @@ object CanonCameraController: Device, Camera, Serializable {
     override fun getLiveviewFlip(callback: (bitmap: Bitmap?) -> Unit) {
 
 
-        this.okClient.newCall(this.okRequest).enqueue(object : okhttp3.Callback {
+        this.okClient.newCall(getRequest()).enqueue(object : okhttp3.Callback {
 
             override fun onFailure(call: okhttp3.Call, e: IOException) {
                 Log.d("RESPONSE_ERROR", e.message ?: "Error: No Error message")
@@ -190,6 +177,18 @@ object CanonCameraController: Device, Camera, Serializable {
         })
     }
 
+    private fun getRequest(): Request {
+
+        return Request.Builder()
+            .url("http://${ipAddress}:8080/ccapi/ver100/shooting/liveview/flip/")
+            .build()
+
+    }
+
+    private fun getBaseUrl(): String {
+
+        return "http://${ipAddress}:8080/"
+    }
     /*
     * Sends HTTP shoot request to camera to grab a picture.
     * Uses retrofit.
@@ -197,7 +196,7 @@ object CanonCameraController: Device, Camera, Serializable {
     override fun shoot(): Unit {
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
@@ -227,7 +226,7 @@ object CanonCameraController: Device, Camera, Serializable {
     override fun setZoom(zoomFactor: String): Unit {
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
@@ -257,7 +256,7 @@ object CanonCameraController: Device, Camera, Serializable {
         val apertureValue = "f" + apertureFactor.toFloat().toString()
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
@@ -292,7 +291,7 @@ object CanonCameraController: Device, Camera, Serializable {
         )
 
         val retroFitBuilder = Retrofit.Builder()
-            .baseUrl(this.BASE_URL)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()

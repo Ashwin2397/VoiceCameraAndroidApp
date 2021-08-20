@@ -69,6 +69,11 @@ class MainActivity : AppCompatActivity(){
             HeaderTextView(textViewHeaders),
             mapOf(
                 Feature.SHOOT to shootImage as Button,
+                Feature.LEFT to btnLeft as Button,
+                Feature.RIGHT to btnRight as Button,
+                Feature.UP to btnUp as Button,
+                Feature.DOWN to btnDown as Button,
+
             )
         )
 

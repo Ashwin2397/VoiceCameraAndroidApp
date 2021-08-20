@@ -23,7 +23,7 @@ class FSMObserver(
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, InputType.UNDEFINED, DeviceType.UNDEFINED)
 
-    fun newWord(word: String) {
+    fun Word(word: String) {
 
 
         val parsedWord = this.parseWord(word)
@@ -31,7 +31,7 @@ class FSMObserver(
 
         val currentStateObject = this.states[this.currentState]
 
-        val newState = currentStateObject!!.newWord(parsedWord.inputType)
+        val newState = currentStateObject!!.Word(parsedWord.inputType)
 
         changeState(newState)
 
@@ -125,7 +125,7 @@ class DynamicObserver(
                 InputType.COMMAND to 2,
                 InputType.PARAMETER to -1 // NO_OP
             ),
-            callbacks = listOf<(optionalWord: NewWord) -> Unit>(uiController::reset)
+            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::reset)
         ),
         1 to State(
             state = 1,
@@ -135,7 +135,7 @@ class DynamicObserver(
                 InputType.COMMAND to 2,
                 InputType.PARAMETER to 1
             ),
-            callbacks = listOf<(optionalWord: NewWord) -> Unit>(uiController::reset, uiController::selectDevice, uiController::showParentHeaders, uiController::showChildHeaders)
+            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::reset, uiController::selectDevice, uiController::showParentHeaders, uiController::showChildHeaders)
         ),
         2 to State(
             state = 2,
@@ -146,7 +146,7 @@ class DynamicObserver(
                 InputType.PARAMETER_TRUE to 3,
                 InputType.PARAMETER_FALSE to -1
             ),
-            callbacks = listOf<(optionalWord: NewWord) -> Unit>(uiController::reset, uiController::selectDevice, uiController::selectCommand, uiController::showParameters, uiController::showParentHeaders)
+            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::reset, uiController::selectDevice, uiController::selectCommand, uiController::showParentHeaders, this::showParameters )
         ),
         3 to State(
             state = 3,
@@ -156,14 +156,14 @@ class DynamicObserver(
                 InputType.COMMAND to 3,
                 InputType.PARAMETER to 3
             ),
-            callbacks = listOf<(optionalWord: NewWord) -> Unit>(uiController::selectParameter, this::scheduleReset, this::sendCommand)
+            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::selectParameter, this::scheduleReset, this::sendCommand)
         ),
     )
 
     var currentState = 0
-    var currentWord = NewWord("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+    var currentWord = Word("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
 
-    fun newWord(word: String) {
+    fun Word(word: String) {
 
         var parsedWord = parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
@@ -178,18 +178,18 @@ class DynamicObserver(
                 false -> InputType.PARAMETER_FALSE
             }
         }
-        val newState = currentStateObject!!.newWord(inputType)
+        val newState = currentStateObject!!.Word(inputType)
 
         changeState(newState)
 
 /*
         // Reset UI:
         uiController.reset()
-        uiController.selectDevice(newWord)
-        uiController.showChildHeaders(newWord)
+        uiController.selectDevice(Word)
+        uiController.showChildHeaders(Word)
 
 
-        when(newWord.inputType) {
+        when(Word.inputType) {
 
             InputType.DEVICE -> {
 
@@ -197,9 +197,9 @@ class DynamicObserver(
                 // Show all sub headers from header at top
                 // Add all parents of header including itself to the header text view
 
-                uiController.selectDevice(newWord)
-                uiController.showSubHeaders(headersToCommands.get(newWord.header))
-                headerTextView.addParents(newWord)
+                uiController.selectDevice(Word)
+                uiController.showSubHeaders(headersToCommands.get(Word.header))
+                headerTextView.addParents(Word)
             }
             InputType.HEADER -> {
 
@@ -207,9 +207,9 @@ class DynamicObserver(
                 // Show all sub headers from header at top
                 // Add all parents of header including itself to the header text view
 
-                uiController.selectHeader(newWord)
+                uiController.selectHeader(Word)
 
-//                val commands = headersToCommands.get(newWord.header)
+//                val commands = headersToCommands.get(Word.header)
 //                displayCommands(commands!!)
 
 
@@ -224,12 +224,12 @@ class DynamicObserver(
                 // Get parameter bar to display parameters
                 //
 
-                uiController.selectCommand(newWord)
-                uiController.showParameters(newWord)
+                uiController.selectCommand(Word)
+                uiController.showParameters(Word)
 
 
                 // if this command has a parameter, set selectedCommand to be this word object
-                selectedCommand = newWord
+                selectedCommand = Word
             }
             InputType.PARAMETER -> {
 
@@ -237,15 +237,15 @@ class DynamicObserver(
                 val isCommandSelected = selectedCommand != null
                 if (isCommandSelected) {
 
-                    Log.d(TAG, "Command: ${selectedCommand!!.value} Parameter: ${newWord.value}")
+                    Log.d(TAG, "Command: ${selectedCommand!!.value} Parameter: ${Word.value}")
 
                     // Check if given parameter from bar is within the "bounds" of the chosen command
                     // Select parameter from bar if parameter given is within the bounds
-                    uiController.selectParameter(newWord)
+                    uiController.selectParameter(Word)
 
                     // Send command and parameter to a master controller, along with the device type
                     // Master controller would then fetch the controller to be used and give the information to achieve this
-                    sendCommand(newWord)
+                    sendCommand(Word)
                 }
 
             }
@@ -264,13 +264,17 @@ class DynamicObserver(
             val newStateObject = this.states[newState]
 
             this.currentState = newState
+            Log.d(TAG, "NEW STATE: ${currentState }")
+
             newStateObject!!.runCallbacks(this.currentWord)
+
         }
     }
 
-    private fun parseWord(word: String): NewWord {
+    private fun parseWord(word: String): Word {
 
-        var parsedWord = NewWord("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+        var parsedWord = Word("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+        val mostLikelyWord = similarWords[word] // Pass to words map, have yet to add these words
 
         val isDefinedWord = words[word] != null
         var isNumericalParameter = false
@@ -284,13 +288,12 @@ class DynamicObserver(
         if (isDefinedWord) {
             parsedWord = words[word]!!
         }else if (isNumericalParameter) {
-            parsedWord = NewWord(word, currentWord.feature ?: Feature.UNDEFINED, Header.UNDEFINED, InputType.PARAMETER, currentWord.deviceType
-                ?: DeviceType.UNDEFINED, listOf())
+            parsedWord = Word(word, currentWord.feature, Header.UNDEFINED, InputType.PARAMETER, currentWord.deviceType, listOf())
         }
         return parsedWord
     }
 
-    fun sendCommand(selectedParameter: NewWord) {
+    fun sendCommand(selectedParameter: Word) {
 
         when(selectedParameter.deviceType) {
             DeviceType.GIMBAL -> {
@@ -304,9 +307,9 @@ class DynamicObserver(
 
     /*
     * Schedules a reset after a fixed time period.
-    * @param {NewWord} selectedParameter
+    * @param {Word} selectedParameter
     * */
-    fun scheduleReset(newWord: NewWord) {
+    fun scheduleReset(Word: Word) {
 
         val mainLooper = Looper.getMainLooper()
 
@@ -319,5 +322,13 @@ class DynamicObserver(
                 }
             }, 1000)
         }).start()
+    }
+
+    fun showParameters(selectedCommand: Word) {
+
+        when(uiController.hasParameters(selectedCommand)) {
+            true -> uiController.showParameters(selectedCommand)
+            false -> { changeState(3) }
+        }
     }
 }

@@ -21,7 +21,7 @@ import kotlin.collections.ArrayList
 //    fun notifyObservers(word: String) {
 //
 //        this.observers.forEach {
-//            it.newWord(word)
+//            it.Word(word)
 //        }
 //    }
 //
@@ -30,7 +30,7 @@ import kotlin.collections.ArrayList
 //        observers.clear()
 //    }
 //
-//    override fun newWord(word: String) {
+//    override fun Word(word: String) {
 //
 //        this.notifyObservers(word)
 //    }
@@ -38,23 +38,23 @@ import kotlin.collections.ArrayList
 //
 //}
 
-    data class NewWord(
-        val value: String,
-        var feature: Feature,
-        val header: Header,
-        val inputType: InputType,
-        val deviceType: DeviceType,
-        val parents: List<Header>
-    )
+data class Word(
+    val value: String,
+    var feature: Feature,
+    val header: Header,
+    val inputType: InputType,
+    val deviceType: DeviceType,
+    val parents: List<Header>
+)
 
 interface SpeechToTextEngineObserver {
 
-    fun newWord(word: String)
+    fun Word(word: String)
 }
 
 interface Observer {
 
-    fun newWord(word: String)
+    fun Word(word: String)
     fun getUIController(): UIController?
     fun getWord(): Word
     fun setUIController(uiController: UIController)
@@ -66,18 +66,10 @@ interface Observer {
 
 }
 
-data class Word(
-    val value: String,
-    val feature: Feature,
-    val inputType: InputType,
-    val deviceType: DeviceType
-)
-
-
 class State(
     val state: Int,
     val input: Map<InputType, Int>,
-    val callbacks: List<(optionalWord: NewWord) -> Unit>,
+    val callbacks: List<(optionalWord: Word) -> Unit>,
     ){
 
     /*
@@ -85,7 +77,7 @@ class State(
 	* @param {String} inputType The inputType of the new word that is supplied by the observer
 	* @return new state
     */
-    fun newWord(inputType: InputType): Int{
+    fun Word(inputType: InputType): Int{
 
         return this.input[inputType] ?: -1
     }
@@ -93,7 +85,7 @@ class State(
     /*
 	* Runs all callbacks once state has been attained for the first time
     */
-    fun runCallbacks(word: NewWord) {
+    fun runCallbacks(word: Word) {
 
         this.callbacks.forEach {
             it(word)

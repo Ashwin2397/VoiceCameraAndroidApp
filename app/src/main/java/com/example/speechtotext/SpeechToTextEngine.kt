@@ -164,7 +164,7 @@ object SpeechToTextEngine: RecognitionListener {
         words.forEach {
 
             // Give each word to callback
-            model!!.newWord(it)
+            model!!.Word(it)
         }
     }
 

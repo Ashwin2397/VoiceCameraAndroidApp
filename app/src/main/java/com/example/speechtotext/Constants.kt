@@ -82,6 +82,7 @@ enum class Header {
     GIMBAL,
 
 }
+/*
 
 val firstCommands = mapOf<String, Word>(
     "zoom" to Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
@@ -145,6 +146,7 @@ val masterDictionary = mapOf<String, Word>(
     "roll" to Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA),
 
     )
+*/
 
 var headersToCommands = mapOf<Header, List<String>>(
     Header.GIMBAL to listOf("portrait", "landscape", "home"),
@@ -158,27 +160,38 @@ var similarWords = mapOf<String, String>(
     "zoom" to "zoom",
     "boom" to "zoom",
     "doom" to "zoom",
+
+
 )
 
-val words = mapOf<String, NewWord>(
+val words = mapOf<String, Word>(
 
-    "camera" to NewWord("camera", Feature.UNDEFINED, Header.CAMERA, InputType.DEVICE, DeviceType.CAMERA, listOf()),
-    "gimbal" to NewWord("gimbal", Feature.UNDEFINED, Header.GIMBAL, InputType.DEVICE, DeviceType.GIMBAL, listOf()),
+    "camera" to Word("camera", Feature.UNDEFINED, Header.CAMERA, InputType.DEVICE, DeviceType.CAMERA, listOf()),
+    "gimbal" to Word("gimbal", Feature.UNDEFINED, Header.GIMBAL, InputType.DEVICE, DeviceType.GIMBAL, listOf()),
 
-    "portrait" to NewWord("portrait", Feature.PORTRAIT, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
-    "home" to NewWord("home", Feature.HOME, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
-    "landscape" to NewWord("landscape", Feature.LANDSCAPE, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "control" to Word("control", Feature.UNDEFINED, Header.CONTROL, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
+    "settings" to Word("settings", Feature.UNDEFINED, Header.SETTINGS, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
 
-    "zoom" to NewWord("zoom", Feature.ZOOM, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA, Header.CONTROL)), // shooting/control/zoom
-    "mode" to NewWord("mode", Feature.MODE, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA, Header.CONTROL)),  // shooting/control/mode
-    "focus" to NewWord("focus", Feature.FOCUS, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA, Header.SETTINGS)), // shooting/settings/afmethod
+    /*GIBMAL COMMANDS*/
+    "portrait" to Word("portrait", Feature.PORTRAIT, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "home" to Word("home", Feature.HOME, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "landscape" to Word("landscape", Feature.LANDSCAPE, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "left" to Word("left", Feature.LEFT, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "right" to Word("right", Feature.RIGHT, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "up" to Word("up", Feature.UP, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "down" to Word("down", Feature.DOWN, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    /*---*/
 
-    "control" to NewWord("control", Feature.UNDEFINED, Header.CONTROL, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
-    "settings" to NewWord("settings", Feature.UNDEFINED, Header.SETTINGS, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
+    /*CAMERA COMMANDS*/
+    "zoom" to Word("zoom", Feature.ZOOM, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA, Header.CONTROL)), // shooting/control/zoom
+    "shoot" to Word("shoot", Feature.SHOOT, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA)), // shooting/control/zoom
+    "mode" to Word("mode", Feature.MODE, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA, Header.CONTROL)),  // shooting/control/mode
+    "focus" to Word("focus", Feature.FOCUS, Header.UNDEFINED, InputType.COMMAND, DeviceType.CAMERA, listOf(Header.CAMERA, Header.SETTINGS)), // shooting/settings/afmethod
+    /*---*/
 
-    /*WORD PARAMETERS*/
-    "movie" to NewWord("movie", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
-    "photo" to NewWord("photo", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
+    /*CAMERA PARAMETERS*/
+    "movie" to Word("movie", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
+    "photo" to Word("photo", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
 
     )
 
