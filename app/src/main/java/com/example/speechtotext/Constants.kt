@@ -157,11 +157,87 @@ var headersToCommands = mapOf<Header, List<String>>(
 
 var similarWords = mapOf<String, String>(
 
+    "shoot" to "shoot",
+    "chute" to "shoot",
+    "suit" to "shoot",
+    "shute" to "shoot",
+
     "zoom" to "zoom",
     "boom" to "zoom",
     "doom" to "zoom",
+    "resume" to "zoom",
 
+    "camera" to "camera",
+    "tamara" to "camera",
+    "kamera" to "camera",
+    "camra" to "camera",
 
+    "gimbal" to "gimbal",
+    "jimbo" to "gimbal",
+    "kimbo" to "gimbal",
+    "gimbel" to "gimbal",
+    "gimble" to "gimbal",
+
+    "portrait" to "portrait",
+
+    "landscape" to "landscape",
+
+    "home" to "home",
+    "hom" to "home",
+    "holme" to "home",
+
+    "control" to "control",
+
+    "settings" to "settings",
+
+    "focus" to "focus",
+    "focussed" to "focus",
+    "forecast" to "focus",
+    "pocus" to "focus",
+
+    "mode" to "mode",
+    "mowed" to "mode",
+    "mood" to "mode",
+    "moad" to "mode",
+
+    "movie" to "movie",
+
+    "photo" to "photo",
+    "foto" to "photo",
+    "toto" to "photo",
+
+    "point" to "point",
+    "pointe" to "point",
+    "poynt" to "point",
+
+    "face" to "face",
+    "bass" to "face",
+    "base" to "face",
+
+    "spot" to "spot",
+    "stop" to "spot",
+    "thought" to "spot",
+
+    "left" to "left",
+    "lift" to "left",
+
+    "right" to "right",
+    "write" to "right",
+    "wright" to "right",
+    "rite" to "right",
+
+    "up" to "up",
+    "app" to "up",
+    "op" to "up",
+    "hop" to "up",
+
+    "down" to "down",
+    "bound" to "down",
+    "downed" to "down",
+
+    "roll" to "roll",
+    "role" to "roll",
+    "rol" to "roll",
 )
 
 val words = mapOf<String, Word>(
@@ -193,6 +269,10 @@ val words = mapOf<String, Word>(
     "movie" to Word("movie", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
     "photo" to Word("photo", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
 
+    "point" to Word("point", Feature.FOCUS, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
+    "face" to Word("face", Feature.FOCUS, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
+    "spot" to Word("spot", Feature.FOCUS, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
+    /*---*/
     )
 
 

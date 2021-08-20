@@ -163,7 +163,7 @@ class DynamicObserver(
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
 
-    fun Word(word: String) {
+    fun newWord(word: String) {
 
         var parsedWord = parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
@@ -181,79 +181,6 @@ class DynamicObserver(
         val newState = currentStateObject!!.Word(inputType)
 
         changeState(newState)
-
-/*
-        // Reset UI:
-        uiController.reset()
-        uiController.selectDevice(Word)
-        uiController.showChildHeaders(Word)
-
-
-        when(Word.inputType) {
-
-            InputType.DEVICE -> {
-
-                // Select device button
-                // Show all sub headers from header at top
-                // Add all parents of header including itself to the header text view
-
-                uiController.selectDevice(Word)
-                uiController.showSubHeaders(headersToCommands.get(Word.header))
-                headerTextView.addParents(Word)
-            }
-            InputType.HEADER -> {
-
-                // Select device button
-                // Show all sub headers from header at top
-                // Add all parents of header including itself to the header text view
-
-                uiController.selectHeader(Word)
-
-//                val commands = headersToCommands.get(Word.header)
-//                displayCommands(commands!!)
-
-
-            }
-            InputType.COMMAND -> {
-
-                // Select device button
-                // Show all sub headers in parent header
-                // Add all parents of header including to the header text view
-
-                // Select command
-                // Get parameter bar to display parameters
-                //
-
-                uiController.selectCommand(Word)
-                uiController.showParameters(Word)
-
-
-                // if this command has a parameter, set selectedCommand to be this word object
-                selectedCommand = Word
-            }
-            InputType.PARAMETER -> {
-
-                //
-                val isCommandSelected = selectedCommand != null
-                if (isCommandSelected) {
-
-                    Log.d(TAG, "Command: ${selectedCommand!!.value} Parameter: ${Word.value}")
-
-                    // Check if given parameter from bar is within the "bounds" of the chosen command
-                    // Select parameter from bar if parameter given is within the bounds
-                    uiController.selectParameter(Word)
-
-                    // Send command and parameter to a master controller, along with the device type
-                    // Master controller would then fetch the controller to be used and give the information to achieve this
-                    sendCommand(Word)
-                }
-
-            }
-            else -> {
-                // Ignore
-            }
-        }*/
-
     }
 
     fun changeState(newState: Int) {
@@ -274,9 +201,9 @@ class DynamicObserver(
     private fun parseWord(word: String): Word {
 
         var parsedWord = Word("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
-        val mostLikelyWord = similarWords[word] // Pass to words map, have yet to add these words
+        val mostLikelyWord = similarWords[word] ?: word // Pass to words map, have yet to add these words
 
-        val isDefinedWord = words[word] != null
+        val isDefinedWord = words[mostLikelyWord] != null
         var isNumericalParameter = false
         try {
             word.toFloat()
@@ -286,7 +213,7 @@ class DynamicObserver(
         }
 
         if (isDefinedWord) {
-            parsedWord = words[word]!!
+            parsedWord = words[mostLikelyWord]!!
         }else if (isNumericalParameter) {
             parsedWord = Word(word, currentWord.feature, Header.UNDEFINED, InputType.PARAMETER, currentWord.deviceType, listOf())
         }

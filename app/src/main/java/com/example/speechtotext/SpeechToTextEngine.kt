@@ -7,10 +7,8 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import android.widget.TextView
 import java.lang.ref.WeakReference
 import java.util.*
-import kotlin.coroutines.suspendCoroutine
 
 
 object SpeechToTextEngine: RecognitionListener {
@@ -164,7 +162,7 @@ object SpeechToTextEngine: RecognitionListener {
         words.forEach {
 
             // Give each word to callback
-            model!!.Word(it)
+            model!!.newWord(it)
         }
     }
 
