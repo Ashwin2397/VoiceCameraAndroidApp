@@ -8,11 +8,6 @@ import kotlin.math.absoluteValue
 
 object MasterCamera {
 
-    var children = mutableListOf<Word>(
-        Word("zoom", Feature.ZOOM, InputType.COMMAND_1, DeviceType.CAMERA),
-        Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
-        Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
-    )
 
     var featureToFun = mapOf<Feature, (word: Word) -> Unit>(
 
@@ -26,12 +21,12 @@ object MasterCamera {
     val factory = MasterControllerFactory()
     var chosenCamera = DeviceName.CANON
 
-    fun sendCommand(command: NewWord, parameter: NewWord) {
+    fun sendCommand(command: Word, parameter: Word) {
 
         val cb = featureToFun.get(command.feature)
 
         if (cb != null) {
-            cb(Word(parameter.value, parameter.feature, parameter.inputType, parameter.deviceType))
+            cb(Word(parameter.value, parameter.feature, parameter.header, parameter.inputType, parameter.deviceType, listOf()))
         }
     }
 
@@ -67,15 +62,16 @@ object MasterCamera {
 
 object MasterGimbal {
 
-    var children = mutableListOf<Word>(
-        Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
-    )
-
     var featureToFun = mapOf<Feature, (word: Word) -> Unit>(
 
         Feature.MOVE to this::move,
         Feature.PORTRAIT to this::portrait,
-        Feature.LANDSCAPE to this::landscape
+        Feature.LANDSCAPE to this::landscape,
+        Feature.HOME to this::home,
+        Feature.LEFT to this::move,
+        Feature.RIGHT to this::move,
+        Feature.UP to this::move,
+        Feature.DOWN to this::move,
     )
 
     val factory = MasterControllerFactory()
@@ -98,12 +94,12 @@ object MasterGimbal {
         Axis.YAW to 0
     )
 
-    fun sendCommand(command: NewWord, parameter: NewWord) {
+    fun sendCommand(command: Word, parameter: Word) {
 
         val cb = featureToFun.get(command.feature)
 
         if (cb != null) {
-            cb(Word(parameter.value, parameter.feature, parameter.inputType, parameter.deviceType))
+            cb(Word(parameter.value, parameter.feature, parameter.header, parameter.inputType, parameter.deviceType, listOf()))
         }
     }
 
@@ -112,12 +108,27 @@ object MasterGimbal {
         (MasterCamera.factory.controllers.get(DeviceType.GIMBAL)?.get(chosenGimbal) as Device).connectDevice(mainActivity)
     }
 
+    fun home(word: Word) {
+
+        coordinates[Axis.ROLL] = 0
+        coordinates[Axis.PITCH] = 0
+        coordinates[Axis.YAW] = 0
+
+        factory.getGimbalInstance(chosenGimbal).move(coordinates, isAbsolute)
+    }
+
     fun portrait(word: Word) {
 
+        coordinates[Axis.ROLL] = 90
+
+        factory.getGimbalInstance(chosenGimbal).move(coordinates, isAbsolute)
     }
 
     fun landscape(word: Word) {
 
+        coordinates[Axis.ROLL] = 0
+
+        factory.getGimbalInstance(chosenGimbal).move(coordinates, isAbsolute)
     }
 
     /*
@@ -197,7 +208,7 @@ object MasterGimbal {
 
         return when(word.feature) {
 
-            Feature.UP, Feature.DOWN, Feature.ROLL_POSITIVE, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE -> 90
+            Feature.UP, Feature.DOWN, Feature.ROLL_POSITIVE, Feature.ROLL_NEGATIVE -> 90
             Feature.LEFT, Feature.RIGHT -> 180
             else -> 0
         }

@@ -12,14 +12,14 @@ import com.github.anastr.speedviewlib.ProgressiveGauge
 class HeaderTextView(
     val textView: TextView
 ){
-    fun showParentHeaders(newWord: NewWord) {
+    fun showParentHeaders(Word: Word) {
         var parents = ""
-        newWord.parents.forEach {
+        Word.parents.forEach {
 
             parents += it.toString() + "\n"
         }
 
-        textView.setText(parents + "\n" + newWord.value)
+        textView.setText(parents + Word.value)
     }
 
     fun clear() {
@@ -74,6 +74,22 @@ data class ParameterDetails(
         }
 
         return isInBounds
+    }
+
+    /*
+    * Sets the current selection based on the value of the Word object.
+    * It's bounds has already been checked!
+    * */
+    fun setCurrentSelection(selectedParameter: Word) {
+
+        val isNumericalParameter = numericalParameters != null
+        if (isNumericalParameter) {
+
+            currentNumericalSelection = selectedParameter.value.toInt() // Already been checked, so not to worry ...
+        }else {
+
+            currentStringSelection = selectedParameter.value
+        }
     }
 }
 
@@ -152,7 +168,7 @@ class AdaptiveParameterButtonBar(
 
                 setOnClickListener {
 
-                    // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
+                    // REFACTOR: Change to Model.Word(feature.toString().lowercase())
                     val btn = it as Button
                     val parameter = btn.text.toString()
 

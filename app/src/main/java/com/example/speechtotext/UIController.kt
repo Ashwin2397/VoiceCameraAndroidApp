@@ -25,7 +25,7 @@ class UIController(
 
     private val TAG = "UICONTROLLER"
 
-    var selectedCommand:NewWord? = null
+    var selectedCommand:Word? = null
 
     val selectedColor = "#25c433"
     val unselectedColor = "#FF6200EE"
@@ -39,6 +39,10 @@ class UIController(
         Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
         Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("movie", "photo"), currentStringSelection =  "photo"),
         Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("point", "face", "spot"), currentStringSelection = "point"),
+        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
         Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
     )
 
@@ -49,6 +53,7 @@ class UIController(
 
     init {
 
+        // Add on click listeners for device buttons
         deviceButtons.forEach {
             val deviceType = it.key.toString()
 
@@ -56,54 +61,47 @@ class UIController(
                 SpeechToTextEngine.notifyModel(deviceType)
             }
         }
+
+        // Add on click listeners for static buttons
+        staticButtons.forEach {
+
+            val feature = it.key.toString()
+
+            it.value.setOnClickListener {
+                SpeechToTextEngine.notifyModel(feature)
+            }
+        }
     }
     /*
     * Shows parameters based on the value of the Word object.
     * If command has parameters => Show parameters
     * Else => Schedule reset 
-    * @param {NewWord} word Contains the key to retrieve it's parameter details. 
+    * @param {Word} word Contains the key to retrieve it's parameter details.
     * */
-    fun showParameters(selectedCommand: NewWord) {
-        
+    fun showParameters(selectedCommand: Word) {
+
         val parameterDetails = featuresToParameters.get(selectedCommand.feature)
-        val hasParameters = parameterDetails != null
 
-        if (hasParameters) {
-
-            val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails!!.adaptiveParameterBarType)
-            adaptiveParameterBar?.show(parameterDetails, SpeechToTextEngine::notifyModel)
-        }else {
-            scheduleReset(selectedCommand)
-        }
-
-        Log.d(TAG, "Show parameters for: ${selectedCommand.feature}")
+        val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails!!.adaptiveParameterBarType)
+        adaptiveParameterBar?.show(parameterDetails, SpeechToTextEngine::notifyModel)
     }
 
     /*
-    * Schedules a reset after a fixed time period.
-    * @param {NewWord} selectedParameter
+    * Checks if the given command has parameters or not.
+    * @param {Word} selectedCommand The command to check.
     * */
-    fun scheduleReset(selectedParameter: NewWord) {
+    fun hasParameters(selectedCommand: Word): Boolean {
 
-        val mainLooper = Looper.getMainLooper()
-
-        Thread(Runnable {
-
-            Timer("Reset UI", false).schedule(timerTask {
-                Handler(mainLooper).post {
-
-                    reset(selectedParameter)
-                }
-            }, 1000)
-        }).start()
+        val parameterDetails = featuresToParameters.get(selectedCommand.feature)
+        return parameterDetails != null
     }
 
     /*
     * If command is static => select command from static map
     * else => select command from list of displayed buttons
-    * @param {NewWord} newWord Contains the key to retrieve the button.
+    * @param {Word} Word Contains the key to retrieve the button.
     * */
-    fun selectCommand(newCommand: NewWord) {
+    fun selectCommand(newCommand: Word) {
 
         val button = (staticButtons[newCommand.feature] ?: getDynamicButton(newCommand.value)) as ToggleButton
         button.isChecked = true
@@ -111,18 +109,14 @@ class UIController(
         selectedCommand = newCommand
     }
 
-    fun selectDevice(newWord: NewWord) {
+    fun selectDevice(Word: Word) {
 
-        deviceButtons.get(newWord.deviceType)?.setBackgroundColor(Color.parseColor(this.selectedColor))
+        deviceButtons.get(Word.deviceType)?.setBackgroundColor(Color.parseColor(this.selectedColor))
     }
 
     fun unSelectDevice(deviceType: DeviceType) {
 
         deviceButtons.get(deviceType)?.setBackgroundColor(Color.parseColor(this.unselectedColor))
-    }
-
-    fun selectHeader(newWord: NewWord) {
-
     }
 
     /*
@@ -134,8 +128,8 @@ class UIController(
 
         val newButton = dynamicButtons.get(buttonText) ?: ToggleButton(applicationContext).apply {
 
-//                setTextOff(buttonText)
-//                setTextOn(buttonText)
+            setTextOff(buttonText)
+            setTextOn(buttonText)
 
             setText(buttonText)
 
@@ -156,9 +150,9 @@ class UIController(
         return newButton
     }
 
-    fun showChildHeaders(newWord: NewWord) {
+    fun showChildHeaders(Word: Word) {
 
-        val childHeaders = headersToCommands.get(newWord.header)
+        val childHeaders = headersToCommands.get(Word.header)
 
         // Show child headers
         childHeaders?.forEach {
@@ -176,9 +170,9 @@ class UIController(
 
     }
 
-    fun showParentHeaders(newWord: NewWord) {
+    fun showParentHeaders(Word: Word) {
         // Show parents headers in HeaderTextView too
-        headerTextView.showParentHeaders(newWord)
+        headerTextView.showParentHeaders(Word)
     }
 
     /*
@@ -188,29 +182,42 @@ class UIController(
     * 3. Remove all buttons from parameter bar
     * 4. Remove all buttons from HeaderTextView
     * */
-    fun reset(newWord: NewWord) {
+    fun reset(Word: Word) {
 
         // Reset device buttons
         deviceButtons.forEach {
             unSelectDevice(it.key)
         }
 
+        // Remove child headers
         headerCreaterLayout.removeAllViews()
 
+        // Remove parent headers
         headerTextView.clear()
 
+        // Remove parameter bars
         adaptiveParameterBars.forEach {
             it.value.hide()
+        }
+
+        // Reset static buttons
+        staticButtons.forEach {
+            (it.value as ToggleButton).isChecked = false
+        }
+
+        // Reset dynamic buttons
+        dynamicButtons.forEach {
+            it.value.isChecked = false
         }
     }
 
     /*
     * Checks if the given parameter is in bounds.
-    * @param selectedCommand {NewWord} The command that the user has previously selected.
-    * @param selectedParameter {NewWord} The parameter that the user has just selected.
+    * @param selectedCommand {Word} The command that the user has previously selected.
+    * @param selectedParameter {Word} The parameter that the user has just selected.
     * @return {Boolean} Value of in bounds check.
     * */
-    fun isParameterInBounds(selectedParameter: NewWord): Boolean {
+    fun isParameterInBounds(selectedParameter: Word): Boolean {
 
         val parameterDetails = featuresToParameters[selectedCommand?.feature]
 
@@ -219,12 +226,14 @@ class UIController(
 
     /*
     * Selects the given parameter from it's adaptive bar for the given command.
-    * @param selectedCommand {NewWord} The command that the user has previously selected.
-    * @param selectedParameter {NewWord} The parameter that the user has just selected.
+    * @param selectedCommand {Word} The command that the user has previously selected.
+    * @param selectedParameter {Word} The parameter that the user has just selected.
     * */
-    fun selectParameter(selectedParameter: NewWord) {
+    fun selectParameter(selectedParameter: Word) {
 
         val parameterDetails = featuresToParameters[selectedCommand?.feature]
+
+        parameterDetails?.setCurrentSelection(selectedParameter)
 
         val adaptiveParameterBar = adaptiveParameterBars[parameterDetails?.adaptiveParameterBarType]
         adaptiveParameterBar?.select(selectedParameter.value)
@@ -232,177 +241,3 @@ class UIController(
 
 
 }
-//
-//class UIController(
-//    val adaptiveParameterBar: AdaptiveParameterBar,
-//){
-//
-//    lateinit var button: Button
-//    var selected = false
-//    var feature = Feature.ANY
-//    var parameters: MutableList<String>? = null
-//    var onParameterClick: ((parameter: String) -> Unit)? = null // Refactor to have one callback for any type of UI touch
-//    var onCommandClick: ((command: String) -> Unit)? = null
-//    var selectedParameter = ""
-//
-//    val selectedColor = "#25c433"
-//    val deSelectedColor = "#c4c4c0"
-//
-//    val gimbalButtons = mutableListOf(Feature.RIGHT, Feature.LEFT, Feature.UP, Feature.DOWN, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE)
-//
-//    /*
-//    * Renders "selected" button view for command.
-//    * Called by on click handler and by the STT Observer.
-//    * @param {Boolean} isUITouch Boolean indicating if the user input is touch
-//    * */
-//    // REFACTOR: Temporarily removed parameter
-//    fun selectCommand(optionalWord: Word) {
-//
-//        this.selected = true
-//
-//        // Render button selected by changing its color
-//
-//        if (feature in gimbalButtons) {
-//
-//            (button as ToggleButton).isChecked = true
-//        }else{
-//
-//            button.setBackgroundColor(Color.parseColor(this.selectedColor))
-//
-//        }
-//
-//
-//    }
-//
-//    /*
-//    * Renders "selected" button view for command.
-//    * Called by on click handler and by the STT Observer.
-//    * @param {Boolean} isUITouch Boolean indicating if the user input is touch
-//    * */
-//    // REFACTOR: Temporarily removed parameter
-//    fun deSelectCommand() {
-//
-//        this.selected = false
-//
-//
-//
-//        //REFACTOR_CRITICAL: Remove this, it is here for testing
-//        if(this.feature in gimbalButtons) {
-//            (button as ToggleButton).isChecked = false
-//
-//        }else{
-//
-//            // Render button selected by changing its color
-//            button.setBackgroundColor(Color.parseColor(this.deSelectedColor))
-//        }
-//
-//    }
-//
-//    /*
-//   * Renders "selected" button view for adaptive parameter button bar.
-//   * Called by the STT Observer.
-//   * Note: Each button in bar already has on click listener.
-//   * */
-//    fun selectParameter(parameter: Word) {
-//
-//        this.selectedParameter = parameter.value
-//        if (feature !in gimbalButtons) {
-//            this.button.setText("${feature}: ${selectedParameter}") // Do not do this for the gimbal buttons
-//
-//
-//        }
-//        this.adaptiveParameterBar.select(selectedParameter)
-//    }
-//
-//    /*
-//    * Sets the feature type that this component represents.
-//    * Set at runtime.
-//    * @param {Feature} feature The feature that this component represents.
-//    * @param {() -> Unit)} onCommandClick The callback to be executed once the user has physically clicked on the command button.
-//    * @param {() -> Unit)} onParameterClick The callback to be executed once the user has physically clicked on a parameter from the adaptive button bar.
-//    * */
-//    fun setFeature(feature: Feature, parameters: MutableList<String>, onCommandClick: (command: String) -> Unit, onParameterClick: (parameter: String) -> Unit) {
-//
-//        this.parameters = parameters
-//
-//        if (parameters.count() > 0) {
-//
-//            this.selectedParameter = parameters.get(0) // Set default selection
-//        }
-//
-//        this.feature = feature
-//
-//        this.onCommandClick = onCommandClick
-//        this.onParameterClick = onParameterClick
-//
-//    }
-//
-//    fun setCommandButton(button: Button) {
-//
-//        this.button = button
-//
-//        this.button.apply {
-//
-//            //REFACTOR_CRITICAL: Remove this, it is here for testing
-//            if(feature !in gimbalButtons){
-//                setText("${feature}: ${selectedParameter}")
-//
-//            }
-//
-//            setOnClickListener {
-//
-//                val words = feature.toString().split("_")
-//                var wordsString = ""
-//
-//                words.forEach {
-//                    wordsString += it + " "
-//                }
-//
-//                SpeechToTextEngine.notifyModel(wordsString)
-////                Model.newWord(feature.toString().lowercase())
-//                // REFACTOR: Change to Model.newWord(feature.toString().lowercase())
-////                onCommandClick?.let { it1 -> it1(feature.toString().lowercase()) }
-//            }
-//        }
-//    }
-//
-//    /*
-//    * Shows the parameter button bar with the previously supplied list of parameters.
-//    * Runs upon selection of button.
-//    * Users can select a parameter from bar or speak it.
-//    * */
-//    fun showParameterButtonBar(optionalWord: Word) {
-//
-//        this.adaptiveParameterBar.show(this.selectedParameter, this.parameters, this.onParameterClick)
-//
-//    }
-//
-//    /*
-//    * Hides the parameter button bar.
-//    * */
-//    fun hideParameterButtonBar() {
-//        this.adaptiveParameterBar.hide()
-//    }
-//
-//    /*
-//    * Supplies the parameters that the adaptive button bar should display.
-//    * @param {ArrayList<String>} parameters A list of parameters that represents each parameter.
-//    * */
-//    fun setButtonBarParameters(parameters: ArrayList<String>) {
-//
-//        this.parameters = parameters
-//    }
-//
-//    /*
-//    * Resets the view back to its original render.
-//    * Unselects the selected button and hides the parameter button bar.
-//    * */
-//    fun reset() {
-//
-//        this.selected = false
-//
-//        hideParameterButtonBar()
-//        deSelectCommand()
-//
-//    }
-//}
