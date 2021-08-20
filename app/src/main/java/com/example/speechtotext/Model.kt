@@ -77,7 +77,7 @@ data class Word(
 class State(
     val state: Int,
     val input: Map<InputType, Int>,
-    val callbacks: Array<(optionalWord: Word) -> Unit>,
+    val callbacks: List<(optionalWord: NewWord) -> Unit>,
     ){
 
     /*
@@ -87,13 +87,13 @@ class State(
     */
     fun newWord(inputType: InputType): Int{
 
-        return if (this.input[inputType] != null) this.input[inputType]!! else this.state
+        return this.input[inputType] ?: -1
     }
 
     /*
 	* Runs all callbacks once state has been attained for the first time
     */
-    fun runCallbacks(word: Word) {
+    fun runCallbacks(word: NewWord) {
 
         this.callbacks.forEach {
             it(word)

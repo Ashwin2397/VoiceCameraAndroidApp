@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -29,7 +30,9 @@ class UIController(
     val selectedColor = "#25c433"
     val unselectedColor = "#FF6200EE"
 
-    var dynamicButtons = mutableMapOf<String, ToggleButton>()
+    var dynamicButtons = mutableMapOf<String, ToggleButton>(
+
+    )
 
     // Move this to the master controller
     var featuresToParameters = mapOf<Feature, ParameterDetails>(
@@ -75,12 +78,12 @@ class UIController(
 
         Log.d(TAG, "Show parameters for: ${selectedCommand.feature}")
     }
-    
+
     /*
-    * Schedules a reset after a fixed time period. 
-    * @param {NewWord} word Yet to figure out what I would need it for. 
+    * Schedules a reset after a fixed time period.
+    * @param {NewWord} selectedParameter
     * */
-    fun scheduleReset(word: NewWord) {
+    fun scheduleReset(selectedParameter: NewWord) {
 
         val mainLooper = Looper.getMainLooper()
 
@@ -89,7 +92,7 @@ class UIController(
             Timer("Reset UI", false).schedule(timerTask {
                 Handler(mainLooper).post {
 
-                    reset()
+                    reset(selectedParameter)
                 }
             }, 1000)
         }).start()
@@ -102,7 +105,7 @@ class UIController(
     * */
     fun selectCommand(newCommand: NewWord) {
 
-        val button = (staticButtons[newCommand.feature] ?: dynamicButtons[newCommand.value]) as ToggleButton
+        val button = (staticButtons[newCommand.feature] ?: getDynamicButton(newCommand.value)) as ToggleButton
         button.isChecked = true
 
         selectedCommand = newCommand
@@ -122,6 +125,37 @@ class UIController(
 
     }
 
+    /*
+    * Fetches dynamic button from it's map.
+    * If button exits in map => returns that button
+    * Else => Creates button, puts it in the map and returns it
+    * */
+    fun getDynamicButton(buttonText: String): ToggleButton {
+
+        val newButton = dynamicButtons.get(buttonText) ?: ToggleButton(applicationContext).apply {
+
+//                setTextOff(buttonText)
+//                setTextOn(buttonText)
+
+            setText(buttonText)
+
+            // Set constraints
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            setOnClickListener {
+                SpeechToTextEngine.notifyModel(buttonText)
+            }
+        }
+
+        if (!dynamicButtons.containsKey(buttonText)) {
+            dynamicButtons[buttonText] = newButton
+        }
+
+        return newButton
+    }
+
     fun showChildHeaders(newWord: NewWord) {
 
         val childHeaders = headersToCommands.get(newWord.header)
@@ -135,26 +169,7 @@ class UIController(
 
             val buttonText = it
 
-            val newButton = dynamicButtons.get(buttonText) ?: ToggleButton(applicationContext).apply {
-
-//                setTextOff(buttonText)
-//                setTextOn(buttonText)
-
-                setText(buttonText)
-
-                // Set constraints
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT)
-
-                setOnClickListener {
-                    SpeechToTextEngine.notifyModel(buttonText)
-                }
-            }
-
-            if (!dynamicButtons.containsKey(buttonText)) {
-                dynamicButtons[buttonText] = newButton
-            }
+            val newButton = getDynamicButton(buttonText)
 
             headerCreaterLayout.addView(newButton)
         }
@@ -173,7 +188,7 @@ class UIController(
     * 3. Remove all buttons from parameter bar
     * 4. Remove all buttons from HeaderTextView
     * */
-    fun reset() {
+    fun reset(newWord: NewWord) {
 
         // Reset device buttons
         deviceButtons.forEach {
@@ -181,8 +196,12 @@ class UIController(
         }
 
         headerCreaterLayout.removeAllViews()
+
         headerTextView.clear()
 
+        adaptiveParameterBars.forEach {
+            it.value.hide()
+        }
     }
 
     /*

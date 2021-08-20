@@ -38,7 +38,9 @@ enum class InputType {
     ANY,
     UNDEFINED,
     HEADER,
-    DEVICE
+    DEVICE,
+    PARAMETER_TRUE,
+    PARAMETER_FALSE
 }
 
 enum class Feature {
@@ -173,6 +175,10 @@ val words = mapOf<String, NewWord>(
 
     "control" to NewWord("control", Feature.UNDEFINED, Header.CONTROL, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
     "settings" to NewWord("settings", Feature.UNDEFINED, Header.SETTINGS, InputType.HEADER, DeviceType.CAMERA, listOf(Header.CAMERA)),
+
+    /*WORD PARAMETERS*/
+    "movie" to NewWord("movie", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
+    "photo" to NewWord("photo", Feature.MODE, Header.UNDEFINED, InputType.PARAMETER, DeviceType.CAMERA, listOf()),
 
     )
 
