@@ -238,6 +238,8 @@ var similarWords = mapOf<String, String>(
     "roll" to "roll",
     "role" to "roll",
     "rol" to "roll",
+    "roller" to "roll",
+    "ruler" to "roll",
 )
 
 val words = mapOf<String, Word>(
@@ -256,6 +258,7 @@ val words = mapOf<String, Word>(
     "right" to Word("right", Feature.RIGHT, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
     "up" to Word("up", Feature.UP, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
     "down" to Word("down", Feature.DOWN, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
+    "roll" to Word("roll", Feature.ROLL, Header.UNDEFINED, InputType.COMMAND, DeviceType.GIMBAL, listOf(Header.GIMBAL)),
     /*---*/
 
     /*CAMERA COMMANDS*/

@@ -72,6 +72,7 @@ object MasterGimbal {
         Feature.RIGHT to this::move,
         Feature.UP to this::move,
         Feature.DOWN to this::move,
+        Feature.ROLL to this::move
     )
 
     val factory = MasterControllerFactory()

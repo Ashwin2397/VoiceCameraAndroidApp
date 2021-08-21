@@ -1,79 +1,381 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
-    <TextView
-        android:id="@+id/transcription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="transcription ... "
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/startTranscription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start transcription"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/transcription" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/transcription"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@mipmap/ic_launcher" />
-
-    <Button
-        android:id="@+id/shootImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Shoot"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/transcription"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/zoom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Zoom"
-        app:layout_constraintBottom_toTopOf="@+id/shootImage"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
-        app:layout_constraintHorizontal_bias="0.426"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.52" />
-
-    <TextView
-        android:id="@+id/parameters"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Parameters"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startTranscription" />
-
-    <LinearLayout
-        android:id="@+id/buttonCreatorLayout"
+    <!--
+    TODO:
+    - Refactor the imageview to allow for the addition of the tiny camera icon upon start up
+      while still being able to produce the same image size
+    -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="right"
-        android:orientation="vertical">
-    </LinearLayout>
+        android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--        android:adjustViewBounds="true"-->
+        <!--        android:maxWidth="42dp"-->
+        <!--        android:maxHeight="42dp"-->
+        <!--        android:scaleType="fitCenter"-->
+        <ImageView
+            android:id="@+id/imageView"
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintBottom_toTopOf="@+id/transcription"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/transcription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <!--START GRID LAYOUT-->
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="15dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5">
+
+                    <TableRow
+                        android:id="@+id/tableRowDeviceBtns"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TableLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            >
+
+                            <TableRow
+                                android:layout_width="164dp"
+                                android:layout_height="45dp">
+
+                                <Button
+                                    android:id="@+id/btnGimbal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="gimbal" />
+                            </TableRow>
+
+                            <TableRow
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+
+                                <Button
+                                    android:id="@+id/btnCamera"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Camera" />
+                            </TableRow>
+
+                        </TableLayout>
+
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRowHeaderTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/textViewHeaders"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRowGimbalBtns"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        >
+
+                        <TableLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            >
+                            <TableRow
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="horizontal"
+                                >
+
+                                <ToggleButton
+                                    android:id="@+id/btnUp"
+                                    android:layout_width="58dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_column="1"
+                                    android:layout_span="2"
+
+                                    android:background="@drawable/toggle_button_up"
+
+                                    android:textOn=""
+                                    android:textOff=""
+                                    android:checked="false"
+
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:insetRight="0dp"
+                                    android:insetLeft="0dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+
+                                    tools:ignore="MissingConstraints">
+                                </ToggleButton>
+
+                            </TableRow>
+                            <TableRow
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                >
+
+                                <ToggleButton
+                                    android:id="@+id/btnLeft"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/toggle_button_left"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_column="0"
+
+                                    android:textOn=""
+                                    android:textOff=""
+                                    android:checked="false"
+
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:insetRight="0dp"
+                                    android:insetLeft="0dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+
+                                    tools:ignore="MissingConstraints">
+                                </ToggleButton>
+
+
+                                <ToggleButton
+                                    android:id="@+id/btnRoll"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_column="1"
+
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:insetRight="0dp"
+                                    android:insetLeft="0dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+
+                                    android:textOn="ROLL"
+                                    android:textOff="ROLL"
+                                    android:checked="false">
+                                </ToggleButton>
+
+
+                                <ToggleButton
+                                    android:id="@+id/btnRight"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/toggle_button_right"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_column="3"
+
+                                    android:textOn=""
+                                    android:textOff=""
+                                    android:checked="false"
+
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:insetRight="0dp"
+                                    android:insetLeft="0dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+
+                                    tools:ignore="MissingConstraints">
+                                </ToggleButton>
+                            </TableRow>
+                            <TableRow
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="horizontal"
+                                >
+
+                                <ToggleButton
+                                    android:id="@+id/btnDown"
+                                    android:layout_width="58dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_column="1"
+                                    android:layout_span="2"
+
+                                    android:background="@drawable/toggle_button_down"
+
+                                    android:textOn=""
+                                    android:textOff=""
+                                    android:checked="false"
+
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:insetRight="0dp"
+                                    android:insetLeft="0dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+
+                                    tools:ignore="MissingConstraints">
+                                </ToggleButton>
+
+                            </TableRow>
+                        </TableLayout>
+
+                    </TableRow>
+                </TableLayout>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4">
+
+                    <TableRow
+                        android:id="@+id/tableRowHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <LinearLayout
+                            android:id="@+id/commandButtonCreatorLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="top"
+                            android:orientation="horizontal">
+
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRowParameter"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <LinearLayout
+                            android:id="@+id/parameterButtonCreatorLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="bottom"
+                            android:orientation="horizontal">
+
+                        </LinearLayout>
+                    </TableRow>
+
+                </TableLayout>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Button
+                            android:id="@+id/configurationButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Configuration" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Button
+                            android:id="@+id/startTranscription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Voice control: Off"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Button
+                            android:id="@+id/btnConnectCamera"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Connect camera" />
+                    </TableRow>
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Button
+                            android:id="@+id/btnConnectGimbal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Connect Gimbal" />
+                    </TableRow>
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                    </TableRow>
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ToggleButton
+                            android:id="@+id/shootImage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textOff="shoot"
+                            android:textOn="Shoot" />
+                    </TableRow>
+
+                </TableLayout>
+            </TableRow>
+
+        </TableLayout>
+
+        <!--END GRID LAYOUT-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

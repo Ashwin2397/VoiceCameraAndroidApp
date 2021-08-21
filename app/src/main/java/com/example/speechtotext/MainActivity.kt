@@ -1,6 +1,7 @@
 package com.example.speechtotext
 
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
@@ -38,7 +39,7 @@ import java.util.*
 * */
 
 
-class MainActivity : AppCompatActivity(){
+class MainActivity : Activity(){
 
     val TAG = "MAIN_ACTIVITY"
     val db by lazy {
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity(){
                 DeviceType.CAMERA to btnCamera,
                 DeviceType.GIMBAL to btnGimbal
             ),
-            applicationContext,
+            this,
             HeaderTextView(textViewHeaders),
             mapOf(
                 Feature.SHOOT to shootImage as Button,
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity(){
                 Feature.RIGHT to btnRight as Button,
                 Feature.UP to btnUp as Button,
                 Feature.DOWN to btnDown as Button,
-
+                Feature.ROLL to btnRoll as Button
             )
         )
 
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity(){
             uiController,
             MasterCamera,
             MasterGimbal,
-            applicationContext
+            this
         )
 
         val systemManager = SystemManager()

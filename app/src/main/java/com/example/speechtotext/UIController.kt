@@ -43,12 +43,15 @@ class UIController(
         Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
         Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
         Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.ROLL to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(-10, 10), currentNumericalSelection = 0),
+
         Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
     )
 
     val adaptiveParameterBars = mapOf<AdaptiveParameterBarType, AdaptiveParameterBar>(
         AdaptiveParameterBarType.BUTTON to AdaptiveParameterButtonBar(parameterCreaterLayout, applicationContext),
         AdaptiveParameterBarType.GAUGE to AdaptiveParameterGaugeBar(parameterCreaterLayout, applicationContext),
+        AdaptiveParameterBarType.SLIDER to AdaptiveParameterSliderBar(parameterCreaterLayout, applicationContext)
     )
 
     init {

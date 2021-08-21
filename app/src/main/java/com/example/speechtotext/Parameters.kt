@@ -3,11 +3,15 @@ package com.example.speechtotext
 import android.content.Context
 import android.graphics.Color
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.MediaController
 import android.widget.TextView
+import androidx.annotation.FloatRange
 import com.github.anastr.speedviewlib.ProgressiveGauge
+import com.google.android.material.slider.Slider
 
 class HeaderTextView(
     val textView: TextView
@@ -40,14 +44,15 @@ interface AdaptiveParameterBar {
 }
 enum class AdaptiveParameterBarType {
     BUTTON,
-    GAUGE
+    GAUGE,
+    SLIDER
 }
 
 data class ParameterDetails(
     val adaptiveParameterBarType: AdaptiveParameterBarType,
     var numericalParameters: IntRange? = null, // IntRange for Gauge and List<String> for Button
     var stringParameters: List<String>? = null,
-    var currentNumericalSelection: Int? = null,
+    var currentNumericalSelection: Float? = null,
     var currentStringSelection: String? = null
 ){
 
@@ -85,11 +90,96 @@ data class ParameterDetails(
         val isNumericalParameter = numericalParameters != null
         if (isNumericalParameter) {
 
-            currentNumericalSelection = selectedParameter.value.toInt() // Already been checked, so not to worry ...
+            currentNumericalSelection = selectedParameter.value.toFloat().toInt() // Already been checked, so not to worry ...
         }else {
 
             currentStringSelection = selectedParameter.value
         }
+    }
+}
+class AdaptiveParameterSliderBar(
+    val layout: LinearLayout,
+    val context: Context
+): AdaptiveParameterBar {
+
+    val slider = Slider(context).apply {
+
+        layoutParams = LinearLayout.LayoutParams(
+            convertDpToPixel(325F),
+            ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+    val label = TextView(context).apply {
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+
+    init {
+
+        slider.addOnChangeListener { slider, value, fromUser ->
+
+
+            label.setText(value.toString())
+        }
+
+        slider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {
+                // Responds to when slider's touch event is being started
+                Log.d("onStartTrackingTouch", slider.value.toString())
+            }
+
+            override fun onStopTrackingTouch(slider: Slider) {
+                // Responds to when slider's touch event is being stopped
+                Log.d("onStopTrackingTouch", slider.value.toString())
+
+                val value = slider.value.toString()
+                SpeechToTextEngine.notifyModel(value)
+                label.setText(value)
+            }
+        })
+
+
+
+
+    }
+
+    override fun select(parameter: String) {
+
+        slider.value = parameter.toFloat()
+    }
+
+    override fun show(
+        parameterDetails: ParameterDetails,
+        onParameterClick: ((parameter: String) -> Unit)?,
+    ) {
+        val range = parameterDetails.numericalParameters
+
+        slider.apply {
+
+            stepSize = 0.5F
+
+            valueFrom = range!!.first.toFloat()
+            valueTo = range!!.last.toFloat()
+
+            value = 0.toFloat() // REFACTOR: Edit to get current selection if it is in absolute mode
+        }
+
+        label.apply {
+            text = parameterDetails.currentNumericalSelection.toString()
+            textSize = convertDpToPixel(10F).toFloat()
+        }
+
+        layout.addView(slider)
+        layout.addView(label)
+    }
+
+    override fun hide() {
+        layout.removeView(slider)
+        layout.removeView(label)
+    }
+
+    private fun convertDpToPixel(dp: Float): Int {
+        return (dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).toInt()
     }
 }
 
