@@ -8,10 +8,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -67,7 +64,7 @@ class MainActivity : Activity(){
                 DeviceType.GIMBAL to btnGimbal
             ),
             this,
-            HeaderTextView(textViewHeaders),
+            HeaderView(llHeaders, this),
             mapOf(
                 Feature.SHOOT to shootImage as Button,
                 Feature.LEFT to btnLeft as Button,
@@ -97,6 +94,7 @@ class MainActivity : Activity(){
             }
         }
 
+        initControllers()
 
         // Initialize all required instances
 

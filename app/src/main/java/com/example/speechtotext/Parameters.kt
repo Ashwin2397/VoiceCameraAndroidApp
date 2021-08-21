@@ -7,30 +7,74 @@ import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.MediaController
 import android.widget.TextView
-import androidx.annotation.FloatRange
 import com.github.anastr.speedviewlib.ProgressiveGauge
 import com.google.android.material.slider.Slider
 
-class HeaderTextView(
-    val textView: TextView
+class HeaderView(
+    val headerView: LinearLayout,
+    val context: Context
 ){
-    fun showParentHeaders(Word: Word) {
-        var parents = ""
-        Word.parents.forEach {
 
-            parents += it.toString() + "\n"
+    val selectedColor = "#25c433"
+
+    fun showParentHeaders(word: Word) {
+
+        var parents = mutableListOf<Button>()
+        word.parents.forEach {
+
+            var newButton = createButton(it.toString())
+
+            headerView.addView(newButton) // Add to view
         }
 
-        textView.setText(parents + Word.value)
+        headerView.addView(createButton(word.value).apply {
+
+            setBackgroundColor(Color.parseColor(selectedColor))
+        })
     }
 
     fun clear() {
 
-        textView.setText("")
+        headerView.removeAllViews()
     }
 
+    private fun createButton(buttonText: String): Button {
+
+        var layoutParameters = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+
+                bottomMargin = 0
+
+        }
+
+        return Button(context).apply {
+
+            setText(buttonText)
+
+            textSize = 15F
+
+            // Set constraints
+            layoutParams = layoutParameters
+
+            minWidth = 0
+            minimumWidth = 0
+            minHeight = 0
+            minimumHeight = 0
+
+            setPadding(0, 0, 0, 1)
+
+            setOnClickListener {
+
+                val btn = it as Button
+                val parameter = btn.text.toString()
+
+                SpeechToTextEngine.notifyModel(parameter)
+                btn.setBackgroundColor(Color.parseColor(selectedColor))
+            }
+        }
+    }
 
 }
 
@@ -90,7 +134,7 @@ data class ParameterDetails(
         val isNumericalParameter = numericalParameters != null
         if (isNumericalParameter) {
 
-            currentNumericalSelection = selectedParameter.value.toFloat().toInt() // Already been checked, so not to worry ...
+            currentNumericalSelection = selectedParameter.value.toFloat() // Already been checked, so not to worry ...
         }else {
 
             currentStringSelection = selectedParameter.value
@@ -161,7 +205,7 @@ class AdaptiveParameterSliderBar(
             valueFrom = range!!.first.toFloat()
             valueTo = range!!.last.toFloat()
 
-            value = 0.toFloat() // REFACTOR: Edit to get current selection if it is in absolute mode
+            value = parameterDetails.currentNumericalSelection!! // REFACTOR: Edit to get current selection if it is in absolute mode
         }
 
         label.apply {

@@ -2,16 +2,10 @@ package com.example.speechtotext
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
-import com.google.android.material.button.MaterialButtonToggleGroup
-import java.util.*
-import kotlin.concurrent.timerTask
 
 
 class UIController(
@@ -19,7 +13,7 @@ class UIController(
     val parameterCreaterLayout: LinearLayout,
     val deviceButtons: Map<DeviceType, Button>,
     val applicationContext: Context,
-    val headerTextView: HeaderTextView,
+    val headerView: HeaderView,
     val staticButtons: Map<Feature, Button>
 ){
 
@@ -36,16 +30,16 @@ class UIController(
 
     // Move this to the master controller
     var featuresToParameters = mapOf<Feature, ParameterDetails>(
-        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
         Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("movie", "photo"), currentStringSelection =  "photo"),
         Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("point", "face", "spot"), currentStringSelection = "point"),
-        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
-        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
-        Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
-        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
-        Feature.ROLL to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(-10, 10), currentNumericalSelection = 0),
+        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.ROLL to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(-10, 10), currentNumericalSelection = 0F),
 
-        Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0),
+        Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
     )
 
     val adaptiveParameterBars = mapOf<AdaptiveParameterBarType, AdaptiveParameterBar>(
@@ -175,7 +169,7 @@ class UIController(
 
     fun showParentHeaders(Word: Word) {
         // Show parents headers in HeaderTextView too
-        headerTextView.showParentHeaders(Word)
+        headerView.showParentHeaders(Word)
     }
 
     /*
@@ -196,7 +190,7 @@ class UIController(
         headerCreaterLayout.removeAllViews()
 
         // Remove parent headers
-        headerTextView.clear()
+        headerView.clear()
 
         // Remove parameter bars
         adaptiveParameterBars.forEach {

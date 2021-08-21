@@ -198,7 +198,7 @@ object MasterGimbal {
         val direction = parseDirection(word)
 
         // REFACTOR_CRITICAL: Run time exception for when the word cannot be parsed to an Integer.
-        val magnitude = word.value.toInt()
+        val magnitude = word.value.toFloat()
 
         val boundary = parseBoundary(word)
 
@@ -209,7 +209,7 @@ object MasterGimbal {
 
         return when(word.feature) {
 
-            Feature.UP, Feature.DOWN, Feature.ROLL_POSITIVE, Feature.ROLL_NEGATIVE -> 90
+            Feature.UP, Feature.DOWN, Feature.ROLL_POSITIVE, Feature.ROLL_NEGATIVE, Feature.ROLL -> 90
             Feature.LEFT, Feature.RIGHT -> 180
             else -> 0
         }
