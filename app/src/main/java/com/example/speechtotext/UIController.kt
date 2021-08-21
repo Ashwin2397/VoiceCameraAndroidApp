@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
+import com.example.speechtotext.devicecontroller.MasterCamera
+import com.example.speechtotext.devicecontroller.MasterGimbal
 
 
 class UIController(
@@ -26,20 +28,6 @@ class UIController(
 
     var dynamicButtons = mutableMapOf<String, ToggleButton>(
 
-    )
-
-    // Move this to the master controller
-    var featuresToParameters = mapOf<Feature, ParameterDetails>(
-        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("movie", "photo"), currentStringSelection =  "photo"),
-        Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("point", "face", "spot"), currentStringSelection = "point"),
-        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.ROLL to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(-10, 10), currentNumericalSelection = 0F),
-
-        Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
     )
 
     val adaptiveParameterBars = mapOf<AdaptiveParameterBarType, AdaptiveParameterBar>(
@@ -77,10 +65,19 @@ class UIController(
     * */
     fun showParameters(selectedCommand: Word) {
 
-        val parameterDetails = featuresToParameters.get(selectedCommand.feature)
+        val parameterDetails = getParameterDetails(selectedCommand)
 
         val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails!!.adaptiveParameterBarType)
         adaptiveParameterBar?.show(parameterDetails, SpeechToTextEngine::notifyModel)
+    }
+
+    private fun getParameterDetails(word: Word): ParameterDetails? {
+
+        return when(word.deviceType) {
+            DeviceType.CAMERA -> MasterCamera.featuresToParameters.get(word.feature)
+            DeviceType.GIMBAL -> MasterGimbal.featuresToParameters.get(word.feature)
+            else -> null
+        }
     }
 
     /*
@@ -89,7 +86,7 @@ class UIController(
     * */
     fun hasParameters(selectedCommand: Word): Boolean {
 
-        val parameterDetails = featuresToParameters.get(selectedCommand.feature)
+        val parameterDetails = getParameterDetails(selectedCommand)
         return parameterDetails != null
     }
 
@@ -216,7 +213,7 @@ class UIController(
     * */
     fun isParameterInBounds(selectedParameter: Word): Boolean {
 
-        val parameterDetails = featuresToParameters[selectedCommand?.feature]
+        val parameterDetails = getParameterDetails(selectedParameter)
 
         return parameterDetails!!.isInBounds(selectedParameter.value)
     }
@@ -228,7 +225,7 @@ class UIController(
     * */
     fun selectParameter(selectedParameter: Word) {
 
-        val parameterDetails = featuresToParameters[selectedCommand?.feature]
+        val parameterDetails = getParameterDetails(selectedParameter)
 
         parameterDetails?.setCurrentSelection(selectedParameter)
 

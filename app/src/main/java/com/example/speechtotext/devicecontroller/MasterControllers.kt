@@ -16,7 +16,11 @@ object MasterCamera {
         Feature.MODE to this::setMode
     )
 
-
+    var featuresToParameters = mapOf(
+        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("movie", "photo"), currentStringSelection =  "photo"),
+        Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("point", "face", "spot"), currentStringSelection = "point"),
+    )
 
     val factory = MasterControllerFactory()
     var chosenCamera = DeviceName.CANON
@@ -73,6 +77,16 @@ object MasterGimbal {
         Feature.UP to this::move,
         Feature.DOWN to this::move,
         Feature.ROLL to this::move
+    )
+
+    var featuresToParameters = mapOf(
+        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.ROLL to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(-10, 10), currentNumericalSelection = 0F),
+
+        Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
     )
 
     val factory = MasterControllerFactory()
