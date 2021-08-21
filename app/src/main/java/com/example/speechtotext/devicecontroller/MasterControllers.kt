@@ -80,10 +80,10 @@ object MasterGimbal {
     )
 
     var featuresToParameters = mapOf(
-        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.UP to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
-        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.LEFT to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.RIGHT to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.UP to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
+        Feature.DOWN to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
         Feature.ROLL to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(-10, 10), currentNumericalSelection = 0F),
 
         Feature.MOVE to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 10), currentNumericalSelection = 0F),
@@ -159,6 +159,24 @@ object MasterGimbal {
         coordinates[axis] = parseIsAbsolute(axis, vectorValue, word)
 
         factory.getGimbalInstance(chosenGimbal).move(coordinates, isAbsolute)
+
+        updateParameterDetails()
+    }
+
+    /*
+    * Updates parameter details based on the current mode of the gimbal.
+    * If incremental => Everything resets to zero
+    * Else if absolute => Everything stays as is
+    * NOTE: This should actually only happen upon successfully sending a command.
+    * */
+    private fun updateParameterDetails() {
+
+        if (!isAbsolute){
+
+            featuresToParameters.forEach {
+                it.value.currentNumericalSelection = 0F
+            }
+        }
     }
 
     fun parseMultiplier(axis: MasterGimbal.Axis, word: Word): Float {

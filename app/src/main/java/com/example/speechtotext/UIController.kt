@@ -30,7 +30,7 @@ class UIController(
 
     )
 
-    val adaptiveParameterBars = mapOf<AdaptiveParameterBarType, AdaptiveParameterBar>(
+    val adaptiveParameterBars = mapOf(
         AdaptiveParameterBarType.BUTTON to AdaptiveParameterButtonBar(parameterCreaterLayout, applicationContext),
         AdaptiveParameterBarType.GAUGE to AdaptiveParameterGaugeBar(parameterCreaterLayout, applicationContext),
         AdaptiveParameterBarType.SLIDER to AdaptiveParameterSliderBar(parameterCreaterLayout, applicationContext)
@@ -69,15 +69,6 @@ class UIController(
 
         val adaptiveParameterBar = adaptiveParameterBars.get(parameterDetails!!.adaptiveParameterBarType)
         adaptiveParameterBar?.show(parameterDetails, SpeechToTextEngine::notifyModel)
-    }
-
-    private fun getParameterDetails(word: Word): ParameterDetails? {
-
-        return when(word.deviceType) {
-            DeviceType.CAMERA -> MasterCamera.featuresToParameters.get(word.feature)
-            DeviceType.GIMBAL -> MasterGimbal.featuresToParameters.get(word.feature)
-            else -> null
-        }
     }
 
     /*
@@ -234,4 +225,12 @@ class UIController(
     }
 
 
+    private fun getParameterDetails(word: Word): ParameterDetails? {
+
+        return when(word.deviceType) {
+            DeviceType.CAMERA -> MasterCamera.featuresToParameters.get(word.feature)
+            DeviceType.GIMBAL -> MasterGimbal.featuresToParameters.get(word.feature)
+            else -> null
+        }
+    }
 }
