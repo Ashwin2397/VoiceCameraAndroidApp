@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
+import androidx.core.view.marginRight
 import com.github.anastr.speedviewlib.ProgressiveGauge
 import java.util.*
 
@@ -187,7 +188,11 @@ class UIController(
 
 interface AdaptiveParameterBar {
 
+    /*
+    * Selects the specified parameter and deselects the previously selected parameter.
+    * */
     fun select(parameter: String)
+
     fun show(selectedParameter: String, parameters: MutableList<String>?, onParameterClick: ((parameter: String) -> Unit)?)
     fun hide()
 
@@ -268,6 +273,7 @@ class AdaptiveParameterButtonBar(
 
     var buttons = mutableMapOf<String, Button>()
     val selectedColor = "#25c433"
+    val unSelectedColor = "#c4c4c0"
     var parameterSelected = false
 
     /*
@@ -294,8 +300,13 @@ class AdaptiveParameterButtonBar(
             selectedButton = buttons.get(parameter)
         }
 
+        // Deselect currently selected button
+        buttons.forEach {
+            it.value.setBackgroundColor(Color.parseColor(unSelectedColor))
+        }
+
         // Initiate selection of that button
-        selectedButton?.setBackgroundColor(Color.parseColor(this.selectedColor))
+        selectedButton?.setBackgroundColor(Color.parseColor(selectedColor))
 
     }
 
@@ -325,14 +336,13 @@ class AdaptiveParameterButtonBar(
 
                 // Set constraints
                 layoutParams = layoutParameters
-
                 minWidth = 0
                 minimumWidth = 0
                 minHeight = 0
                 minimumHeight = 0
 
+                setPadding(35, 10, 35,  10)
 
-                
                 setOnClickListener {
 
                     // REFACTOR: Change to Model.newWord(feature.toString().lowercase())

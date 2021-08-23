@@ -478,6 +478,14 @@ class MainActivity : AppCompatActivity(){
         var i = 0
 
         chosenControls = db.getControls()
+
+        // REFACTOR: Special case ...
+        if (chosenControls.contains(Feature.ROLL)) {
+            chosenControls.remove(Feature.ROLL)
+            chosenControls.add(Feature.ROLL_POSITIVE)
+            chosenControls.add(Feature.ROLL_NEGATIVE)
+
+        }
         chosenControls.forEach {
 
 
