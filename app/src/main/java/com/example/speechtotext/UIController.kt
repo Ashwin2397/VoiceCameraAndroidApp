@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
-import androidx.core.view.marginRight
 import com.github.anastr.speedviewlib.ProgressiveGauge
 import java.util.*
+import kotlin.math.absoluteValue
 
 
 class UIController(
@@ -27,7 +27,7 @@ class UIController(
     val selectedColor = "#25c433"
     val deSelectedColor = "#c4c4c0"
 
-    val gimbalButtons = mutableListOf(Feature.RIGHT, Feature.LEFT, Feature.UP, Feature.DOWN, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE)
+    val gimbalButtons = mutableListOf(Feature.RIGHT, Feature.LEFT, Feature.UP, Feature.DOWN, Feature.ROLL,)
 
     /*
     * Renders "selected" button view for command.
@@ -294,11 +294,8 @@ class AdaptiveParameterButtonBar(
         }
 
         // Retrieve button from map using the name of the parameter
-        var selectedButton = buttons.get(params)
+        var selectedButton = buttons.get(params) ?: buttons.get(parameter) ?: buttons.get(params.toFloat().absoluteValue.toInt().toString())
 
-        if (selectedButton == null) {
-            selectedButton = buttons.get(parameter)
-        }
 
         // Deselect currently selected button
         buttons.forEach {

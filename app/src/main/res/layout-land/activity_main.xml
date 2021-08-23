@@ -160,18 +160,13 @@ TODO:
                     tools:ignore="MissingConstraints">
                 </ToggleButton>
 
+
                 <ToggleButton
-                    android:id="@+id/btnRollLeft"
+                    android:id="@+id/btnRoll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/toggle_button_roll_left"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_column="1"
 
-                    android:textOn=""
-                    android:textOff=""
-                    android:checked="false"
-
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:insetRight="0dp"
@@ -179,29 +174,9 @@ TODO:
                     android:minHeight="0dp"
                     android:minWidth="0dp"
 
-                    tools:ignore="MissingConstraints">
-                </ToggleButton>
-
-                <ToggleButton
-                    android:id="@+id/btnRollRight"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/toggle_button_roll_right"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_column="2"
-
-                    android:textOn=""
-                    android:textOff=""
-                    android:checked="false"
-
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:insetRight="0dp"
-                    android:insetLeft="0dp"
-                    android:minHeight="0dp"
-                    android:minWidth="0dp"
-
-                    tools:ignore="MissingConstraints">
+                    android:textOn="ROLL"
+                    android:textOff="ROLL"
+                    android:checked="false">
                 </ToggleButton>
 
 

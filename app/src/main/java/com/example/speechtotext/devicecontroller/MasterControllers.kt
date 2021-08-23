@@ -110,8 +110,9 @@ object MasterGimbal {
 
                     Feature.RIGHT -> coordinate - 360
                     Feature.LEFT -> coordinate + 360
-                    Feature.ROLL_NEGATIVE, Feature.DOWN -> -90
-                    Feature.ROLL_POSITIVE, Feature.UP -> 90
+                    Feature.DOWN -> -90
+                    Feature.UP -> 90,
+                        Feature.ROLL ->
                     else -> 0
                 }
             }
@@ -145,7 +146,7 @@ object MasterGimbal {
 
         return when(word.feature) {
 
-            Feature.UP, Feature.DOWN, Feature.ROLL_POSITIVE, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE -> 90
+            Feature.UP, Feature.DOWN, Feature.ROLL_POSITIVE, Feature.ROLL, Feature.ROLL_POSITIVE -> 90
             Feature.LEFT, Feature.RIGHT -> 180
             else -> 0
         }
@@ -161,7 +162,7 @@ object MasterGimbal {
         return when(word.feature) {
 
             Feature.UP, Feature.RIGHT, Feature.ROLL, Feature.ROLL_POSITIVE -> 1
-            Feature.DOWN, Feature.LEFT, Feature.ROLL_NEGATIVE -> -1
+            Feature.DOWN, Feature.LEFT -> -1
             else -> 0
         }
     }
@@ -172,7 +173,7 @@ object MasterGimbal {
 
             Feature.RIGHT, Feature.LEFT -> Axis.YAW
             Feature.UP, Feature.DOWN -> Axis.PITCH
-            Feature.ROLL, Feature.ROLL_NEGATIVE, Feature.ROLL_POSITIVE -> Axis.ROLL
+            Feature.ROLL, Feature.ROLL, Feature.ROLL_POSITIVE -> Axis.ROLL
             else -> Axis.UNDEFINED
         }
     }

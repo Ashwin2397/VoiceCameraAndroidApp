@@ -54,7 +54,6 @@ enum class Feature {
     ANY,
     UNDEFINED,
     ROLL,
-    ROLL_NEGATIVE,
     ROLL_POSITIVE,
     DOWN,
     UP,
