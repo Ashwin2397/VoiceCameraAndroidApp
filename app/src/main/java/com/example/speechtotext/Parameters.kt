@@ -360,7 +360,6 @@ class AdaptiveParameterGaugeBar(
         params.apply {
             width = 500
             height = 500
-            leftMargin = 100
             bottomMargin = convertDpToPixel(15f).toInt()
         }
 
@@ -403,13 +402,36 @@ class AdaptiveParameterGaugeBar(
             speedTo(selectedParameter!!.toFloat(), 0)
         }
 
+        // Add min
+        layout.addView(TextView(context).apply {
+            setText(range!!.first.toString())
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                leftMargin = 100
+                bottomMargin = convertDpToPixel(5.8f).toInt()
+            }
+        })
+
         // Display current parameter
         layout.addView(progressiveGauge)
+
+        // Add max
+        layout.addView(TextView(context).apply {
+            setText(range!!.last.toString())
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                bottomMargin = convertDpToPixel(5.8f).toInt()
+            }
+        })
     }
 
     override fun hide() {
 
-        layout.removeView(progressiveGauge)
+        layout.removeAllViews()
     }
 
     fun convertDpToPixel(dp: Float): Float {
