@@ -218,8 +218,7 @@ class AdaptiveParameterSliderBar(
     }
 
     override fun hide() {
-        layout.removeView(slider)
-        layout.removeView(label)
+        layout.removeAllViews()
     }
 
     private fun convertDpToPixel(dp: Float): Int {
@@ -234,6 +233,7 @@ class AdaptiveParameterButtonBar(
 
     var buttons = mutableMapOf<String, Button>()
     val selectedColor = "#25c433"
+    val deSelectedColor = "#c4c4c0"
 
     /*
     * Renders the selected view for the specified button.
@@ -257,6 +257,11 @@ class AdaptiveParameterButtonBar(
 
         if (selectedButton == null) {
             selectedButton = buttons.get(parameter)
+        }
+
+        // De select other buttons
+        buttons.forEach {
+            it.value.setBackgroundColor((Color.parseColor(deSelectedColor)))
         }
 
         // Initiate selection of that button

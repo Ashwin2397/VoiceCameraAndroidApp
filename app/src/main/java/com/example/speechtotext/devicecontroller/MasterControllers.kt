@@ -206,6 +206,11 @@ object MasterGimbal {
 
                     Feature.RIGHT -> coordinate - 360
                     Feature.LEFT -> coordinate + 360
+                    Feature.ROLL -> if (parseDirection(word) == -1) {
+                        -90
+                    }else {
+                        90
+                    }
                     Feature.ROLL_NEGATIVE, Feature.DOWN -> -90
                     Feature.ROLL_POSITIVE, Feature.UP -> 90
                     else -> 0
@@ -256,8 +261,15 @@ object MasterGimbal {
 
         return when(word.feature) {
 
-            Feature.UP, Feature.RIGHT, Feature.ROLL, Feature.ROLL_POSITIVE -> 1
+            Feature.UP, Feature.RIGHT, Feature.ROLL_POSITIVE -> 1
             Feature.DOWN, Feature.LEFT, Feature.ROLL_NEGATIVE -> -1
+            Feature.ROLL -> {
+                if (word.value.toFloat() < 0) {
+                    -1
+                }else {
+                    1
+                }
+            }
             else -> 0
         }
     }
