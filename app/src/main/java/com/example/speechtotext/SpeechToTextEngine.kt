@@ -11,6 +11,7 @@ import android.widget.TextView
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.absoluteValue
 
 
 object SpeechToTextEngine: RecognitionListener {
@@ -162,9 +163,7 @@ object SpeechToTextEngine: RecognitionListener {
 
         words.forEach {
 
-            // Give each word to callback
-            model!!.newWord(it)
+                model!!.newWord(it)
         }
     }
-
 }

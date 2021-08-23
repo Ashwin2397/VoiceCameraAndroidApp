@@ -86,6 +86,8 @@ val firstCommands = mapOf<String, Word>(
     "hop" to Word("up", Feature.UP, InputType.COMMAND_1, DeviceType.CAMERA),
     "down" to Word("down", Feature.DOWN, InputType.COMMAND_1, DeviceType.CAMERA),
     "roll" to Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA),
+    "rule" to Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA),
+    "roehl" to Word("roll", Feature.ROLL, InputType.COMMAND_1, DeviceType.CAMERA),
     "aperture" to Word("aperture", Feature.APERTURE, InputType.COMMAND_1, DeviceType.CAMERA),
     "focus" to Word("focus", Feature.FOCUS, InputType.COMMAND_1, DeviceType.CAMERA),
     "mode" to Word("mode", Feature.MODE, InputType.COMMAND_1, DeviceType.CAMERA),
