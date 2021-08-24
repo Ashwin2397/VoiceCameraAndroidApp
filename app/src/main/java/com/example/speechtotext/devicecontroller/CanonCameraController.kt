@@ -17,6 +17,9 @@ import java.io.IOException
 import android.app.*
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -60,6 +63,10 @@ object CanonCameraController: Device, Camera, Serializable {
 
     val okClient by lazy {
         OkHttpClient()
+    }
+
+    val toast by lazy {
+        Toast.makeText(context.get(), "", Toast.LENGTH_SHORT)
     }
 
     override fun setApplicationContext(context: Context) {
@@ -118,6 +125,22 @@ object CanonCameraController: Device, Camera, Serializable {
         this.ipAddress = ipAddress
     }
 
+    private fun failureMessage(message: String?) {
+
+        val mainLooper = Looper.getMainLooper()
+        Thread(Runnable {
+
+            Handler(mainLooper).post {
+
+                toast.apply {
+                    setText("Failed to connect to Canon Camera!")
+                    show()
+                }
+                Log.d("RESPONSE_ERROR", message?:"Error: No Error message")
+            }
+        }).start()
+
+    }
     /*
     * Configures liveview so that camera can connect to imageView.
     *
@@ -142,7 +165,7 @@ object CanonCameraController: Device, Camera, Serializable {
             }
 
             override fun onFailure(call: Call<Empty?>, t: Throwable) {
-                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+                failureMessage(t.message)
             }
         })
     }
@@ -158,8 +181,7 @@ object CanonCameraController: Device, Camera, Serializable {
         this.okClient.newCall(getRequest()).enqueue(object : okhttp3.Callback {
 
             override fun onFailure(call: okhttp3.Call, e: IOException) {
-                Log.d("RESPONSE_ERROR", e.message ?: "Error: No Error message")
-
+                failureMessage(e.message)
             }
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
@@ -213,7 +235,7 @@ object CanonCameraController: Device, Camera, Serializable {
             }
 
             override fun onFailure(call: Call<Empty?>, t: Throwable) {
-                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+                failureMessage(t.message)
             }
         })
 
@@ -243,7 +265,7 @@ object CanonCameraController: Device, Camera, Serializable {
             }
 
             override fun onFailure(call: Call<Zoom?>, t: Throwable) {
-                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+                failureMessage(t.message)
             }
         })
     }
@@ -273,7 +295,7 @@ object CanonCameraController: Device, Camera, Serializable {
             }
 
             override fun onFailure(call: Call<Aperture?>, t: Throwable) {
-                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+                failureMessage(t.message)
             }
         })
 
@@ -308,7 +330,7 @@ object CanonCameraController: Device, Camera, Serializable {
             }
 
             override fun onFailure(call: Call<FocusType?>, t: Throwable) {
-                Log.d("RESPONSE_ERROR", t.message?:"Error: No Error message")
+                failureMessage(t.message)
             }
         })
 

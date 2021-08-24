@@ -7,13 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.speechtotext.*
+import java.lang.StringBuilder
 import java.lang.ref.WeakReference
 
 object  PilotflyGimbalController: Device, Gimbal {
+
+    private val TAG = "PILOTFLY_GIMBAL"
 
     //    val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
@@ -52,7 +56,7 @@ object  PilotflyGimbalController: Device, Gimbal {
 
         if (bluetoothAdapter == null) {
             // Device doesn't support Bluetooth
-            Toast.makeText(context.get(), "Your device does not support bluetooth!", Toast.LENGTH_SHORT).show()
+            sendMessage("Your device does not support bluetooth!")
         }
 
         if (bluetoothAdapter?.isEnabled == false) {
@@ -87,10 +91,7 @@ object  PilotflyGimbalController: Device, Gimbal {
             bluetoothLeScanner.stopScan(leScanCallback)
 
             if (device == null) {
-                toast.apply {
-                    setText("Pilotfly gimbal not found")
-                    show()
-                }
+               sendMessage("Pilotfly gimbal not found!")
             }
         }
     }
@@ -100,10 +101,7 @@ object  PilotflyGimbalController: Device, Gimbal {
 
         bluetoothLeScanner.stopScan(leScanCallback)
         if (device == null) {
-            toast.apply {
-                setText("Pilotfly gimbal not found")
-                show()
-            }
+            sendMessage("Pilotfly gimbal not found!")
         }
     }
     private val leScanCallback: ScanCallback = @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -123,10 +121,7 @@ object  PilotflyGimbalController: Device, Gimbal {
                 // Pass service to Pilotfly controller to use
                 bleService.connect(result.device.address)
 
-                toast.apply {
-                    setText("Pilotfly gimbal connected!")
-                    show()
-                }
+                sendMessage("Pilotfly gimbal connected!")
             }
         }
 
@@ -161,11 +156,24 @@ object  PilotflyGimbalController: Device, Gimbal {
         // Success if is true
         if (!bleService.sendCommand(adjustedCoordinates)) {
 
-                toast.apply {
-                    setText("Pilotfly gimbal not connected")
-                    show()
-                }
+            sendMessage("Pilotfly gimbal not connected")
         }
 
+    }
+
+    private fun sendMessage(message: String) {
+
+        val mainLooper = Looper.getMainLooper()
+        Thread(Runnable {
+
+            Handler(mainLooper).post {
+
+                toast.apply {
+                    setText(message)
+                    show()
+                }
+                Log.d(TAG, message)
+            }
+        }).start()
     }
 }
