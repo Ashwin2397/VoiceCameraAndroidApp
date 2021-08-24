@@ -10,11 +10,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.speechtotext.*
 import java.lang.ref.WeakReference
 
-object PilotflyGimbalController: Device, Gimbal {
+object  PilotflyGimbalController: Device, Gimbal {
 
 //    val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
@@ -49,6 +50,7 @@ object PilotflyGimbalController: Device, Gimbal {
 
         if (bluetoothAdapter == null) {
             // Device doesn't support Bluetooth
+            Toast.makeText(context.get(), "Your device does not support bluetooth!", Toast.LENGTH_SHORT).show()
         }
 
         if (bluetoothAdapter?.isEnabled == false) {
@@ -127,6 +129,10 @@ object PilotflyGimbalController: Device, Gimbal {
         var adjustedCoordinates = coordinates.toMutableMap()
         adjustedCoordinates[MasterGimbal.Axis.PITCH] = adjustedCoordinates[MasterGimbal.Axis.PITCH]!!.times(-1)
 
-        bleService.sendCommand(adjustedCoordinates)
+        // Success if is true
+        if (!bleService.sendCommand(adjustedCoordinates)) {
+            Toast.makeText(context.get(), "Pilotfly gimbal not connected", Toast.LENGTH_SHORT).show()
+        }
+
     }
 }

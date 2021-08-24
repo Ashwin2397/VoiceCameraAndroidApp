@@ -7,6 +7,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.speechtotext.devicecontroller.MasterGimbal
 import java.util.*
@@ -19,15 +20,12 @@ class BluetoothLeService : Service() {
     private val TAG = "BLE_SERVICE"
 
     private val binder = LocalBinder()
-    lateinit var bluetoothGatt: BluetoothGatt
-    lateinit var characteristic: BluetoothGattCharacteristic
+    var bluetoothGatt: BluetoothGatt? = null
+    var characteristic: BluetoothGattCharacteristic? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
 
     val SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb"
     val CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
-
-    var i = 0
-    var testCommands = arrayListOf(72, 34, 56, 23, 12, 90, 3, 11, 87, 25, 62)
 
     fun initialize(): Boolean {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -73,7 +71,7 @@ class BluetoothLeService : Service() {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
 
-            characteristic = bluetoothGatt
+            characteristic = bluetoothGatt!!
                 .getService(UUID.fromString(SERVICE_UUID))
                 .getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID))
 
@@ -86,28 +84,23 @@ class BluetoothLeService : Service() {
 
     // REFACTOR_CRITICAL: Use coordinates map to send the appropriate coordinates to the Pilotfly gimbal.
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    fun sendCommand(coordinates: Map<MasterGimbal.Axis, Int>) {
+    fun sendCommand(coordinates: Map<MasterGimbal.Axis, Int>): Boolean {
 
         val commandBuilder = CommandBuilder() //REFACTOR_CRITICAL: Command Builder is not able to handle zero!!!
+        val isConnected = characteristic != null && bluetoothGatt != null
 
+        if (isConnected) {
+            commandBuilder.setRoll(coordinates[MasterGimbal.Axis.ROLL]!!) // TEST, 'i' variable just simulates change in command
+            commandBuilder.setPitch(coordinates[MasterGimbal.Axis.PITCH]!!)
+            commandBuilder.setYaw(coordinates[MasterGimbal.Axis.YAW]!!)
 
-        commandBuilder.setRoll(coordinates[MasterGimbal.Axis.ROLL]!!) // TEST, 'i' variable just simulates change in command
-        commandBuilder.setPitch(coordinates[MasterGimbal.Axis.PITCH]!!)
-        commandBuilder.setYaw(coordinates[MasterGimbal.Axis.YAW]!!)
+            characteristic?.setValue(commandBuilder.build())
+            characteristic?.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
 
-//        if (i >= testCommands.size) {
-//            i = 0
-//        }
-//        commandBuilder.setRoll(0) // TEST, 'i' variable just simulates change in command
-//        commandBuilder.setPitch(testCommands[i])
-//        commandBuilder.setYaw(0)
-//        i += 1
+            bluetoothGatt?.writeCharacteristic(characteristic)
+        }
 
-
-        characteristic.setValue(commandBuilder.build())
-        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-
-        bluetoothGatt.writeCharacteristic(characteristic)
+        return isConnected
 
     }
     override fun onBind(intent: Intent): IBinder? {
@@ -120,38 +113,7 @@ class BluetoothLeService : Service() {
         }
     }
 }
-//
-//fun main() {
-//
-//
-////        print(((0x02+0xF0+0x03)%256).hexString())
-//    val cmd = CommandBuilder()
-//    cmd.angles[2] = -180
-//    cmd.angles[0] = 45
-//
-//    println(cmd.build())
-//    //        println(cmd.convertAngle(45))
-////        println(cmd.convertAngle(90))
-////        println(cmd.convertAngle(180))
-////        println(cmd.convertAngle(-45))
-////        println(cmd.convertAngle(-90))
-////        println(cmd.convertAngle(-180))
-//
-//
-////        print((-2048).absoluteValue)
-//}
 
-fun Int.hexString(): String {
-    return toString(16)
-}
-
-fun String.decodeHex(): ByteArray {
-    check(length % 2 == 0) { "Must have an even length" }
-
-    return chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
-}
 class CommandBuilder {
 
     private val TAG = "COMMAND_BUILDER"
@@ -165,17 +127,12 @@ class CommandBuilder {
 
     val SPEED = "0002" // Increase for higher speed of movement
 
-    val MAX_ANGLE = 180 // Therefore only ever 1 byte
-    val MIN_ANGLE = -180
-
     val ANGLE_CONVERSION_FACTOR = 0.02197265625
     var angles = mutableListOf(
         0, // Roll
         0, // Pitch
         0, // Yaw
     )
-
-    var payloadSize = ""
 
     fun setRoll(rollAngle: Int) {
         angles[0] = rollAngle
@@ -197,12 +154,6 @@ class CommandBuilder {
         angles.forEach {
             var convertedAngle = convertAngle(it) // String
 
-
-            // For each byte in converted angle
-//            convertedAngle.decodeHex().forEach {
-//                payloadChecksum += it.toInt()
-//            }
-            // Assumes that the first byte is 0x00, which is not exactly good
             payloadChecksum += parseLong(convertedAngle.slice(IntRange(2,3)), 16).toInt()
             payloadChecksum += parseLong(convertedAngle.slice(IntRange(0,1)), 16).toInt()
 
@@ -248,7 +199,7 @@ class CommandBuilder {
     }
 
     fun littleEndian(hexRepresentation: String): String{
-//        var hexWithPad = (if (hexRepresentation.length == 3) "0${hexRepresentation}" else hexRepresentation)
+
         var hexWithPad = hexRepresentation
         for(i in 0 until 4 - hexRepresentation.length){
             hexWithPad = "0" + hexWithPad
