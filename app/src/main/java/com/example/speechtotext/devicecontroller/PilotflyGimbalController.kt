@@ -1,10 +1,8 @@
 package com.example.speechtotext.devicecontroller
 
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -17,7 +15,7 @@ import java.lang.ref.WeakReference
 
 object  PilotflyGimbalController: Device, Gimbal {
 
-//    val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
+    //    val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
     private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
 
 
@@ -27,10 +25,14 @@ object  PilotflyGimbalController: Device, Gimbal {
 
     // BT variables
     lateinit var bluetoothAdapter: BluetoothAdapter
+    private var device: BluetoothDevice? = null
     val REQUEST_ENABLE_BT = 0
     private val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds.
     val bleService = BluetoothLeService()
 
+    val toast by lazy {
+        Toast.makeText(context.get(), "", Toast.LENGTH_SHORT)
+    }
 
     override fun setApplicationContext(context: Context) {
         this.context = WeakReference(context)
@@ -72,7 +74,7 @@ object  PilotflyGimbalController: Device, Gimbal {
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             handler.postDelayed({
                 scanning = false
-                bluetoothLeScanner.stopScan(leScanCallback)
+                stopBTScan(bluetoothLeScanner)
             }, SCAN_PERIOD)
             scanning = true
             bluetoothLeScanner.startScan(
@@ -83,9 +85,27 @@ object  PilotflyGimbalController: Device, Gimbal {
         } else {
             scanning = false
             bluetoothLeScanner.stopScan(leScanCallback)
+
+            if (device == null) {
+                toast.apply {
+                    setText("Pilotfly gimbal not found")
+                    show()
+                }
+            }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun stopBTScan(bluetoothLeScanner: BluetoothLeScanner) {
+
+        bluetoothLeScanner.stopScan(leScanCallback)
+        if (device == null) {
+            toast.apply {
+                setText("Pilotfly gimbal not found")
+                show()
+            }
+        }
+    }
     private val leScanCallback: ScanCallback = @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     object : ScanCallback() {
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -93,15 +113,24 @@ object  PilotflyGimbalController: Device, Gimbal {
             super.onScanResult(callbackType, result)
 
             Log.d("BLE_SCANNER", "Device: ${result.device.name}")
-//            device = result.device
-//
+
             // Connect to device
-            bleService.initialize()
-            bleService.connect(result.device.address)
+            if (result.device.name == "Pilotfly") {
 
-            // Pass service to Pilotfly controller to use
+                device = result.device
 
+                bleService.initialize()
+                // Pass service to Pilotfly controller to use
+                bleService.connect(result.device.address)
+
+                toast.apply {
+                    setText("Pilotfly gimbal connected!")
+                    show()
+                }
+            }
         }
+
+
     }
 
     override fun getConnectionType(): ConnectionType {
@@ -131,7 +160,11 @@ object  PilotflyGimbalController: Device, Gimbal {
 
         // Success if is true
         if (!bleService.sendCommand(adjustedCoordinates)) {
-            Toast.makeText(context.get(), "Pilotfly gimbal not connected", Toast.LENGTH_SHORT).show()
+
+                toast.apply {
+                    setText("Pilotfly gimbal not connected")
+                    show()
+                }
         }
 
     }

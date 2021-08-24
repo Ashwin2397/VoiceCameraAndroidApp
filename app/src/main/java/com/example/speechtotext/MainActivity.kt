@@ -48,13 +48,10 @@ class MainActivity : Activity(){
 
     var screenChanged = false
 
-
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        Toast.makeText(this, "MAIN", Toast.LENGTH_SHORT).show()
 
         val uiController = UIController(
             commandButtonCreatorLayout,
@@ -127,6 +124,12 @@ class MainActivity : Activity(){
             val camera = factory.getCameraInstance(MasterCamera.chosenCamera)
             camera?.configureLiveview(this@MainActivity::setImageView)
 
+        }
+
+        btnConnectGimbal.setOnClickListener {
+
+            val gimbal = factory.getGimbalInstance(MasterGimbal.chosenGimbal) as Device
+            gimbal.connectDevice(this@MainActivity)
         }
 
         // To render the configuration view
