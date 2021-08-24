@@ -121,8 +121,8 @@ class MainActivity : Activity(){
 
         btnConnectCamera.setOnClickListener {
 
-            val camera = factory.getCameraInstance(MasterCamera.chosenCamera)
-            camera?.configureLiveview(this@MainActivity::setImageView)
+            val camera = factory.getCameraInstance(MasterCamera.chosenCamera) as Device
+            camera.connectDevice(this@MainActivity)
 
         }
 

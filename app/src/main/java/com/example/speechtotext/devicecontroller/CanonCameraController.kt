@@ -77,6 +77,7 @@ object CanonCameraController: Device, Camera, Serializable {
 
     override fun connectDevice(mainActivity: MainActivity) {
 
+        configureLiveview(mainActivity::setImageView)
     }
 
     override fun getConnectionType(): ConnectionType {
