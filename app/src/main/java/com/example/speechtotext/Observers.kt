@@ -239,7 +239,7 @@ class DynamicObserver(
 
         when(uiController.hasParameters(selectedCommand)) {
             true -> uiController.showParameters(selectedCommand)
-            false -> { changeState(3) }
+            false -> { changeState(2) }
         }
     }
 }

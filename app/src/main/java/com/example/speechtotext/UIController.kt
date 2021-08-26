@@ -103,7 +103,7 @@ class UIController(
         val word = words.get(feature.toString().lowercase())
         val parameterDetails = getParameterDetails(word!!)
 
-        return "${word.value}: ${parameterDetails?.currentNumericalSelection?.toString() ?: parameterDetails?.currentStringSelection}"
+        return "${word.value}: ${parameterDetails?.currentNumericalSelection?.toString() ?: parameterDetails?.currentStringSelection ?: ""}"
     }
 
     /*
