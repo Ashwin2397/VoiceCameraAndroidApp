@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -53,24 +54,26 @@ class MainActivity : Activity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val systemManager = SystemManager()
+        val features = systemManager.getFeatures()
+        val chosenControls = db.getControls()
+
+        val otherStaticButtons = mutableMapOf(
+            Feature.SHOOT to shootImage as ToggleButton,
+        )
+
         val uiController = UIController(
             commandButtonCreatorLayout,
             parameterButtonCreatorLayout,
             mapOf(
-                DeviceType.CAMERA to btnCamera,
-                DeviceType.GIMBAL to btnGimbal
+                DeviceType.CAMERA to Button(this),
+                DeviceType.GIMBAL to Button(this)
             ),
             this,
-            HeaderView(llHeaders, this),
-            mapOf(
-                Feature.SHOOT to shootImage as Button,
-                Feature.LEFT to btnLeft as Button,
-                Feature.RIGHT to btnRight as Button,
-                Feature.UP to btnUp as Button,
-                Feature.DOWN to btnDown as Button,
-                Feature.ROLL to btnRoll as Button
-            )
+            HeaderView(commandButtonCreatorLayout, this),
         )
+
+        uiController.setStaticButtons(chosenControls, otherStaticButtons)
 
         val observer = DynamicObserver(
             uiController,
@@ -78,10 +81,6 @@ class MainActivity : Activity(){
             MasterGimbal,
             this
         )
-
-        val systemManager = SystemManager()
-        val features = systemManager.getFeatures()
-
 
         // Initialize all controllers for the first time
         factory.controllers.forEach {

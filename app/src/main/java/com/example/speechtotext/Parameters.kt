@@ -20,7 +20,10 @@ class HeaderView(
 
     fun showParentHeaders(word: Word) {
 
-        var parents = mutableListOf<Button>()
+        // NO OP
+
+
+        /*var parents = mutableListOf<Button>()
         word.parents.forEach {
 
             var newButton = createButton(it.toString())
@@ -31,12 +34,13 @@ class HeaderView(
         headerView.addView(createButton(word.value).apply {
 
             setBackgroundColor(Color.parseColor(selectedColor))
-        })
+        })*/
     }
 
     fun clear() {
 
-        headerView.removeAllViews()
+        // NO OP
+        // headerView.removeAllViews()
     }
 
     private fun createButton(buttonText: String): Button {
@@ -114,12 +118,11 @@ data class ParameterDetails(
                 true
             }catch (e: NumberFormatException) { false }
 
-        if (isNumeric) {
 
-            isInBounds = isNumericalParameter && (selectedParameter.toFloat() <= numericalParameters!!.last && selectedParameter.toFloat() >= numericalParameters!!.first)
-
+        if (isNumericalParameter) {
+            isInBounds = isNumeric && (selectedParameter.toFloat() <= numericalParameters!!.last && selectedParameter.toFloat() >= numericalParameters!!.first)
         }else {
-            isInBounds = (stringParameters?.contains((selectedParameter)) ?: false) && !isNumericalParameter
+            isInBounds = (stringParameters?.contains((selectedParameter)) ?: false)
         }
 
         return isInBounds

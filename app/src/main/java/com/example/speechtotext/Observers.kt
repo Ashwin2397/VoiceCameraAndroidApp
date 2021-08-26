@@ -120,41 +120,25 @@ class DynamicObserver(
         0 to State(
             state = 0,
             input = mapOf<InputType, Int>(
-                InputType.DEVICE to 1,
-                InputType.HEADER to 1,
-                InputType.COMMAND to 2,
+                InputType.COMMAND to 1,
                 InputType.PARAMETER to -1 // NO_OP
             ),
-            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::reset)
+            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::resetCommand)
         ),
         1 to State(
             state = 1,
             input = mapOf<InputType, Int>(
-                InputType.DEVICE to 1,
-                InputType.HEADER to 1,
-                InputType.COMMAND to 2,
-                InputType.PARAMETER to 1
+                InputType.COMMAND to 1,
+                InputType.PARAMETER_TRUE to 2,
+                InputType.PARAMETER_FALSE to -1
             ),
-            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::reset, uiController::selectDevice, uiController::showParentHeaders, uiController::showChildHeaders)
+            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::resetCommand, uiController::selectCommand, this::showParameters)
         ),
         2 to State(
             state = 2,
             input = mapOf<InputType, Int>(
-                InputType.DEVICE to 1,
-                InputType.HEADER to 1,
                 InputType.COMMAND to 2,
-                InputType.PARAMETER_TRUE to 3,
-                InputType.PARAMETER_FALSE to -1
-            ),
-            callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::reset, uiController::selectDevice, uiController::selectCommand, uiController::showParentHeaders, this::showParameters )
-        ),
-        3 to State(
-            state = 3,
-            input = mapOf<InputType, Int>(
-                InputType.DEVICE to 3,
-                InputType.HEADER to 3,
-                InputType.COMMAND to 3,
-                InputType.PARAMETER to 3
+                InputType.PARAMETER to 2
             ),
             callbacks = listOf<(optionalWord: Word) -> Unit>(uiController::selectParameter, this::scheduleReset, this::sendCommand)
         ),
@@ -172,7 +156,7 @@ class DynamicObserver(
 
         var inputType = parsedWord.inputType
 
-        if (currentState == 2 && inputType == InputType.PARAMETER) {
+        if (currentState == 1 && inputType == InputType.PARAMETER) {
             inputType = when(uiController.isParameterInBounds(parsedWord)) {
                 true -> InputType.PARAMETER_TRUE
                 false -> InputType.PARAMETER_FALSE

@@ -16,9 +16,9 @@ class UIController(
     val deviceButtons: Map<DeviceType, Button>,
     val applicationContext: Context,
     val headerView: HeaderView,
-    val staticButtons: Map<Feature, Button>
 ){
 
+    private var staticButtons = mutableMapOf<Feature, Button>() // I changed this so that I can change set this attribute everytime the chosen controls changes
     private val TAG = "UICONTROLLER"
 
     var selectedCommand:Word? = null
@@ -46,17 +46,66 @@ class UIController(
                 SpeechToTextEngine.notifyModel(deviceType)
             }
         }
+    }
 
-        // Add on click listeners for static buttons
-        staticButtons.forEach {
+    /*
+    * Use list of chosen controls to do the following:
+    * 1. Create buttons
+    * 2. Add to command layout
+    * */
+    fun setStaticButtons(chosenControls: MutableList<Feature>, otherStaticButtons: MutableMap<Feature, ToggleButton>) {
 
-            val feature = it.key.toString()
+        staticButtons.clear()
+
+        val NUMBER_ROWS = 4
+        var verticalLinearLayout:LinearLayout? = null
+        var i = 0
+
+        // These buttons are the chosen controls
+        chosenControls.forEach {
+
+            if (it != Feature.SHOOT) {
+
+                if (i%NUMBER_ROWS == 0) {
+                    verticalLinearLayout = LinearLayout(applicationContext).apply {
+
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT)
+                        orientation = LinearLayout.VERTICAL
+                    }
+
+                    headerCreaterLayout.addView(verticalLinearLayout)
+                }
+
+                val buttonText = it.toString()
+                val newButton = createNewButton(buttonText)
+
+                verticalLinearLayout!!.addView(newButton)
+                staticButtons.put(it, newButton)
+
+                i += 1
+            }
+        }
+
+        otherStaticButtons.forEach {
+            val feature = it.key
+            staticButtons.put(feature, it.value)
 
             it.value.setOnClickListener {
-                SpeechToTextEngine.notifyModel(feature)
+                SpeechToTextEngine.notifyModel(feature.toString())
             }
         }
     }
+
+    private fun getButtonText(feature: Feature): String {
+
+        val word = words.get(feature.toString().lowercase())
+        val parameterDetails = getParameterDetails(word!!)
+
+        return "${word.value}: ${parameterDetails?.currentNumericalSelection?.toString() ?: parameterDetails?.currentStringSelection}"
+    }
+
     /*
     * Shows parameters based on the value of the Word object.
     * If command has parameters => Show parameters
@@ -88,7 +137,7 @@ class UIController(
     * */
     fun selectCommand(newCommand: Word) {
 
-        val button = (staticButtons[newCommand.feature] ?: getDynamicButton(newCommand.value)) as ToggleButton
+        val button = (staticButtons[newCommand.feature] ?: getButton(newCommand.value, dynamicButtons)) as ToggleButton
         button.isChecked = true
 
         selectedCommand = newCommand
@@ -105,18 +154,36 @@ class UIController(
     }
 
     /*
-    * Fetches dynamic button from it's map.
+    * Fetches button from it's specified map.
     * If button exits in map => returns that button
     * Else => Creates button, puts it in the map and returns it
     * */
-    fun getDynamicButton(buttonText: String): ToggleButton {
+    fun getButton(buttonText: String, buttonMap: MutableMap<String, ToggleButton>): ToggleButton {
 
-        val newButton = dynamicButtons.get(buttonText) ?: ToggleButton(applicationContext).apply {
+        val newButton = buttonMap.get(buttonText) ?: createNewButton(buttonText)
 
-            setTextOff(buttonText)
-            setTextOn(buttonText)
+        if (!buttonMap.containsKey(buttonText)) {
+            buttonMap[buttonText] = newButton
+        }
 
-            setText(buttonText)
+        return newButton
+    }
+
+    /*
+    * Creates new button and adds on click listeners.
+    * @param {String} buttonText The buttons text and the word to send to the model.
+    * @return {ToggleButton} A button that represents the given text.
+    * */
+    private fun createNewButton(buttonText: String): ToggleButton {
+
+        val parsedButtonText = getButtonText(Feature.valueOf(buttonText))
+
+        return ToggleButton(applicationContext).apply {
+
+            setTextOff(parsedButtonText)
+            setTextOn(parsedButtonText)
+
+            setText(parsedButtonText)
 
             // Set constraints
             layoutParams = LinearLayout.LayoutParams(
@@ -127,14 +194,7 @@ class UIController(
                 SpeechToTextEngine.notifyModel(buttonText)
             }
         }
-
-        if (!dynamicButtons.containsKey(buttonText)) {
-            dynamicButtons[buttonText] = newButton
-        }
-
-        return newButton
     }
-
     fun showChildHeaders(Word: Word) {
 
         val childHeaders = headersToCommands.get(Word.header)
@@ -148,7 +208,7 @@ class UIController(
 
             val buttonText = it
 
-            val newButton = getDynamicButton(buttonText)
+            val newButton = getButton(buttonText, dynamicButtons)
 
             headerCreaterLayout.addView(newButton)
         }
@@ -167,7 +227,7 @@ class UIController(
     * 3. Remove all buttons from parameter bar
     * 4. Remove all buttons from HeaderTextView
     * */
-    fun reset(Word: Word) {
+    fun reset(word: Word) {
 
         // Reset device buttons
         deviceButtons.forEach {
@@ -180,9 +240,19 @@ class UIController(
         // Remove parent headers
         headerView.clear()
 
-        // Remove parameter bars
-        adaptiveParameterBars.forEach {
-            it.value.hide()
+
+        resetCommand(word)
+    }
+
+    /*
+    * Resets all buttons.
+    * Removes parameter bar
+    * */
+    fun resetCommand(word: Word) {
+
+        // Reset dynamic buttons
+        dynamicButtons.forEach {
+            it.value.isChecked = false
         }
 
         // Reset static buttons
@@ -190,9 +260,9 @@ class UIController(
             (it.value as ToggleButton).isChecked = false
         }
 
-        // Reset dynamic buttons
-        dynamicButtons.forEach {
-            it.value.isChecked = false
+        // Remove parameter bars
+        adaptiveParameterBars.forEach {
+            it.value.hide()
         }
     }
 
@@ -222,6 +292,16 @@ class UIController(
 
         val adaptiveParameterBar = adaptiveParameterBars[parameterDetails?.adaptiveParameterBarType]
         adaptiveParameterBar?.select(selectedParameter.value)
+
+        // Change button text
+        val buttonText = getButtonText(selectedParameter.feature)
+        (staticButtons.get(selectedParameter.feature) as ToggleButton)?.apply {
+
+            setTextOff(buttonText)
+            setTextOn(buttonText)
+
+            setText(buttonText)
+        }
     }
 
 

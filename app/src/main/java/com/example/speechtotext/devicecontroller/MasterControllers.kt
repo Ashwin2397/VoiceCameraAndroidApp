@@ -13,13 +13,15 @@ object MasterCamera {
 
         Feature.ZOOM to this::setZoom,
         Feature.FOCUS to this::setFocusType,
-        Feature.MODE to this::setMode
+        Feature.MODE to this::setMode,
+        Feature.APERTURE to this::setAperture
     )
 
     var featuresToParameters = mapOf(
-        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.GAUGE, numericalParameters = IntRange(0, 100), currentNumericalSelection = 0F),
+        Feature.ZOOM to ParameterDetails(AdaptiveParameterBarType.SLIDER, numericalParameters = IntRange(0, 100), currentNumericalSelection = 0F),
         Feature.MODE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("movie", "photo"), currentStringSelection =  "photo"),
         Feature.FOCUS to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("point", "face", "spot"), currentStringSelection = "point"),
+        Feature.APERTURE to ParameterDetails(AdaptiveParameterBarType.BUTTON, stringParameters = listOf("3.4", "4.0", "4.5", "5.0", "5.6", "6.3", "7.1", "8.0"), currentStringSelection = "3.4"),
     )
 
     val factory = MasterControllerFactory()
