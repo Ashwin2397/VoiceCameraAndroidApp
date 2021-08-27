@@ -306,7 +306,7 @@ class AdaptiveParameterButtonBar(
                 minHeight = 0
                 minimumHeight = 0
 
-
+                setPadding(35, 35, 35, 35)
 
                 setOnClickListener {
 

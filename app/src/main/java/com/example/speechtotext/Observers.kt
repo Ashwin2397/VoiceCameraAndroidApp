@@ -146,11 +146,15 @@ class DynamicObserver(
 
     var currentState = 0
     var currentWord = Word("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
+    var currentCommand = Word("", Feature.UNDEFINED, Header.UNDEFINED, InputType.UNDEFINED, DeviceType.ANY, listOf())
 
     fun newWord(word: String) {
 
         var parsedWord = parseWord(word)
         this.currentWord = parsedWord // Save word to be used by cb
+        if (parsedWord.inputType == InputType.COMMAND) {
+            currentCommand = parsedWord
+        }
 
         val currentStateObject = this.states[this.currentState]
 
@@ -190,16 +194,16 @@ class DynamicObserver(
         val isDefinedWord = words[mostLikelyWord] != null
         var isNumericalParameter = false
         try {
-            word.toFloat()
+            mostLikelyWord.toFloat()
             isNumericalParameter = true
         }catch (e: NumberFormatException) {
             isNumericalParameter = false
         }
 
-        if (isDefinedWord) {
+        if (isDefinedWord && !isNumericalParameter) {
             parsedWord = words[mostLikelyWord]!!
         }else if (isNumericalParameter) {
-            parsedWord = Word(word, currentWord.feature, Header.UNDEFINED, InputType.PARAMETER, currentWord.deviceType, listOf())
+            parsedWord = Word(word, currentCommand.feature, Header.UNDEFINED, InputType.PARAMETER, currentCommand.deviceType, listOf())
         }
         return parsedWord
     }

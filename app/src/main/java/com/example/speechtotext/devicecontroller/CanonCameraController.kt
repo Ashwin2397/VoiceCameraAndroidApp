@@ -136,7 +136,7 @@ object CanonCameraController: Device, Camera, Serializable {
                     setText("Failed to connect to Canon Camera!")
                     show()
                 }
-                Log.d("RESPONSE_ERROR", message?:"Error: No Error message")
+//                Log.d("RESPONSE_ERROR", message?:"Error: No Error message")
             }
         }).start()
 
@@ -158,7 +158,7 @@ object CanonCameraController: Device, Camera, Serializable {
         data.enqueue(object : Callback<Empty?> {
             override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
 
-                Log.d("RESPONSE", response.body().toString())
+//                Log.d("RESPONSE", response.body().toString())
 
                 callback(this@CanonCameraController)
 
@@ -194,7 +194,7 @@ object CanonCameraController: Device, Camera, Serializable {
                 // Supply bitmap to callback function
                 callback(bitmap) // Correct syntax for calling callback that requires parameter
 
-                Log.d("RESPONSE", response.body.toString())
+//                Log.d("RESPONSE", response.body.toString())
 
             }
         })
@@ -230,7 +230,7 @@ object CanonCameraController: Device, Camera, Serializable {
         data.enqueue(object : Callback<Empty?> {
             override fun onResponse(call: Call<Empty?>, response: Response<Empty?>) {
 
-                Log.d("RESPONSE", response.body().toString())
+//                Log.d("RESPONSE", response.body().toString())
 
             }
 
@@ -260,7 +260,7 @@ object CanonCameraController: Device, Camera, Serializable {
         data.enqueue(object : Callback<Zoom?> {
             override fun onResponse(call: Call<Zoom?>, response: Response<Zoom?>) {
 
-                Log.d("RESPONSE", response.body().toString())
+//                Log.d("RESPONSE", response.body().toString())
 
             }
 
@@ -290,7 +290,7 @@ object CanonCameraController: Device, Camera, Serializable {
         data.enqueue(object : Callback<Aperture?> {
             override fun onResponse(call: Call<Aperture?>, response: Response<Aperture?>) {
 
-                Log.d("RESPONSE", response.body().toString())
+//                Log.d("RESPONSE", response.body().toString())
 
             }
 
@@ -325,7 +325,7 @@ object CanonCameraController: Device, Camera, Serializable {
         data.enqueue(object : Callback<FocusType?> {
             override fun onResponse(call: Call<FocusType?>, response: Response<FocusType?>) {
 
-                Log.d("RESPONSE", response.body().toString())
+//                Log.d("RESPONSE", response.body().toString())
 
             }
 

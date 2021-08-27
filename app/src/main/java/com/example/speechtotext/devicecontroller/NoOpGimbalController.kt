@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
 
 object NoOpGimbalController: Device, Gimbal {
 
-    private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
+    private val featuresAvailable = arrayListOf<Feature>(Feature.INCREMENTAL_MOVEMENT, Feature.HOME, Feature.PORTRAIT, Feature.LANDSCAPE)
     private val deviceName = DeviceName.NO_OP_GIMBAL
     private val connectionType = ConnectionType.NATIVE
 

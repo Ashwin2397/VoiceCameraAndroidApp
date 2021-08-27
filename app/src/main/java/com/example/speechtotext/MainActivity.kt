@@ -49,6 +49,9 @@ class MainActivity : Activity(){
 
     var screenChanged = false
 
+    var otherStaticButtons = mutableMapOf<Feature, ToggleButton>()
+    var uiController: UIController? = null
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,13 +59,13 @@ class MainActivity : Activity(){
 
         val systemManager = SystemManager()
         val features = systemManager.getFeatures()
-        val chosenControls = db.getControls()
+        val chosenControls = parseControls(db.getControls())
 
-        val otherStaticButtons = mutableMapOf(
-            Feature.SHOOT to shootImage as ToggleButton,
+        otherStaticButtons.put(
+            Feature.SHOOT, shootImage as ToggleButton,
         )
 
-        val uiController = UIController(
+        uiController = UIController(
             commandButtonCreatorLayout,
             parameterButtonCreatorLayout,
             mapOf(
@@ -73,10 +76,10 @@ class MainActivity : Activity(){
             HeaderView(commandButtonCreatorLayout, this),
         )
 
-        uiController.setStaticButtons(chosenControls, otherStaticButtons)
+        uiController!!.setStaticButtons(chosenControls, otherStaticButtons)
 
         val observer = DynamicObserver(
-            uiController,
+            uiController!!,
             MasterCamera,
             MasterGimbal,
             this
@@ -143,6 +146,21 @@ class MainActivity : Activity(){
         }
     }
 
+    private fun parseControls(controls: MutableList<Feature>): MutableList<Feature> {
+
+        if (controls.contains(Feature.INCREMENTAL_MOVEMENT)) {
+            controls.add(Feature.UP)
+            controls.add(Feature.DOWN)
+            controls.add(Feature.LEFT)
+            controls.add(Feature.RIGHT)
+            controls.add(Feature.ROLL)
+
+            controls.remove(Feature.INCREMENTAL_MOVEMENT)
+        }
+
+        return controls
+    }
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onResume() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -163,8 +181,11 @@ class MainActivity : Activity(){
             Log.d(TAG, "Camera chosen: ${db.getCamera()}; Gimbal chosen: ${db.getGimbal()}")
             Log.d(TAG, "Controls chosen: ${db.getControls()}")
 
-            // Only change controllers
-            // Dont bother with the controls
+            // Update controls
+            val chosenControls = parseControls(db.getControls())
+            uiController!!.setStaticButtons(chosenControls, otherStaticButtons)
+
+            // Update controllers
             initControllers()
 
             screenChanged = false

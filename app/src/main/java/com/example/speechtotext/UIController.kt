@@ -30,6 +30,8 @@ class UIController(
 
     )
 
+    val noParameterBinding = listOf(Feature.SHOOT, Feature.UP, Feature.DOWN, Feature.LEFT, Feature.RIGHT, Feature.ROLL, Feature.HOME, Feature.PORTRAIT, Feature.LANDSCAPE)
+
     val adaptiveParameterBars = mapOf(
         AdaptiveParameterBarType.BUTTON to AdaptiveParameterButtonBar(parameterCreaterLayout, applicationContext),
         AdaptiveParameterBarType.GAUGE to AdaptiveParameterGaugeBar(parameterCreaterLayout, applicationContext),
@@ -56,8 +58,9 @@ class UIController(
     fun setStaticButtons(chosenControls: MutableList<Feature>, otherStaticButtons: MutableMap<Feature, ToggleButton>) {
 
         staticButtons.clear()
+        headerCreaterLayout.removeAllViews()
 
-        val NUMBER_ROWS = 4
+        val NUMBER_ROWS = 5
         var verticalLinearLayout:LinearLayout? = null
         var i = 0
 
@@ -98,12 +101,24 @@ class UIController(
         }
     }
 
+    /*
+    * If hasParameterBinding => [COMMAND]:[CURRENT PARAMETER SELECTION]
+    * Else => [COMMAND]
+    *
+    * */
     private fun getButtonText(feature: Feature): String {
 
         val word = words.get(feature.toString().lowercase())
         val parameterDetails = getParameterDetails(word!!)
 
-        return "${word.value}: ${parameterDetails?.currentNumericalSelection?.toString() ?: parameterDetails?.currentStringSelection ?: ""}"
+        var buttonText = word.value
+
+        val hasParameterBinding = !noParameterBinding.contains(feature)
+        if (hasParameterBinding) {
+            buttonText += ": ${parameterDetails?.currentNumericalSelection?.toString() ?: parameterDetails?.currentStringSelection ?: ""}"
+        }
+
+        return buttonText
     }
 
     /*
@@ -176,25 +191,44 @@ class UIController(
     * */
     private fun createNewButton(buttonText: String): ToggleButton {
 
-        val parsedButtonText = getButtonText(Feature.valueOf(buttonText))
-
         return ToggleButton(applicationContext).apply {
 
-            setTextOff(parsedButtonText)
-            setTextOn(parsedButtonText)
+            setButtonText(buttonText)
 
-            setText(parsedButtonText)
+            minWidth = 0
+            minimumWidth = 0
+            minHeight = 0
+            minimumHeight = 0
+
+            setPadding(35, 35, 35, 35)
 
             // Set constraints
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT)
+                ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+
+                    setMargins(1, 0, 0, 0)
+                }
 
             setOnClickListener {
                 SpeechToTextEngine.notifyModel(buttonText)
             }
         }
     }
+
+    /*
+    * Parses buttonText and sets it's text appropriately.
+    * */
+    private fun ToggleButton.setButtonText(buttonText: String) {
+
+        val parsedButtonText = getButtonText(Feature.valueOf(buttonText))
+
+        this.setTextOff(parsedButtonText)
+        this.setTextOn(parsedButtonText)
+
+        this.setText(parsedButtonText)
+    }
+
     fun showChildHeaders(Word: Word) {
 
         val childHeaders = headersToCommands.get(Word.header)

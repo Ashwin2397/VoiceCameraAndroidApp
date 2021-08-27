@@ -22,7 +22,7 @@ object DJIGimbalController: Device, Gimbal, Serializable {
 
     private val deviceName = DeviceName.DJI_RS_2
     private val connectionType = ConnectionType.HTTP
-    private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
+    private val featuresAvailable = arrayListOf<Feature>(Feature.INCREMENTAL_MOVEMENT, Feature.HOME, Feature.PORTRAIT, Feature.LANDSCAPE)
     lateinit var context: WeakReference<Context>
 
     val featureURL = mapOf<Feature, String>(
@@ -70,8 +70,8 @@ object DJIGimbalController: Device, Gimbal, Serializable {
                 pitch = convert(coordinates[MasterGimbal.Axis.PITCH]!!),
                 roll = convert(coordinates[MasterGimbal.Axis.ROLL]!!),
                 isAbsolute = when (isAbsolute) {
-                    true -> "1"
-                    else -> "0"
+                    true -> "0"
+                    else -> "1"
                 },
                 timeForAction = "10"
             ))
@@ -98,7 +98,7 @@ object DJIGimbalController: Device, Gimbal, Serializable {
     //REFACTOR_CRITICAL: I don't know if this works with the new range that I defined...
     private fun convert(angle: Int): String {
 
-        return ((angle.toFloat()/RANGE)*1800).roundToInt().toString()
+        return ((angle.toFloat())*10).roundToInt().toString()
     }
 
     override fun isFeatureAvailable(gimbalFeature: Feature): Boolean {

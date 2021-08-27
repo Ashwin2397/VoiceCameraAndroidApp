@@ -20,7 +20,7 @@ object  PilotflyGimbalController: Device, Gimbal {
     private val TAG = "PILOTFLY_GIMBAL"
 
     //    val featuresAvailable = arrayListOf<Feature>(Feature.ABSOLUTE_MOVEMENT, Feature.INCREMENTAL_MOVEMENT)
-    private val featuresAvailable = arrayListOf<Feature>(Feature.LEFT, Feature.RIGHT, Feature.UP, Feature.DOWN, Feature.ROLL)
+    private val featuresAvailable = arrayListOf<Feature>(Feature.INCREMENTAL_MOVEMENT, Feature.HOME, Feature.PORTRAIT, Feature.LANDSCAPE)
 
 
     private val connectionType = ConnectionType.BLUETOOTH
