@@ -32,7 +32,9 @@ object  PilotflyGimbalController: Device, Gimbal {
     private var device: BluetoothDevice? = null
     val REQUEST_ENABLE_BT = 0
     private val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds.
-    val bleService = BluetoothLeService()
+    val bleService by lazy{
+        BluetoothLeService(context.get()!!)
+    }
 
     val toast by lazy {
         Toast.makeText(context.get(), "", Toast.LENGTH_SHORT)
@@ -120,8 +122,6 @@ object  PilotflyGimbalController: Device, Gimbal {
                 bleService.initialize()
                 // Pass service to Pilotfly controller to use
                 bleService.connect(result.device.address)
-
-                sendMessage("Pilotfly gimbal connected!")
             }
         }
 

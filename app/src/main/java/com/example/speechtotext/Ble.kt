@@ -2,10 +2,9 @@ package com.example.speechtotext
 
 import android.app.Service
 import android.bluetooth.*
+import android.content.Context
 import android.content.Intent
-import android.os.Binder
-import android.os.Build
-import android.os.IBinder
+import android.os.*
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -15,7 +14,7 @@ import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import java.lang.Long.parseLong
 
-class BluetoothLeService : Service() {
+class BluetoothLeService(val context: Context) : Service() {
 
     private val TAG = "BLE_SERVICE"
 
@@ -62,9 +61,10 @@ class BluetoothLeService : Service() {
                 // successfully connected to the GATT Server
                 gatt?.discoverServices()
 
-                Log.d(TAG, "Connected!!")
+                sendMessage("Pilotfly gimbal connected!")
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
+                sendMessage("Pilotfly gimbal disconnected!")
             }
         }
 
@@ -77,7 +77,19 @@ class BluetoothLeService : Service() {
 
             bluetoothGatt = gatt ?: bluetoothGatt
 
-            Log.d(TAG, "Services discovered!!")
+
+        }
+
+        private fun sendMessage(message: String) {
+
+            val mainLooper = Looper.getMainLooper()
+
+            Thread(Runnable {
+
+                Handler(mainLooper).post {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+            }).start()
         }
 
     }
