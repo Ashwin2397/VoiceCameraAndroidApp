@@ -60,7 +60,7 @@ class UIController(
         staticButtons.clear()
         headerCreaterLayout.removeAllViews()
 
-        val NUMBER_ROWS = 5
+        val NUMBER_ROWS = 6
         var verticalLinearLayout:LinearLayout? = null
         var i = 0
 
@@ -202,12 +202,14 @@ class UIController(
 
             setPadding(35, 35, 35, 35)
 
+            textSize = 10F
+
             // Set constraints
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT).apply {
 
-                    setMargins(1, 0, 0, 0)
+                    setMargins(0, 0, 0, 0)
                 }
 
             setOnClickListener {
