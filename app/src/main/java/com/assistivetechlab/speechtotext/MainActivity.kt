@@ -1,4 +1,4 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 
 import android.app.Activity
@@ -14,8 +14,8 @@ import android.widget.ToggleButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import com.example.speechtotext.devicecontroller.*
-import com.example.speechtotext.manager.SystemManager
+import com.assistivetechlab.speechtotext.devicecontroller.*
+import com.assistivetechlab.speechtotext.manager.SystemManager
 import kotlinx.android.synthetic.main.activity_configuration.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
@@ -234,7 +234,7 @@ class MainActivity : Activity(){
         MasterGimbal.connectDevice(this@MainActivity)
     }
 
-    fun setImageView(camera: com.example.speechtotext.devicecontroller.Camera) {
+    fun setImageView(camera: com.assistivetechlab.speechtotext.devicecontroller.Camera) {
 
         Timer().scheduleAtFixedRate(object : TimerTask() {
             override fun run() {

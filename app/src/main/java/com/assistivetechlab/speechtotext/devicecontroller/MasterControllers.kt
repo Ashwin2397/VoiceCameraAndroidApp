@@ -1,8 +1,8 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.speechtotext.*
+import com.assistivetechlab.speechtotext.*
 import java.lang.Integer.min
 import kotlin.math.absoluteValue
 

@@ -1,9 +1,9 @@
-    package com.example.speechtotext
+    package com.assistivetechlab.speechtotext
 
-import com.example.speechtotext.devicecontroller.Camera
-import com.example.speechtotext.devicecontroller.Gimbal
-import kotlin.collections.ArrayList
-//
+import com.assistivetechlab.speechtotext.devicecontroller.Camera
+import com.assistivetechlab.speechtotext.devicecontroller.Gimbal
+
+    //
 //object Model: SpeechToTextEngineObserver{
 //
 //    private var observers: ArrayList<FSMObserver> = ArrayList()

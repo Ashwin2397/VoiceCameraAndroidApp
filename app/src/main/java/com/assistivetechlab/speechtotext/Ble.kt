@@ -1,4 +1,4 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 import android.app.Service
 import android.bluetooth.*
@@ -8,7 +8,7 @@ import android.os.*
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.example.speechtotext.devicecontroller.MasterGimbal
+import com.assistivetechlab.speechtotext.devicecontroller.MasterGimbal
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt

@@ -1,4 +1,4 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 import org.junit.Test
 

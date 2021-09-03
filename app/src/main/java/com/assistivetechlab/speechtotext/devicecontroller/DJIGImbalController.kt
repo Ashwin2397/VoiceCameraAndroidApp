@@ -1,9 +1,9 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.example.speechtotext.*
+import com.assistivetechlab.speechtotext.*
 import com.google.gson.annotations.SerializedName
 import retrofit2.Call
 import retrofit2.Callback

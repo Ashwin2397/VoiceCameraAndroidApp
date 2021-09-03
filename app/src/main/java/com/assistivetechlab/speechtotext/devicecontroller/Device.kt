@@ -1,8 +1,8 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.example.speechtotext.*
+import com.assistivetechlab.speechtotext.*
 
 /*
 * TODO:

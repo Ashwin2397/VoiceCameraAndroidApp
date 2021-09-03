@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.speechtotext">
+    package="com.assistivetechlab.speechtotext">
     <!--Start BT permissions-->
     <uses-feature android:name="android.hardware.bluetooth"/>
     <!-- Playstore will hide your app from users that dont have this feature, so use required="true" sparingly ... Only use it if your app firmly requires it, which it doesnt ...    -->
@@ -29,11 +29,11 @@
         android:theme="@style/Theme.SpeechToText"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".ConfigurationActivity"
+            android:name="com.assistivetechlab.speechtotext.ConfigurationActivity"
             android:screenOrientation="landscape">
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.assistivetechlab.speechtotext.MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

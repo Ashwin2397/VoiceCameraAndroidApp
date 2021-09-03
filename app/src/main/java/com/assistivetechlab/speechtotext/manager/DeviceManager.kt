@@ -1,13 +1,11 @@
-package com.example.speechtotext.manager
+package com.assistivetechlab.speechtotext.manager
 
-import android.content.Context
-import com.example.speechtotext.ConnectionType
-import com.example.speechtotext.DeviceDetails
-import com.example.speechtotext.DeviceName
-import com.example.speechtotext.Feature
-import com.example.speechtotext.devicecontroller.*
+import com.assistivetechlab.speechtotext.ConnectionType
+import com.assistivetechlab.speechtotext.DeviceDetails
+import com.assistivetechlab.speechtotext.DeviceName
+import com.assistivetechlab.speechtotext.Feature
+import com.assistivetechlab.speechtotext.devicecontroller.*
 import java.io.Serializable
-import java.util.*
 import kotlin.collections.ArrayList
 
 

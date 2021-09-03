@@ -1,4 +1,4 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 import android.app.Activity
 import android.content.Context
@@ -83,8 +83,8 @@ class Database(
             sharedPreferences.getString("chosenCamera", DeviceName.CANON.toString())
                 ?: DeviceName.CANON.toString()
             ),
-            sharedPreferences.getString("chosenCameraIp", "")
-                ?: ""
+            sharedPreferences.getString("chosenCameraIp", "192.168.0.107")
+                ?: "192.168.0.107"
         )
     }
 

@@ -1,28 +1,12 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
-import android.util.Log
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import com.example.speechtotext.*
+import com.assistivetechlab.speechtotext.*
 import kotlinx.android.synthetic.main.activity_main.*
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.w3c.dom.Text
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import java.io.IOException
-import java.io.Serializable
 import java.lang.ref.WeakReference
 
 object NoOpCameraController: Device, Camera {

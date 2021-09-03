@@ -1,4 +1,4 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 import android.app.Activity
 import android.content.Context
@@ -10,9 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.iterator
-import com.example.speechtotext.manager.Features
-import com.example.speechtotext.manager.FeaturesManager
+import com.assistivetechlab.speechtotext.manager.Features
 import kotlinx.android.synthetic.main.activity_configuration.*
 
 /*

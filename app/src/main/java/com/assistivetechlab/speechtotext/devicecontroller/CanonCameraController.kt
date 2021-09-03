@@ -1,9 +1,8 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
-import com.example.speechtotext.*
+import com.assistivetechlab.speechtotext.*
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.OkHttpClient
 import okhttp3.Request

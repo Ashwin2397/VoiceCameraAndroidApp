@@ -1,14 +1,14 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import com.example.speechtotext.ConnectionType
-import com.example.speechtotext.DeviceName
-import com.example.speechtotext.Feature
-import com.example.speechtotext.MainActivity
+import com.assistivetechlab.speechtotext.ConnectionType
+import com.assistivetechlab.speechtotext.DeviceName
+import com.assistivetechlab.speechtotext.Feature
+import com.assistivetechlab.speechtotext.MainActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.ref.WeakReference
 

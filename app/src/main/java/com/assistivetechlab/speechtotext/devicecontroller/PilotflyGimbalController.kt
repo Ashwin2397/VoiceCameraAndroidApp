@@ -1,4 +1,4 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -11,8 +11,7 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.example.speechtotext.*
-import java.lang.StringBuilder
+import com.assistivetechlab.speechtotext.*
 import java.lang.ref.WeakReference
 
 object  PilotflyGimbalController: Device, Gimbal {

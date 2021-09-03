@@ -1,12 +1,11 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.renderscript.ScriptGroup
 import android.util.Log
-import com.example.speechtotext.devicecontroller.MasterCamera
-import com.example.speechtotext.devicecontroller.MasterGimbal
+import com.assistivetechlab.speechtotext.devicecontroller.MasterCamera
+import com.assistivetechlab.speechtotext.devicecontroller.MasterGimbal
 import java.util.*
 import kotlin.concurrent.timerTask
 

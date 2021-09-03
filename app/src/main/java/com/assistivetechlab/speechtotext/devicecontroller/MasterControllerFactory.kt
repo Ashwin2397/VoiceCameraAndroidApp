@@ -1,7 +1,7 @@
-package com.example.speechtotext.devicecontroller
+package com.assistivetechlab.speechtotext.devicecontroller
 
-import com.example.speechtotext.DeviceName
-import com.example.speechtotext.DeviceType
+import com.assistivetechlab.speechtotext.DeviceName
+import com.assistivetechlab.speechtotext.DeviceType
 
 class MasterControllerFactory {
 

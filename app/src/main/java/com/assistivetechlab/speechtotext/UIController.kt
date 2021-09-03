@@ -1,4 +1,4 @@
-package com.example.speechtotext
+package com.assistivetechlab.speechtotext
 
 import android.content.Context
 import android.graphics.Color
@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ToggleButton
-import com.example.speechtotext.devicecontroller.MasterCamera
-import com.example.speechtotext.devicecontroller.MasterGimbal
+import com.assistivetechlab.speechtotext.devicecontroller.MasterCamera
+import com.assistivetechlab.speechtotext.devicecontroller.MasterGimbal
 
 
 class UIController(
